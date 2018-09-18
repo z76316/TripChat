@@ -1,0 +1,115 @@
+* {
+	box-sizing: border-box;
+	font-family: 'Noto Sans', sans-serif;
+}
+
+#render_me {
+	width: 100%;
+	margin: 0 auto;
+}
+
+main>header {
+  width: 100%;
+  text-align: center;
+}
+
+nav {
+  display: flex;
+  justify-content: center;
+  height: 40px;
+  line-height: 40px;
+  background-color: #eeeeee;
+  border-bottom: 1px solid #888888;
+}
+
+nav>a {
+  flex: 1;
+  text-align: center; 
+  border-right: 1px solid #888888;
+}
+
+input {
+	display: flex;
+	/*align-items: center;*/
+	margin: 0 auto;
+	margin-top: 16px;
+	margin-bottom: 16px;
+	padding: 4px;
+	width: 20%;
+  /*height: 32px;*/
+  border: solid 1px #979797;
+  border-radius: 2px;
+}
+
+button {
+  margin: 0 auto;
+  padding: 6px 8px;
+	width: 12%;
+  font-size: 80%;
+  /*letter-spacing: 1px;
+  text-align: center;
+  border: solid 1px #979797;
+  border-radius: 8px;
+  background-color: black;
+  text-align: center;
+  color: white;*/
+}
+
+.start_game_button_disabled {
+  button: disabled;
+  color: gray;
+}
+
+
+.game_container>.step_count {
+  width: 100%;
+  text-align: center;
+  margin: 10px 0px;
+}
+
+.board {
+  margin: 0 auto;
+  position: relative;
+  text-align: center;
+  width: 300px;
+  height: 300px;
+  background-color: #888888;
+}
+
+.disable {
+  opacity: 0.5;
+}
+
+.board>.cell {
+  position: absolute;
+  width: 101px;
+  height: 101px;
+  line-height: 101px;
+  text-align: center;
+  background-color: #ffffff;
+  border: 1px outset #888888;
+  z-index: 2;
+  transition: left 0.5s, top 0.5s;
+  cursor: pointer;
+}
+
+.board>.cell-space {
+  background-color: transparent;
+  border: 1px inset #888888;
+  z-index: 1;
+  transition: all 0s ease 0s;
+}
+
+.rank_head {
+  margin: 0 auto;
+  width: 300px;
+  text-align: center;
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.rank_head>div {
+  text-align: center;
+  width: 80px;
+}
