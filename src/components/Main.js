@@ -3,11 +3,12 @@ import { BrowserRouter, Link, Switch, Route } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 // import CSS
-import '../css/normalize.css';
+import '../css/reset.css';
 import '../css/app.css';
+import '../css/main.css';
 
 // import photo
-import logo from '../../photo/logo_04.png';
+import logo from '../../photo/logo_04_burned.png';
 import planIcon from '../../photo/plan_icon_01.png';
 
 // import ReactDOM
@@ -19,7 +20,9 @@ class Main extends Component {
 		super(props);
 		this.state = {
 			isLogin: this.props.isLogin,
-			loginOrSignup: 'login',
+			loginOrSignup: 'signup',
+			login_tab_style: 'login_tab active',
+			singup_tab_style: 'login_tab',
 			inputName: '',
 			inputEmail: '',
 			inputPassword: '',
@@ -47,43 +50,44 @@ class Main extends Component {
 
 	handleNameInput = (e) => {
 		let inputName = e.target.value;
-		this.setState({inputName: inputName});
+		// this.setState({inputName: inputName});
 	}
 
 	handleEmailInput = (e) => {
 		let inputEmail = e.target.value;
-		this.setState({inputEmail: inputName});
+		// this.setState({inputEmail: inputName});
 	}
 
 	handlePasswordInput = (e) => {
 		let inputPassword = e.target.value;
-		this.setState({inputPassword: inputName});
+		// this.setState({inputPassword: inputName});
 	}
 
 	render() {
 		if(!this.state.isLogin) {
 			return(
-				<div>
+				<div className='login_page'>
+					<div className='login_page_background'></div>
 
-					<div className="login_container">
-						<img className='login_logo' style={{width: '128px'}} src={logo} alt={'logo'} />
-						<div className="title">TripChat</div>
+					<div className='login_container'>
+						<div className='login_title_div'>
+							<img className='login_logo' src={logo} alt={'logo'} />
+							<div className="title">TripChat</div>
+						</div>
 						<div className="subtitle">編輯地圖，規劃旅途</div>
-						<div className='login_tab'>
-							<button 
-								className='fb_login_button'
-								type='button' 
-								onClick={() => this.loginWithFB()}>使用 Facebook 登入</button>
-							<button 
-								className='go_login_button'
-								type='button' 
-								onClick={() => this.loginWithGo()}>使用 Google 登入</button>
+						<button 
+							className='fb_login_button'
+							type='button' 
+							onClick={() => this.loginWithFB()}>使用 Facebook 登入</button>
+						<button 
+							className='go_login_button'
+							type='button' 
+							onClick={() => this.loginWithGo()}>使用 Google 登入</button>
+						<div className='login_tab_container'>
+							<span className={this.state.login_tab_style}>登入</span>
+							<span className={this.state.singup_tab_style}>快速註冊</span>
 						</div>
 						
-						<div>
-							<span className='login_tab'>登入</span>
-							<span className='signup_tab'>快速註冊</span>
-						</div>
 						<div className='login_input_container'>
 							{	
 								(this.state.loginOrSignup === 'signup') ? 

@@ -3,8 +3,10 @@ import { BrowserRouter, Link, Switch, Route } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 // import CSS
-import '../css/normalize.css';
+import '../css/reset.css';
 import '../css/app.css';
+import '../css/header.css';
+import '../css/trip.css';
 
 // import photo
 import logo from '../../photo/logo_04.png';
@@ -69,15 +71,19 @@ class Trip extends Component {
 		return(
 			<div>
 				<header>
-					<img className='header_logo' style={{height: '42px'}} src={logo} alt={'logo'} />
-					<div className="header_title">TripChat</div>
-					<img className='plan_icon' style={{height: '42px'}} src={planIcon} alt={'main page icon'} />
+					<div className='header_left'>
+						<img className='header_logo' src={logo} alt={'logo'} />
+						<div className="header_title">TripChat</div>
+					</div>
+					<Link to='/'>
+						<img className='plan_icon' src={planIcon} alt={'main page icon'} />
+					</Link>
 				</header>
 				<div className="trip_container">
-					<div className='trip_map_container'>
-						<div className='trip_map'></div>
-						<div className='trip_map_bar'>
-							<div className='trip_title_style'>Trip：</div>
+					<div className='trip_map'></div>
+					<div className='trip_map_bar'>
+						<div className='bar_title_container'>
+							<div className='trip_title_style'>Trip:</div>
 							<input 
 								className='input_trip_title' 
 								type="text" 
@@ -85,7 +91,9 @@ class Trip extends Component {
 								placeholder='旅程標題' 
 								onChange={ (e) => this.handleTripTitleInput(e) }
 							/>
-							<div className='trip_date_style'>日期：</div>
+						</div>
+						<div className='bar_title_container'>
+							<div className='trip_date_style'>日期:</div>
 							<input 
 								className='input_trip_date' 
 								type="text" 
@@ -93,7 +101,9 @@ class Trip extends Component {
 								placeholder='出發日期' 
 								onChange={ (e) => this.handleTripDateInput(e) }
 							/>
-							<div className='trip_location_style'>地點：</div>
+						</div>
+						<div className='bar_title_container'>
+							<div className='trip_location_style'>地點:</div>
 							<input 
 								className='input_trip_location' 
 								type="text" 
@@ -101,20 +111,20 @@ class Trip extends Component {
 								placeholder='旅遊地點' 
 								onChange={ (e) => this.handleTripLocationInput(e) }
 							/>
-							<div className='trip_map_bar_tool_box'>
-								<img className='arrow_icon' style={{height: '32px'}} src={arrowIcon} alt={'arrow tool'} />
-								<img className='note_icon' style={{height: '32px'}} src={noteIcon} alt={'note tool'} />
-								<img className='pen_icon' style={{height: '32px'}} src={penIcon} alt={'pen tool'} />
-								<img className='compass_icon' style={{height: '32px'}} src={compassIcon} alt={'circle tool'} />
-							</div>
-							<div className='addMemberButton'>
-								<img className='add_member_icon' style={{height: '32px'}} src={addMemberIcon} alt={'add member button'} />
-							</div>
-							<button 
-								className='export_button'
-								type='button' 
-								onClick={() => this.exportFile()}>匯出</button>
 						</div>
+						<div className='trip_map_bar_tool_box'>
+							<img className='arrow_icon' src={arrowIcon} alt={'arrow tool'} />
+							<img className='note_icon' src={noteIcon} alt={'note tool'} />
+							<img className='pen_icon' src={penIcon} alt={'pen tool'} />
+							<img className='compass_icon' src={compassIcon} alt={'circle tool'} />
+						</div>
+						<div className='addMemberButton'>
+							<img className='add_member_icon' style={{height: '32px'}} src={addMemberIcon} alt={'add member button'} />
+						</div>
+						<button 
+							className='export_button'
+							type='button' 
+							onClick={() => this.exportFile()}>匯出</button>
 					</div>
 					<div className='trip_chat_room'>
 						<div className='chat_room_header'>
@@ -123,15 +133,27 @@ class Trip extends Component {
 						</div>
 						<div className='chat_room_main'>
 
-							<div className="talk-bubble left-in">
+							<div className="talk_bubble">
 							  <div className="talktext">
 							    <p>真伯斯: 呵啥呵</p>
 							  </div>
 							</div>
 
-							<div className="talk-bubble right-in">
+							<div className="talk_bubble_self">
 							  <div className="talktext">
 							    <p>伯斯: 呵屁呵</p>
+							  </div>
+							</div>
+
+							<div className="talk_bubble_self">
+							  <div className="talktext">
+							    <p>伯斯: 呵屁呵</p>
+							  </div>
+							</div>
+
+							<div className="talk_bubble">
+							  <div className="talktext">
+							    <p>真伯斯: 呵啥呵</p>
 							  </div>
 							</div>
 

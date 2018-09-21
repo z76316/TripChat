@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { BrowserRouter, Link, Switch, Route } from 'react-router-dom';
 
 // import CSS
-import '../css/normalize.css';
+import '../css/reset.css';
 import '../css/app.css';
 
 // import photo
@@ -17,7 +17,7 @@ class App extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			isLogin: false,
+			isLogin: true,
 			trip: [],
 			tripTitle: '',
 			tripDate: '',
@@ -60,7 +60,7 @@ class App extends Component {
 		return(
 			<div>
 				<Route 
-					path='/' 
+					exact path='/' 
 					render={() => <Main
 						isLogin={this.state.isLogin}
 					/>}
