@@ -1,0 +1,127 @@
+input {
+	display: flex;
+	margin: 0 auto;
+	margin-top: 16px;
+	margin-bottom: 16px;
+	padding: 4px;
+  padding-left: 12%;
+	width: 60%;
+  border: solid 1px #979797;
+  border-radius: 4px;
+}
+
+button {
+  margin: 0 auto;
+  padding: 6px 8px;
+	width: 12%;
+  font-size: 80%;
+  /*letter-spacing: 1px;
+  text-align: center;
+  border: solid 1px #979797;
+  border-radius: 8px;
+  background-color: black;
+  text-align: center;
+  color: white;*/
+}
+
+.profile_container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 40%;
+  margin: 4% auto;
+}
+
+.profile_container > .profile_picture {
+  height: 180px;
+  border-radius: 50%;
+
+}
+
+.profile_container > .profile_content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 10%; 
+  line-height: 1.5;
+}
+
+.profile_container > .profile_content > .logout_button {
+  width: 80px;
+  height: 32px;
+  border-radius: 4px;
+  margin: 8% auto auto 0;
+}
+
+.trip_list_container > .trip_list_tag {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+}
+
+.trip_list_container > .trip_list_tag > .trip_list_tag_now,
+.trip_list_container > .trip_list_tag > .trip_list_tag_past {
+  color: white;
+  width: 50%;
+  text-align: center;
+  padding: 8px 0;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.trip_list_container > .trip_list_tag > .trip_list_tag_now {
+  background-color: #7E9FD9;
+  cursor: pointer;
+  margin-right: 4px; 
+}
+
+.trip_list_container > .trip_list_tag > .trip_list_tag_past {
+  background-color: #7E9FD9;
+  cursor: pointer;
+  margin-left: 4px; 
+}
+
+.trip_list_container > .trip_list_tag .current {
+  background-color: #617EB3;
+}
+
+.trip_list_container > .trip_list_background {
+  background-color: #617EB3;
+}
+
+.trip_list_area {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 80%;
+  margin: 0 auto;
+  padding: 2% 1%;
+}
+
+.trip_list_area > a {
+  width: 300px;
+  margin: 2%;
+}
+
+.trip_list_area > a > .trip {
+  background-color: #EEEEEE;
+  width: 100%;
+  height: 115px;
+  border-radius: 8px;
+  padding: 4%;
+}
+
+.trip_list_area > a > .trip > div {
+  line-height: 1.5;
+}
+
+.trip_list_area > .trip_create {
+  background-color: #FFFFFF;
+  width: 300px;
+  height: 115px;
+  border-radius: 8px;
+  padding: 4%;
+  margin: 2%;
+  display: flex;
+  align-items: center;
+}

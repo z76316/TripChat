@@ -1,0 +1,31 @@
+header {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 1%;
+  margin-bottom: 8px;
+  border-bottom: 4px solid #1B4965;
+}
+
+header > .header_left {
+  display: flex;
+  justify-content: flex-start;
+  width: 20%;
+}
+
+header > .header_left > .header_title {
+  font-weight:bolder;
+}
+
+header img {
+  height: 42px;
+}
+
+header > a > .plan_icon {
+  cursor: pointer;
+}
+
+.header_left > .header_title {
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+}

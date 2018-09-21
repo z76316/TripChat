@@ -1,0 +1,7 @@
+/* for parent element of float object to fix some layout problems*/
+
+.clearfix::after {
+	content: "";
+	display: table;
+	clear: both;
+}
