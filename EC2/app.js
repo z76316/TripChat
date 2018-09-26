@@ -16,10 +16,42 @@ app.use("/exe/", function(req, res, next) {
 // Utility
 const request = require("request");
 
+// mysql
+const mysql = require('mysql');
+
+// MySQL command
+const SELECT_ALL_test_tbl_QUERY = 'SELECT * FROM test_tbl';
+
+// connnect mysql
+const connection = mysql.createConnection({
+	host: 'localhost',
+	user: 'root',
+	password: 'ec2server',
+	database: 'TEST1'
+});
+
+connection.connect(err => {
+	if(err) {
+		return err;
+	}
+});
+
 // Test
 app.get('/exe/test',function(req, res) {
 	let data = 'Testing';
 	res.send({ data: data });
+});
+
+app.get('/exe/mysql/test_tbl', function(req, res) {
+	connection.query(SELECT_ALL_test_tbl_QUERY, (err, results) => {
+		if(err) {
+			return res.send(err);
+		} else {
+			return res.json({
+				data: results
+			});
+		}
+	});
 });
 
 var port = 9000;
