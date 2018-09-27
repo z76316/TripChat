@@ -83,7 +83,8 @@ class Trip extends Component {
 	}
 
 	componentDidMount() {
-		socket = io.connect('http://localhost:9000');
+		// socket = io.connect('http://localhost:9000');
+		socket = io.connect('http://52.89.137.222:9000');
 
 		// Listen for chat
 		socket.on('chat', (data) => {
