@@ -20,22 +20,22 @@ import meetingIcon from '../../photo/meeting_icon_01.png';
 import addMemberIcon from '../../photo/add_member_icon_01.png';
 
 // import ReactDOM
+import MyChatBox from './myChatBox';
+import OthersChatBox from './othersChatBox';
 
+let socket;
 
 class Trip extends Component {
 
 	constructor(props) {
 		super(props);
 		this.state = {
-			chatInputValue: ''
+			chatInputValue: '',
+			currUser: '伯斯',
+			whoTyping: '',
+			chatBoxes: []
 		};
-		this.handleChange = this.handleChange.bind(this);
-	}
 
-	handleChange = (e) => {
-		let inputName = e.target.value;
-		console.log(this.state);
-		this.setState({inputName: inputName});
 	}
 
 	exportFile = (e) => {
@@ -54,18 +54,64 @@ class Trip extends Component {
 		
 	}
 
-	handleChatInput = (e) => {
+	// 暫時，以後直接用 state 中的 currUser
+	handleNameInput = (e) => {
+		let chatNameValue = e.target.value;
+		this.setState({currUser: chatNameValue});
+	}
 
+	handleChatInput = (e) => {
+		let currUser = this.state.currUser;
+		let isTyping;
+		e.target.value ? isTyping = true : isTyping = false;
+		socket.emit('typing', {who: currUser, isTyping: isTyping});
+		let chatInputValue = e.target.value;
+		this.setState({chatInputValue: chatInputValue});
+		console.log(chatInputValue);
 	}
 
 	onEnterPress = (e) => {
 		if(e.keyCode == 13 && e.shiftKey == false) {
 			e.preventDefault();
 			// this.myFormRef.submit();
+			socket.emit('chat', {
+				message: this.state.chatInputValue,
+				currUser: this.state.currUser
+			});
+			e.target.value = '';
 		}
 	}
 
+	componentDidMount() {
+		socket = io.connect('http://localhost:9000');
 
+		// Listen for chat
+		socket.on('chat', (data) => {
+			console.log(data);
+			let temp_chatBoxes = this.state.chatBoxes;
+			let new_chat = {
+				who: data.currUser,
+				content: data.message
+			};
+			temp_chatBoxes.push(new_chat);
+			this.setState({
+				chatBoxes: temp_chatBoxes,
+				chatInputValue: '',
+				whoTyping: ''
+			});
+		});
+
+		// Listen for typing
+		socket.on('typing', (typingState) => {
+			console.log(typingState);
+			if(typingState.isTyping) {
+				this.setState({whoTyping: typingState.who});
+			} else {
+				this.setState({whoTyping: ''});
+			}
+		});
+
+	}
 
 	render() {
 		return(
@@ -132,8 +178,31 @@ class Trip extends Component {
 							<div className='chat_room_header_title'>討論桌</div>
 						</div>
 						<div className='chat_room_main'>
+							{ this.state.chatBoxes.map( (chat,index) => {
+								console.log(chat.who);
+								console.log(chat.content);
+								if(chat.who === this.state.currUser) {
+									return (
+										<MyChatBox 
+											key={index}
+											index={index} 
+											user={chat.who}
+											content={chat.content}
+										/>
+									);
+								} else {
+									return (
+										<OthersChatBox 
+											key={index}
+											index={index} 
+											user={chat.who}
+											content={chat.content}
+										/>
+									);
+								}
+							})}
 
-							<div className="talk_bubble">
+							{/*<div className="talk_bubble">
 							  <div className="talktext">
 							    <p>真伯斯: 呵啥呵</p>
 							  </div>
@@ -155,7 +224,20 @@ class Trip extends Component {
 							  <div className="talktext">
 							    <p>真伯斯: 呵啥呵</p>
 							  </div>
-							</div>
+							</div>*/}
+							{ 
+								this.state.whoTyping ? 
+									<div className='who_typing'>{this.state.whoTyping}輸入中訊息中...</div> : 
+									<div className='who_typing'></div>
+							}
+
+							<input 
+								className='temp_currUser' 
+								type="text" 
+								name="temp_currUser" 
+								placeholder='先打暱稱，以後幫大家變成使用者資訊' 
+								onChange={ (e) => this.handleNameInput(e) }
+							/>
 
 	            <textarea 
 	            	className='input_chat'

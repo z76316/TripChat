@@ -4,6 +4,9 @@ const app = express(); // 產生 express application 物件
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// socket.io
+const socket = require('socket.io');
+
 // Utility
 const request = require("request");
 
@@ -38,6 +41,11 @@ connection.query(SELECT_ALL_test_tbl_QUERY, (err, results) => {
 		}
 });
 
+// App setup
+let port = 9000;
+let server = app.listen(port, function() {
+	console.log('Server is running on port', port);
+});
 
 // 路徑開頭若為 "/exe/" , server 端就允許這個 cross domain control 的行為
 app.use("/exe/", function(req, res, next) {
@@ -48,12 +56,16 @@ app.use("/exe/", function(req, res, next) {
     next();
 });
 
-// Test
+// Static files
+app.use(express.static('../dist'));
+
+// API Test
 app.get('/exe/test',function(req, res) {
 	let data = 'Testing';
 	res.send({ data: data });
 });
 
+// MySQL API
 app.get('/exe/mysql/test_tbl', function(req, res) {
 	connection.query(SELECT_ALL_test_tbl_QUERY, (err, results) => {
 		if(err) {
@@ -66,7 +78,18 @@ app.get('/exe/mysql/test_tbl', function(req, res) {
 	});
 });
 
-var port = 9000;
-app.listen(port, function() {
-	console.log('Server is running on port', port);
-});
+
+// Socket setup
+let io = socket(server);
+
+io.on('connection', function(socket) {
+	console.log('made socket connection', socket.id);
+	
+	socket.on('chat', function(data) {
+		io.sockets.emit('chat', data);
+	});
+
+	socket.on('typing', function(typingState) {
+		socket.broadcast.emit('typing', typingState);
+	});
+})
