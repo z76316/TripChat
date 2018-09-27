@@ -8,12 +8,15 @@
   },
   "dependencies": {
     "body-parser": "*",
-    "express": "*",
-    "request": "*"
+    "cors": "^2.8.4",
+    "express": "~4.16.0",
+    "mysql": "^2.16.0",
+    "request": "*",
+    "socket.io": "^2.1.1"
   },
   "author": "Scott",
   "license": "ISC",
   "devDependencies": {
-    "mysql": "^2.16.0"
+    "nodemon": "^1.18.4"
   }
 }

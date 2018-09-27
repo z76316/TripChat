@@ -10,14 +10,14 @@ module.exports = {
   },
   plugins: [
     new HtmlWebPackPlugin({
-      template: "./src/index.html",
-      filename: "./index.html"
+      template: "./src/index.html"
     })
   ],
   devServer: {
     contentBase: path.join(__dirname, 'dist'),
     overlay: true
   },
+  performance: { hints: false },
   module: {
     rules: [
       {
