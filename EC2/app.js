@@ -4,6 +4,12 @@ const app = express(); // 產生 express application 物件
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Utility
+const request = require("request");
+
+// mysql
+const mysql = require('mysql');
+
 // MySQL command
 const SELECT_ALL_test_tbl_QUERY = 'SELECT * FROM test_tbl';
 
@@ -40,29 +46,6 @@ app.use("/exe/", function(req, res, next) {
     res.set("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
     res.set("Access-Control-Allow-Credentials", "true");
     next();
-});
-
-// Utility
-const request = require("request");
-
-// mysql
-const mysql = require('mysql');
-
-// MySQL command
-const SELECT_ALL_test_tbl_QUERY = 'SELECT * FROM test_tbl';
-
-// connnect mysql
-const connection = mysql.createConnection({
-	host: 'localhost',
-	user: 'root',
-	password: 'ec2server',
-	database: 'TEST1'
-});
-
-connection.connect(err => {
-	if(err) {
-		return err;
-	}
 });
 
 // Test
