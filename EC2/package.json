@@ -8,12 +8,11 @@
   },
   "dependencies": {
     "body-parser": "*",
-    "express": "*",
-    "request": "*"
+    "express": "~4.16.0",
+    "request": "*",
+    "cors": "^2.8.4",
+    "mysql": "^2.16.0"
   },
   "author": "Scott",
-  "license": "ISC",
-  "devDependencies": {
-    "mysql": "^2.16.0"
-  }
+  "license": "ISC"
 }

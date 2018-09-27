@@ -4,6 +4,35 @@ const app = express(); // 產生 express application 物件
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// MySQL command
+const SELECT_ALL_test_tbl_QUERY = 'SELECT * FROM test_tbl';
+
+// connnect mysql
+const connection = mysql.createConnection({
+	host: 'localhost',
+	user: 'root',
+	password: 'ec2server',
+	database: 'TEST1',
+	insecureAuthL: true
+});
+
+connection.connect(err => {
+	if(err) {
+		return err;
+	}
+});
+
+connection.query(SELECT_ALL_test_tbl_QUERY, (err, results) => {
+	if(err) {
+			console.log(err);
+		} else {
+			console.log({
+				data: results
+			});
+		}
+});
+
+
 // 路徑開頭若為 "/exe/" , server 端就允許這個 cross domain control 的行為
 app.use("/exe/", function(req, res, next) {
     res.set("Access-Control-Allow-Origin", "*");
