@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter, Link, Switch, Route } from 'react-router-dom';
+import { HashRouter, BrowserRouter, Link, Switch, Route } from 'react-router-dom';
 
 import App from './components/App';
 
@@ -8,9 +8,9 @@ class Container extends Component {
 
 	render() {
 		return (
-			<BrowserRouter>			
+			<HashRouter>			
 				<App />
-			</BrowserRouter>
+			</HashRouter>
 		);
 	}
 }
