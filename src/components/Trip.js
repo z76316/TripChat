@@ -72,6 +72,10 @@ class Trip extends Component {
 
 	onEnterPress = (e) => {
 		if(e.keyCode == 13 && e.shiftKey == false) {
+			if(e.target.value === '') {
+				e.preventDefault();
+				return;	
+			}
 			e.preventDefault();
 			// this.myFormRef.submit();
 			socket.emit('chat', {
