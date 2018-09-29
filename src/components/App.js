@@ -12,25 +12,21 @@ import logo from '../../photo/logo_04.png';
 import Main from './Main';
 import Trip from './Trip';
 
+
 class App extends Component {
 
 	constructor(props) {
 		super(props);
 		this.state = {
-			isLogin: true,
+			isLogin: false,
+			loginOrSignup: 'signup',
 			trip: [],
 			tripTitle: '',
 			tripDate: '',
 			tripLocation: '',
 			tripMember: []
 		};
-		this.handleChange = this.handleChange.bind(this);
-	}
 
-	handleChange = (e) => {
-		let inputName = e.target.value;
-		console.log(this.state);
-		this.setState({inputName: inputName});
 	}
 
 	loginWithFB = (e) => {
@@ -41,19 +37,8 @@ class App extends Component {
 
 	}
 
-	handleNameInput = (e) => {
-		let inputName = e.target.value;
-		this.setState({inputName: inputName});
-	}
-
-	handleEmailInput = (e) => {
-		let inputEmail = e.target.value;
-		this.setState({inputEmail: inputName});
-	}
-
-	handlePasswordInput = (e) => {
-		let inputPassword = e.target.value;
-		this.setState({inputPassword: inputName});
+	handleIsLogin = () => {
+		this.setState({isLogin: true});
 	}
 
 	render() {
@@ -63,6 +48,7 @@ class App extends Component {
 					exact path='/' 
 					render={() => <Main
 						isLogin={this.state.isLogin}
+						handleIsLogin={this.handleIsLogin}
 					/>}
 				/>
 				<Route 
