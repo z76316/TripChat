@@ -98,7 +98,17 @@ class Main extends Component {
 		this.setState({inputPassword: inputPassword});
 	}
 
+	setLoginState = (data) => {
+		localStorage.setItem('currUser', JSON.stringify(
+			{
+				name: data.name,
+				email: data.email,
+				provider: data.provider
+			}));
+	}
+
 	submitLogin = () => {
+		console.log(this.state.loginOrSignup);
 		if(this.state.loginOrSignup === 'signup') {
 			
 			if(this.state.inputName && 
@@ -108,21 +118,66 @@ class Main extends Component {
 				let signup_data = {
 					name: this.state.inputName,
 					email: this.state.inputEmail,
-					password: this.state.inputPassword
+					password: this.state.inputPassword,
+					provider: 'email'
 				};
 				this.ajax('post', Server_ip+'/exe/accounts/signup', signup_data, (req) => {
 					let result=JSON.parse(req.responseText);
 					if(result.err) {
 						alert(result.err);
 					} else {
+						this.setLoginState(signup_data);
 						alert(result.message);
-						this.props.handleIsLogin();
+						this.props.handleIsLogin(true);
 						this.setState({isLogin: true});
 					}
 				});
+			} else {
+				alert('尚有空白欄位！');
 			}
 
+		} else if(this.state.loginOrSignup === 'login') {
+			if(this.state.inputEmail && 
+				this.state.inputPassword) {
+
+				let login_data = {
+					email: this.state.inputEmail,
+					password: this.state.inputPassword,
+					provider: 'email'
+				};
+				console.log(login_data);
+				this.ajax('post', Server_ip+'/exe/accounts/login', login_data, (req) => {
+					let result=JSON.parse(req.responseText);
+					if(result.err) {
+						alert(result.err);
+					} else {
+						this.setLoginState(result.loginState);
+						alert(result.message);
+						this.props.handleIsLogin(true);
+						this.setState({isLogin: true});
+					}
+				});
+			} else {
+				alert('尚有空白欄位！');
+			}
 		}
+	}
+
+	changeLoginState = (state) => {
+		this.props.handleIsLogin(state);
+		this.setState({isLogin: state});
+	}
+
+	checkLoginState = () => {
+		if(!JSON.parse(localStorage.getItem('currUser')) || JSON.parse(localStorage.getItem('currUser')).length === 0) {
+			this.setState({isLogin: false});
+		} else {
+			this.setState({isLogin: true});
+		}
+	}
+
+	componentDidMount() {
+		this.checkLoginState();
 	}
 
 	render() {
@@ -191,7 +246,8 @@ class Main extends Component {
 			);
 		} else {
 			return(
-				<MainProfile />
+				<MainProfile 
+					changeLoginState={this.changeLoginState}/>
 			);
 		}
 

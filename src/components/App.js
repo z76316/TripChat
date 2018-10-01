@@ -37,8 +37,20 @@ class App extends Component {
 
 	}
 
-	handleIsLogin = () => {
-		this.setState({isLogin: true});
+	handleIsLogin = (state) => {
+		this.setState({isLogin: state});
+	}
+
+	checkLoginState = () => {
+		if(!JSON.parse(localStorage.getItem('currUser')) || JSON.parse(localStorage.getItem('currUser')).length === 0) {
+			this.setState({isLogin: false});
+		} else {
+			this.setState({isLogin: true});
+		}
+	}
+
+	componentDidMount() {
+		this.checkLoginState();
 	}
 
 	render() {

@@ -71,6 +71,44 @@ app.get('/exe/mysql/test_tbl', function(req, res) {
 	});
 });
 
+app.post('/exe/accounts/login', (req, res) => {
+  let data = req.body;
+  if (!data.email || !data.password) {
+      res.send({ error: "Login Error: Wrong Data Format" });
+      return;
+  }
+
+  let email = data.email;
+  let password = data.password;
+  let provider = data.provider;
+  let checkAccount = 
+  	`SELECT * FROM accounts
+  	WHERE 
+  	account_email = '${email}' AND
+  	account_password = '${password}' AND
+  	provider = '${provider}'`;
+  	console.log(checkAccount);
+	connection.query(checkAccount, (err, account) => {
+		console.log(account);
+		if(err) {
+			res.send( {err: 'Something went wrong during check your email and password input: ' + err} );
+		} else if(account.length === 0) {
+			res.send( {err: '帳號或密碼輸入錯誤。'} );
+		} else {
+			let loginState = {
+				name: account[0].account_name,
+				email: account[0].account_email,
+				provider: account[0].provider
+			};
+			console.log(loginState);
+			res.send({
+				loginState: loginState,
+				message: `${account[0].account_name}，歡迎回來!`
+			});
+		}
+	});
+});
+
 app.post('/exe/accounts/signup', (req, res) => {
   let data = req.body;
   if (!data.name || !data.email || !data.password) {
@@ -81,29 +119,29 @@ app.post('/exe/accounts/signup', (req, res) => {
   let name = data.name;
   let email = data.email;
   let password = data.password;
+  let provider = data.provider;
   let isExistAccount = 
   	`SELECT * FROM accounts
   	WHERE account_email = '${email}'`;
   let INSERT_INTO_accounts = 
-  	`INSERT INTO accounts (account_name, account_email, account_password, create_date) 
+  	`INSERT INTO accounts (account_name, account_email, account_password, create_date, provider) 
   	VALUES 
-  	('${name}', '${email}', '${password}', CURDATE())`;
+  	('${name}', '${email}', '${password}', CURDATE(), '${provider}')`;
 	connection.query(isExistAccount, (err, account) => {
 		if(err) {
 			res.send( {err: 'Something went wrong during check this email is exist: ' + err} );
 		} else if(account.length !== 0) {
-			res.send( {err: 'This email has been used.'} );
+			res.send( {err: '此信箱已被註冊。'} );
 		} else {
 			connection.query(INSERT_INTO_accounts, (err, results) => {
 		  	if(err) {
 		  		res.send({err: 'Something went wrong during add this account into database: ' + err});
 		  	} else {
-		  		res.send({message: 'Successfully created a account!'});
+		  		res.send({message: '您已成功註冊帳戶!'});
 		  	}
 		  });
 		}
 	});
-  
 
   //宣告發信物件
   // let transporter = nodemailer.createTransport({
