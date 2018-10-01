@@ -20,6 +20,8 @@ class MainProfile extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			profile_name: '',
+			profile_email: '',
 			trip_list_tag_now: 'trip_list_tag_now current',
 			trip_list_tag_past: 'trip_list_tag_past'
 		};
@@ -32,8 +34,26 @@ class MainProfile extends Component {
 		this.setState({inputName: inputName});
 	}
 
-	logOut = (e) => {
+	editName = () => {
 
+	}
+
+	logOut = () => {
+		localStorage.removeItem('currUser');
+		this.props.changeLoginState(false);
+	}
+
+	getLoginState = () => {
+		let currUser = JSON.parse(localStorage.getItem('currUser'));
+		this.setState(
+			{
+				profile_name: currUser.name,
+				profile_email: currUser.email
+			});
+	}
+
+	componentDidMount() {
+		this.getLoginState();
 	}
 
 	render() {
@@ -50,10 +70,18 @@ class MainProfile extends Component {
 				</header>
 				<div className="main_container">
 					<div className="profile_container">
-						<img className='profile_picture' src={fbHead} />
+						<div className='profile_picture_container'>
+							<img className='profile_picture' src={fbHead} />
+						</div>
 						<div className='profile_content'>
-							<div className='profile_name'>伯斯</div>
-							<div className='profile_email'>boss@gmail.com</div>
+							<div className='profile_name'>
+								{this.state.profile_name}
+								<button 
+									className='edit_name_button'
+									type='button' 
+									onClick={() => this.editName()}>更改名稱</button>
+							</div>
+							<div className='profile_email'>{this.state.profile_email}</div>
 							<button 
 								className='logout_button'
 								type='button' 
@@ -115,5 +143,9 @@ class MainProfile extends Component {
 	}
 
 }
+
+MainProfile.propTypes = { 
+	changeLoginState: PropTypes.func
+}; 
 
 export default MainProfile;

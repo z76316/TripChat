@@ -110,6 +110,7 @@ button {
   padding-bottom: 2%;
   width: 50%;
   border-bottom: 2px solid #CCCCCC;
+  cursor: pointer;
 }
 
 .login_tab_container .active {

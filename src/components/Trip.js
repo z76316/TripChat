@@ -72,6 +72,10 @@ class Trip extends Component {
 
 	onEnterPress = (e) => {
 		if(e.keyCode == 13 && e.shiftKey == false) {
+			if(e.target.value === '') {
+				e.preventDefault();
+				return;	
+			}
 			e.preventDefault();
 			// this.myFormRef.submit();
 			socket.emit('chat', {
@@ -82,7 +86,17 @@ class Trip extends Component {
 		}
 	}
 
+	scrollToBottom() {
+		this.messagesEnd.scrollIntoView({ behavior: 'auto' });
+	}
+
+	componentDidUpdate() {
+  	this.scrollToBottom();
+	}
+
 	componentDidMount() {
+		this.scrollToBottom();
+
 		// socket = io.connect('http://localhost:9000');
 		socket = io.connect('http://52.89.137.222:9000');
 
@@ -179,58 +193,63 @@ class Trip extends Component {
 							<div className='chat_room_header_title'>討論桌</div>
 						</div>
 						<div className='chat_room_main'>
-							{ this.state.chatBoxes.map( (chat,index) => {
-								console.log(chat.who);
-								console.log(chat.content);
-								if(chat.who === this.state.currUser) {
-									return (
-										<MyChatBox 
-											key={index}
-											index={index} 
-											user={chat.who}
-											content={chat.content}
-										/>
-									);
-								} else {
-									return (
-										<OthersChatBox 
-											key={index}
-											index={index} 
-											user={chat.who}
-											content={chat.content}
-										/>
-									);
+							<div className='chat_area'>
+								{ this.state.chatBoxes.map( (chat,index) => {
+									console.log(chat.who);
+									console.log(chat.content);
+									if(chat.who === this.state.currUser) {
+										return (
+											<MyChatBox 
+												key={index}
+												index={index} 
+												user={chat.who}
+												content={chat.content}
+											/>
+										);
+									} else {
+										return (
+											<OthersChatBox 
+												key={index}
+												index={index} 
+												user={chat.who}
+												content={chat.content}
+											/>
+										);
+									}
+								})}
+
+								{/*<div className="talk_bubble">
+								  <div className="talktext">
+								    <p>真伯斯: 呵啥呵</p>
+								  </div>
+								</div>
+
+								<div className="talk_bubble_self">
+								  <div className="talktext">
+								    <p>伯斯: 呵屁呵</p>
+								  </div>
+								</div>
+
+								<div className="talk_bubble_self">
+								  <div className="talktext">
+								    <p>伯斯: 呵屁呵</p>
+								  </div>
+								</div>
+
+								<div className="talk_bubble">
+								  <div className="talktext">
+								    <p>真伯斯: 呵啥呵</p>
+								  </div>
+								</div>*/}
+								{ 
+									this.state.whoTyping ? 
+										<div className='who_typing'>{this.state.whoTyping}輸入中訊息中...</div> : 
+										<div className='who_typing'></div>
 								}
-							})}
-
-							{/*<div className="talk_bubble">
-							  <div className="talktext">
-							    <p>真伯斯: 呵啥呵</p>
-							  </div>
+								<div style={{ float:'left', clear: 'both' }}
+           				ref={(el) => { this.messagesEnd = el; }}>
+         				</div>
 							</div>
-
-							<div className="talk_bubble_self">
-							  <div className="talktext">
-							    <p>伯斯: 呵屁呵</p>
-							  </div>
-							</div>
-
-							<div className="talk_bubble_self">
-							  <div className="talktext">
-							    <p>伯斯: 呵屁呵</p>
-							  </div>
-							</div>
-
-							<div className="talk_bubble">
-							  <div className="talktext">
-							    <p>真伯斯: 呵啥呵</p>
-							  </div>
-							</div>*/}
-							{ 
-								this.state.whoTyping ? 
-									<div className='who_typing'>{this.state.whoTyping}輸入中訊息中...</div> : 
-									<div className='who_typing'></div>
-							}
 
 							<input 
 								className='temp_currUser' 

@@ -28,29 +28,50 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 40%;
+  width: 50%;
   margin: 4% auto;
 }
 
-.profile_container > .profile_picture {
+.profile_container > .profile_picture_container {
+  width: 50%;
+  display: flex;
+  justify-content: space-around;
+}
+
+.profile_container > .profile_picture_container > .profile_picture {
   height: 180px;
   border-radius: 50%;
 
 }
 
 .profile_container > .profile_content {
+  width: 50%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 10%; 
   line-height: 1.5;
+}
+
+.profile_content > .profile_name {
+  width: 100%;
+}
+
+.profile_content > .profile_email {
+  width: 100%;
+}
+
+.profile_content > .profile_name > .edit_name_button {
+  width: 80px;
+  padding: 4px;
+  border-radius: 4px;
+  margin: 0 auto auto 8px;
 }
 
 .profile_container > .profile_content > .logout_button {
   width: 80px;
   height: 32px;
   border-radius: 4px;
-  margin: 8% auto auto 0;
+  margin: 2% auto auto 0;
 }
 
 .trip_list_container > .trip_list_tag {

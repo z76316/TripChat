@@ -14,15 +14,20 @@ import planIcon from '../../photo/plan_icon_01.png';
 // import ReactDOM
 import MainProfile from './MainProfile';
 
+// Server ip
+let Server_ip = 'http://localhost:9000';
+// let Server_ip = 'http://52.89.137.222:9000';
+
+
 class Main extends Component {
 
 	constructor(props) {
 		super(props);
 		this.state = {
 			isLogin: this.props.isLogin,
-			loginOrSignup: 'signup',
+			loginOrSignup: 'login',
 			login_tab_style: 'login_tab active',
-			singup_tab_style: 'login_tab',
+			signup_tab_style: 'login_tab',
 			inputName: '',
 			inputEmail: '',
 			inputPassword: '',
@@ -31,14 +36,28 @@ class Main extends Component {
 			tripDate: '',
 			tripLocation: ''
 		};
-		this.handleChange = this.handleChange.bind(this);
+
 	}
 
-	handleChange = (e) => {
-		let inputName = e.target.value;
-		console.log(this.state);
-		this.setState({inputName: inputName});
-	}
+	ajax = (method, src, args, callback) => {
+		let req = new XMLHttpRequest();
+		if(method.toLowerCase() === 'post'){ 
+			// post through json args
+			req.open(method, src);
+			req.setRequestHeader('Content-Type', 'application/json');
+			req.onload = function(){
+				callback(this);
+			};
+			req.send(JSON.stringify(args));
+		}else{ 
+			// get through http args
+			req.open(method, src+'?'+args);
+			req.onload = function(){
+				callback(this);
+			};
+			req.send();
+		}
+	};
 
 	loginWithFB = (e) => {
 
@@ -48,19 +67,117 @@ class Main extends Component {
 
 	}
 
+	changeToSignup = () => {
+		this.setState({
+			loginOrSignup: 'signup',
+			login_tab_style: 'login_tab',
+			signup_tab_style: 'login_tab active'
+		});
+	}
+
+	changeToLogin = () => {
+		this.setState({
+			loginOrSignup: 'login',
+			login_tab_style: 'login_tab active',
+			signup_tab_style: 'login_tab'
+		});
+	}
+
 	handleNameInput = (e) => {
 		let inputName = e.target.value;
-		// this.setState({inputName: inputName});
+		this.setState({inputName: inputName});
 	}
 
 	handleEmailInput = (e) => {
 		let inputEmail = e.target.value;
-		// this.setState({inputEmail: inputName});
+		this.setState({inputEmail: inputEmail});
 	}
 
 	handlePasswordInput = (e) => {
 		let inputPassword = e.target.value;
-		// this.setState({inputPassword: inputName});
+		this.setState({inputPassword: inputPassword});
+	}
+
+	setLoginState = (data) => {
+		localStorage.setItem('currUser', JSON.stringify(
+			{
+				name: data.name,
+				email: data.email,
+				provider: data.provider
+			}));
+	}
+
+	submitLogin = () => {
+		console.log(this.state.loginOrSignup);
+		if(this.state.loginOrSignup === 'signup') {
+			
+			if(this.state.inputName && 
+				this.state.inputEmail && 
+				this.state.inputPassword) {
+
+				let signup_data = {
+					name: this.state.inputName,
+					email: this.state.inputEmail,
+					password: this.state.inputPassword,
+					provider: 'email'
+				};
+				this.ajax('post', Server_ip+'/exe/accounts/signup', signup_data, (req) => {
+					let result=JSON.parse(req.responseText);
+					if(result.err) {
+						alert(result.err);
+					} else {
+						this.setLoginState(signup_data);
+						alert(result.message);
+						this.props.handleIsLogin(true);
+						this.setState({isLogin: true});
+					}
+				});
+			} else {
+				alert('尚有空白欄位！');
+			}
+
+		} else if(this.state.loginOrSignup === 'login') {
+			if(this.state.inputEmail && 
+				this.state.inputPassword) {
+
+				let login_data = {
+					email: this.state.inputEmail,
+					password: this.state.inputPassword,
+					provider: 'email'
+				};
+				console.log(login_data);
+				this.ajax('post', Server_ip+'/exe/accounts/login', login_data, (req) => {
+					let result=JSON.parse(req.responseText);
+					if(result.err) {
+						alert(result.err);
+					} else {
+						this.setLoginState(result.loginState);
+						alert(result.message);
+						this.props.handleIsLogin(true);
+						this.setState({isLogin: true});
+					}
+				});
+			} else {
+				alert('尚有空白欄位！');
+			}
+		}
+	}
+
+	changeLoginState = (state) => {
+		this.props.handleIsLogin(state);
+		this.setState({isLogin: state});
+	}
+
+	checkLoginState = () => {
+		if(!JSON.parse(localStorage.getItem('currUser')) || JSON.parse(localStorage.getItem('currUser')).length === 0) {
+			this.setState({isLogin: false});
+		} else {
+			this.setState({isLogin: true});
+		}
+	}
+
+	componentDidMount() {
+		this.checkLoginState();
 	}
 
 	render() {
@@ -84,8 +201,12 @@ class Main extends Component {
 							type='button' 
 							onClick={() => this.loginWithGo()}>使用 Google 登入</button>
 						<div className='login_tab_container'>
-							<span className={this.state.login_tab_style}>登入</span>
-							<span className={this.state.singup_tab_style}>快速註冊</span>
+							<span 
+								className={this.state.login_tab_style}
+								onClick={() => this.changeToLogin()}>登入</span>
+							<span 
+								className={this.state.signup_tab_style}
+								onClick={() => this.changeToSignup()}>快速註冊</span>
 						</div>
 						
 						<div className='login_input_container'>
@@ -109,7 +230,7 @@ class Main extends Component {
 							/>
 							<input 
 								className='input_password' 
-								type="text" 
+								type="password" 
 								name="password" 
 								placeholder='請輸入密碼(至少 6 碼)' 
 								onChange={ (e) => this.handlePasswordInput(e) }
@@ -125,7 +246,8 @@ class Main extends Component {
 			);
 		} else {
 			return(
-				<MainProfile />
+				<MainProfile 
+					changeLoginState={this.changeLoginState}/>
 			);
 		}
 
@@ -136,7 +258,8 @@ class Main extends Component {
 }
 
 Main.propTypes = { 
-	isLogin: PropTypes.any
+	isLogin: PropTypes.any,
+	handleIsLogin: PropTypes.func
 }; 
 
 export default Main;
