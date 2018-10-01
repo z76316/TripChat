@@ -34,6 +34,10 @@ class MainProfile extends Component {
 		this.setState({inputName: inputName});
 	}
 
+	editName = () => {
+
+	}
+
 	logOut = () => {
 		localStorage.removeItem('currUser');
 		this.props.changeLoginState(false);
@@ -66,9 +70,17 @@ class MainProfile extends Component {
 				</header>
 				<div className="main_container">
 					<div className="profile_container">
-						<img className='profile_picture' src={fbHead} />
+						<div className='profile_picture_container'>
+							<img className='profile_picture' src={fbHead} />
+						</div>
 						<div className='profile_content'>
-							<div className='profile_name'>{this.state.profile_name}</div>
+							<div className='profile_name'>
+								{this.state.profile_name}
+								<button 
+									className='edit_name_button'
+									type='button' 
+									onClick={() => this.editName()}>更改名稱</button>
+							</div>
 							<div className='profile_email'>{this.state.profile_email}</div>
 							<button 
 								className='logout_button'

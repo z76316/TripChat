@@ -15,8 +15,8 @@ import planIcon from '../../photo/plan_icon_01.png';
 import MainProfile from './MainProfile';
 
 // Server ip
-// let Server_ip = 'http://localhost:9000';
-let Server_ip = 'http://52.89.137.222:9000';
+let Server_ip = 'http://localhost:9000';
+// let Server_ip = 'http://52.89.137.222:9000';
 
 
 class Main extends Component {
@@ -25,9 +25,9 @@ class Main extends Component {
 		super(props);
 		this.state = {
 			isLogin: this.props.isLogin,
-			loginOrSignup: 'signup',
-			login_tab_style: 'login_tab',
-			signup_tab_style: 'login_tab active',
+			loginOrSignup: 'login',
+			login_tab_style: 'login_tab active',
+			signup_tab_style: 'login_tab',
 			inputName: '',
 			inputEmail: '',
 			inputPassword: '',
