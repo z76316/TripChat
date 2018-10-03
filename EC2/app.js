@@ -4,6 +4,27 @@ const app = express(); // 產生 express application 物件
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// session
+let session = require('express-session');
+// let FileStore = require('session-file-store')(session);
+app.use(session({
+	name: 'identityKey',
+	secret: 'suger daddy',
+	// store: new FileStore(),
+	saveUninitialized: false,
+	resave: true,
+	cookie: {
+		maxAge: 300 * 1000
+	}
+}));
+
+// let test_accounts = [
+// 	{
+// 		name: 'test',
+// 		password: '123456'
+// 	}	
+// ];
+
 // socket.io
 const socket = require('socket.io');
 
@@ -15,9 +36,6 @@ const request = require("request");
 
 // mysql
 const mysql = require('mysql');
-
-// MySQL command
-const SELECT_ALL_test_tbl_QUERY = 'SELECT * FROM test_tbl';
 
 // connnect mysql
 const connection = mysql.createConnection({
@@ -71,77 +89,158 @@ app.get('/exe/mysql/test_tbl', function(req, res) {
 	});
 });
 
-app.post('/exe/accounts/login', (req, res) => {
-  let data = req.body;
-  if (!data.email || !data.password) {
-      res.send({ error: "Login Error: Wrong Data Format" });
-      return;
-  }
 
-  let email = data.email;
-  let password = data.password;
-  let provider = data.provider;
-  let checkAccount = 
-  	`SELECT * FROM accounts
-  	WHERE 
-  	account_email = '${email}' AND
-  	account_password = '${password}' AND
-  	provider = '${provider}'`;
-  	console.log(checkAccount);
-	connection.query(checkAccount, (err, account) => {
-		console.log(account);
+app.get('/exe/checkloginstate', function (req, res) {
+	let sess = req.session;
+	let account_id = sess.account_id;
+	let name = sess.name;
+	let email = sess.email;
+	let isLogin = !!email;
+	res.send({
+		name: name,
+		email: email,
+		isLogin: isLogin
+	});
+	console.log(`id = ${account_id}, name = ${name}, email = ${email}, isLogin = ${isLogin}`);
+	console.log(sess);
+});
+
+app.get('/exe/logout', function(req, res){
+	req.session.destroy(function(err) {
 		if(err) {
-			res.send( {err: 'Something went wrong during check your email and password input: ' + err} );
-		} else if(account.length === 0) {
-			res.send( {err: '帳號或密碼輸入錯誤。'} );
-		} else {
-			let loginState = {
-				name: account[0].account_name,
-				email: account[0].account_email,
-				provider: account[0].provider
-			};
-			console.log(loginState);
-			res.send({
-				loginState: loginState,
-				message: `${account[0].account_name}，歡迎回來!`
-			});
+			res.send({err: err});
+			return;
 		}
+		res.clearCookie('identityKey');
+		res.send({message: 'See ya!'});
 	});
 });
 
-app.post('/exe/accounts/signup', (req, res) => {
-  let data = req.body;
-  if (!data.name || !data.email || !data.password) {
-      res.send({ error: "Signup Error: Wrong Data Format" });
-      return;
-  }
+app.post('/exe/accounts/editname', (req, res) => {
+	let sess = req.session;
+	let account_id = sess.account_id;
+	let new_name = req.body.new_name;
+	let update_date = {
+		account_name: new_name
+	};
+	let UpdateName = 
+		`UPDATE accounts 
+		SET ? WHERE account_id = ?`;
+	if(new_name.length < 1) {
+		res.send({name: sess.name});
+		return;
+	}
+		connection.query(UpdateName, [update_date, account_id], (err, result) => {
+			console.log(result);
+			if(err) {
+				res.send( {err: 'Something went wrong during update profile name: ' + err} );
+			} else {
+				req.session.regenerate(function(err) {
+					if(err) {
+						res.send({err: 'Something went wrong during regenerate session: ' + err});
+						return;
+					}
+				});
+				req.session.name = new_name;
+				console.log(req.session);
+				res.send({
+					name: req.session.name
+				});
+			}
+		});
+});
 
-  let name = data.name;
-  let email = data.email;
-  let password = data.password;
-  let provider = data.provider;
-  let isExistAccount = 
-  	`SELECT * FROM accounts
-  	WHERE account_email = '${email}'`;
-  let INSERT_INTO_accounts = 
-  	`INSERT INTO accounts (account_name, account_email, account_password, create_date, provider) 
-  	VALUES 
-  	('${name}', '${email}', '${password}', CURDATE(), '${provider}')`;
-	connection.query(isExistAccount, (err, account) => {
-		if(err) {
-			res.send( {err: 'Something went wrong during check this email is exist: ' + err} );
-		} else if(account.length !== 0) {
-			res.send( {err: '此信箱已被註冊。'} );
-		} else {
-			connection.query(INSERT_INTO_accounts, (err, results) => {
-		  	if(err) {
-		  		res.send({err: 'Something went wrong during add this account into database: ' + err});
-		  	} else {
-		  		res.send({message: '您已成功註冊帳戶!'});
-		  	}
-		  });
-		}
-	});
+app.post('/exe/accounts/login', (req, res) => {
+	let sess = req.session;
+	let data = req.body;
+	if (!data.email || !data.password) {
+		res.send({ error: "Login Error: Wrong Data Format" });
+		return;
+	}
+
+	let email = data.email;
+	let password = data.password;
+	let provider = data.provider;
+	let checkAccount = 
+		`SELECT * FROM accounts
+		WHERE 
+		account_email = '${email}' AND
+		account_password = '${password}' AND
+		provider = '${provider}'`;
+		console.log(checkAccount);
+		connection.query(checkAccount, (err, account) => {
+			console.log(account);
+			if(err) {
+				res.send( {err: 'Something went wrong during check your email and password input: ' + err} );
+			} else if(account.length === 0) {
+				res.send( {err: '帳號或密碼輸入錯誤。'} );
+			} else {
+				req.session.regenerate(function(err) {
+					if(err) {
+						res.send({err: 'Something went wrong during regenerate session: ' + err});
+						return;
+					}
+				});
+				console.log('id在這裡啦' + account[0].account_id);
+				console.log(account[0].account_name);
+				console.log(account[0].account_email);
+				console.log(account[0].provider);
+				req.session.account_id = account[0].account_id;
+				req.session.name = account[0].account_name;
+				req.session.email = account[0].account_email;
+				req.session.isLogin = true;
+				console.log(req.session);
+				res.send({
+					message: `${account[0].account_name}，歡迎回來!`
+				});
+			}
+		});
+});
+
+app.post('/exe/accounts/signup', (req, res) => {
+	let sess = req.session;
+	let data = req.body;
+	if (!data.name || !data.email || !data.password) {
+		res.send({ error: "Signup Error: Wrong Data Format" });
+		return;
+	}
+
+	let name = data.name;
+	let email = data.email;
+	let password = data.password;
+	let provider = data.provider;
+	let isExistAccount = 
+		`SELECT * FROM accounts
+		WHERE account_email = '${email}'`;
+	let INSERT_INTO_accounts = 
+		`INSERT INTO accounts (account_name, account_email, account_password, create_date, provider) 
+		VALUES 
+		('${name}', '${email}', '${password}', CURDATE(), '${provider}')`;
+		connection.query(isExistAccount, (err, account) => {
+			if(err) {
+				res.send( {err: 'Something went wrong during check this email is exist: ' + err} );
+			} else if(account.length !== 0) {
+				res.send( {err: '此信箱已被註冊。'} );
+			} else {
+				connection.query(INSERT_INTO_accounts, (err, results) => {
+				if(err) {
+					res.send({err: 'Something went wrong during add this account into database: ' + err});
+				} else {
+					req.session.regenerate(function(err) {
+						if(err) {
+							res.send({err: 'Something went wrong during regenerate session: ' + err});
+							return;
+						}
+					});
+					req.session.name = name;
+					req.session.email = email;
+					req.session.isLogin = true;
+					console.log(req.session);
+					res.send({message: '您已成功註冊帳戶!'});
+				}
+			});
+			}
+		});
 
   //宣告發信物件
   // let transporter = nodemailer.createTransport({

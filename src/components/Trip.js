@@ -23,6 +23,10 @@ import addMemberIcon from '../../photo/add_member_icon_01.png';
 import MyChatBox from './myChatBox';
 import OthersChatBox from './othersChatBox';
 
+// Server ip
+let Server_ip = 'http://localhost:9000';
+// let Server_ip = 'http://52.89.137.222:9000';
+
 let socket;
 
 class Trip extends Component {
@@ -37,6 +41,26 @@ class Trip extends Component {
 		};
 
 	}
+
+	ajax = (method, src, args, callback) => {
+		let req = new XMLHttpRequest();
+		if(method.toLowerCase() === 'post'){ 
+			// post through json args
+			req.open(method, src);
+			req.setRequestHeader('Content-Type', 'application/json');
+			req.onload = function(){
+				callback(this);
+			};
+			req.send(JSON.stringify(args));
+		}else{ 
+			// get through http args
+			req.open(method, src+'?'+args);
+			req.onload = function(){
+				callback(this);
+			};
+			req.send();
+		}
+	};
 
 	exportFile = (e) => {
 
@@ -95,10 +119,18 @@ class Trip extends Component {
 	}
 
 	componentDidMount() {
+		this.ajax('get', Server_ip+'/exe/checkloginstate', '', (req) => {
+			let result=JSON.parse(req.responseText);
+			console.log('Trip.js session ' + result.name + ' ' + result.email);
+			if(result.isLogin) {
+				this.setState({currUser: result.name});
+			} else {
+				window.location = '/';
+			}
+		});
 		this.scrollToBottom();
 
-		// socket = io.connect('http://localhost:9000');
-		socket = io.connect('http://52.89.137.222:9000');
+		socket = io.connect(Server_ip);
 
 		// Listen for chat
 		socket.on('chat', (data) => {
@@ -251,13 +283,13 @@ class Trip extends Component {
          				</div>
 							</div>
 
-							<input 
+							{/* <input 
 								className='temp_currUser' 
 								type="text" 
 								name="temp_currUser" 
 								placeholder='先打暱稱，以後幫大家變成使用者資訊' 
 								onChange={ (e) => this.handleNameInput(e) }
-							/>
+							/> */}
 
 	            <textarea 
 	            	className='input_chat'

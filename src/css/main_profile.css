@@ -60,6 +60,24 @@ button {
   width: 100%;
 }
 
+.profile_content > .profile_name > .input_edit_name {
+  margin: 0;
+  display: inline-block;
+}
+
+.profile_content > .profile_name > .displayNone {
+  display: none;
+}
+
+.profile_content > .profile_name > .edit_name_icon {
+  display: inline-block;
+  margin-left: 10px;
+  background: url('../../photo/edit_name_01.png');
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
 .profile_content > .profile_name > .edit_name_button {
   width: 80px;
   padding: 4px;

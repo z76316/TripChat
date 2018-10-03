@@ -14,6 +14,52 @@ import planIcon from '../../photo/plan_icon_01.png';
 import fbHead from '../../photo/fb_head.jpg';
 
 // import ReactDOM
+import TripCard from './TripCard';
+
+// Server ip
+let Server_ip = 'http://localhost:9000';
+// let Server_ip = 'http://52.89.137.222:9000';
+
+// Fake Trip list
+let a_trip = {
+	tripId: 1,
+	tripTitle: '清水斷崖獨木舟',
+	tripDate: new Date(2016,6,21),
+	tripLocation: '宜蘭',
+	tripMembers: '伯斯, 真伯斯, 假伯斯'
+};
+
+let b_trip = {
+	tripId: 2,
+	tripTitle: '草嶺古道驚魂記',
+	tripDate: new Date(2016,3,11),
+	tripLocation: '宜蘭',
+	tripMembers: '伯斯, 真伯斯, 假伯斯'
+};
+
+let c_trip = {
+	tripId: 3,
+	tripTitle: '司馬庫斯看星星',
+	tripDate: new Date(2013,8,17),
+	tripLocation: '新竹',
+	tripMembers: '伯斯, 真伯斯, 假伯斯'
+};
+
+let d_trip = {
+	tripId: 4,
+	tripTitle: '阿里山看日出沒看到',
+	tripDate: new Date(2012,1,3),
+	tripLocation: '嘉義',
+	tripMembers: '伯斯, 真伯斯, 假伯斯'
+};
+
+let e_trip = {
+	tripId: 5,
+	tripTitle: '花蓮3日遊',
+	tripDate: new Date(2011,8,27),
+	tripLocation: '花蓮',
+	tripMembers: '伯斯, 真伯斯, 假伯斯'
+};
 
 class MainProfile extends Component {
 
@@ -22,34 +68,114 @@ class MainProfile extends Component {
 		this.state = {
 			profile_name: '',
 			profile_email: '',
+			temp_name: '',
+			edit_name: false,
+			input_edit_name_style: 'displayNone',
+			currEditName: '',
+			now_or_memory: 'now',
 			trip_list_tag_now: 'trip_list_tag_now current',
-			trip_list_tag_past: 'trip_list_tag_past'
+			trip_list_tag_past: 'trip_list_tag_past',
+			trip_list: [a_trip, b_trip, c_trip],
+			memory_list: [d_trip, e_trip]
 		};
-		this.handleChange = this.handleChange.bind(this);
 	}
 
-	handleChange = (e) => {
-		let inputName = e.target.value;
-		console.log(this.state);
-		this.setState({inputName: inputName});
-	}
+	ajax = (method, src, args, callback) => {
+		let req = new XMLHttpRequest();
+		if(method.toLowerCase() === 'post'){ 
+			// post through json args
+			req.open(method, src);
+			req.setRequestHeader('Content-Type', 'application/json');
+			req.onload = function(){
+				callback(this);
+			};
+			req.send(JSON.stringify(args));
+		}else{ 
+			// get through http args
+			req.open(method, src+'?'+args);
+			req.onload = function(){
+				callback(this);
+			};
+			req.send();
+		}
+	};
 
 	editName = () => {
+		if(!this.state.edit_name) {
+			let temp_name = this.state.profile_name;
+			this.setState({
+				temp_name: temp_name,
+				currEditName: temp_name,
+				profile_name: '',
+				edit_name: true,
+				input_edit_name_style: 'input_edit_name'
+			});
+		} else {
+			let update_data = {new_name: this.state.currEditName};
+			this.ajax('post', Server_ip+'/exe/accounts/editname', update_data, (req) => {
+				let result=JSON.parse(req.responseText);
+				if(result.err) {
+					alert(result.err);
+				} else {
+					this.setState({
+						profile_name: result.name,
+						edit_name: false,
+						input_edit_name_style: 'displayNone'
+					});
+				}
+			});
+		}
+	}
 
+	handleEditName = (e) => {
+		let currEditName = e.target.value;
+		this.setState({
+			temp_name: currEditName,
+			currEditName: currEditName
+		});
+		console.log(currEditName);
 	}
 
 	logOut = () => {
-		localStorage.removeItem('currUser');
-		this.props.changeLoginState(false);
+		this.ajax('get', Server_ip+'/exe/logout', '', (req) => {
+			let result=JSON.parse(req.responseText);
+			if(result.err) {
+				alert('登出失敗: ' + result.err);
+			} else {
+				this.props.changeLoginState(false);
+			}
+		});
+	}
+
+	changeTab = (tab) => {
+		if(tab === 'now') {
+			this.setState({
+				now_or_memory: 'now',
+				trip_list_tag_now: 'trip_list_tag_now current',
+				trip_list_tag_past: 'trip_list_tag_past'
+			});
+		} else if(tab === 'memory') {
+			this.setState({
+				now_or_memory: 'memory',
+				trip_list_tag_now: 'trip_list_tag_now',
+				trip_list_tag_past: 'trip_list_tag_past current'
+			});
+		}
 	}
 
 	getLoginState = () => {
-		let currUser = JSON.parse(localStorage.getItem('currUser'));
-		this.setState(
-			{
-				profile_name: currUser.name,
-				profile_email: currUser.email
-			});
+		this.ajax('get', Server_ip+'/exe/checkloginstate', '', (req) => {
+			let result=JSON.parse(req.responseText);
+			console.log('MainProfile.js session ' + result.name + ' ' + result.email);
+			if(result.isLogin) {
+				this.setState(
+					{
+						profile_name: result.name,
+						profile_email: result.email
+					}
+				);
+			}
+		});
 	}
 
 	componentDidMount() {
@@ -76,10 +202,15 @@ class MainProfile extends Component {
 						<div className='profile_content'>
 							<div className='profile_name'>
 								{this.state.profile_name}
-								<button 
-									className='edit_name_button'
-									type='button' 
-									onClick={() => this.editName()}>更改名稱</button>
+								<input 
+									className={this.state.input_edit_name_style} 
+									type="text" 
+									name="edit_name" 
+									value={this.state.temp_name}
+									onChange={ (e) => this.handleEditName(e) }
+								/>
+								<div className='edit_name_icon'
+									onClick={() => this.editName()}></div>
 							</div>
 							<div className='profile_email'>{this.state.profile_email}</div>
 							<button 
@@ -90,46 +221,59 @@ class MainProfile extends Component {
 					</div>
 					<div className='trip_list_container'>
 						<div className='trip_list_tag'>
-							<div className={this.state.trip_list_tag_now}>規劃中</div>
-							<div className={this.state.trip_list_tag_past}>回憶錄</div>
+							<div className={this.state.trip_list_tag_now}
+								onClick={() => this.changeTab('now')}>規劃中</div>
+							<div className={this.state.trip_list_tag_past}
+								onClick={() => this.changeTab('memory')}>回憶錄</div>
 						</div>
 						<div className='trip_list_background'>
 							<div className='trip_list_area'>
-								<Link to='/trip'>
+								{this.state.now_or_memory === 'now' ? 
+									(
+										this.state.trip_list.map((trip, index) => {
+											return (
+												<TripCard 
+													key={index}
+													tripId={trip.tripId}	
+													tripTitle={trip.tripTitle}
+													tripDate={trip.tripDate}
+													tripLocation={trip.tripLocation}
+													tripMembers={trip.tripMembers}
+												/>
+											);
+										})
+									) : 
+									(
+										this.state.memory_list.map((trip, index) => {
+											return (
+												<TripCard 
+													key={index}
+													tripId={trip.tripId}	
+													tripTitle={trip.tripTitle}
+													tripDate={trip.tripDate}
+													tripLocation={trip.tripLocation}
+													tripMembers={trip.tripMembers}
+												/>
+											);
+										})
+									)		
+								}
+								{this.state.now_or_memory === 'now' &&
+									(<div className='trip_create'>
+										<div className='trip_create_content'>開啟下一趟旅程</div>
+									</div>)
+								}
+								{/* <Link to='/trip'>
 									<div className='trip'>
 										<div className='trip_title'>清水斷崖獨木舟</div>
 										<div className='trip_date'>2018.6.21</div>
 										<div className='trip_location'>宜蘭</div>
 										<div className='trip_member'>伯斯、真博斯、假伯斯</div>
 									</div>
-								</Link>
-								<Link to='/trip'>
-									<div className='trip'>
-										<div className='trip_title'>清水斷崖獨木舟</div>
-										<div className='trip_date'>2018.6.21</div>
-										<div className='trip_location'>宜蘭</div>
-										<div className='trip_member'>伯斯、真博斯、假伯斯</div>
-									</div>
-								</Link>
-								<Link to='/trip'>
-									<div className='trip'>
-										<div className='trip_title'>清水斷崖獨木舟</div>
-										<div className='trip_date'>2018.6.21</div>
-										<div className='trip_location'>宜蘭</div>
-										<div className='trip_member'>伯斯、真博斯、假伯斯</div>
-									</div>
-								</Link>
-								<Link to='/trip'>
-									<div className='trip'>
-										<div className='trip_title'>清水斷崖獨木舟</div>
-										<div className='trip_date'>2018.6.21</div>
-										<div className='trip_location'>宜蘭</div>
-										<div className='trip_member'>伯斯、真博斯、假伯斯</div>
-									</div>
-								</Link>
-								<div className='trip_create'>
+								</Link> */}
+								{/* <div className='trip_create'>
 									<div className='trip_create_content'>開啟下一趟旅程</div>
-								</div>
+								</div> */}
 							</div>
 						</div>
 					</div>
