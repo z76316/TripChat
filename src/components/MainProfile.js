@@ -15,6 +15,10 @@ import fbHead from '../../photo/fb_head.jpg';
 
 // import ReactDOM
 
+// Server ip
+let Server_ip = 'http://localhost:9000';
+// let Server_ip = 'http://52.89.137.222:9000';
+
 class MainProfile extends Component {
 
 	constructor(props) {
@@ -34,22 +38,54 @@ class MainProfile extends Component {
 		this.setState({inputName: inputName});
 	}
 
+	ajax = (method, src, args, callback) => {
+		let req = new XMLHttpRequest();
+		if(method.toLowerCase() === 'post'){ 
+			// post through json args
+			req.open(method, src);
+			req.setRequestHeader('Content-Type', 'application/json');
+			req.onload = function(){
+				callback(this);
+			};
+			req.send(JSON.stringify(args));
+		}else{ 
+			// get through http args
+			req.open(method, src+'?'+args);
+			req.onload = function(){
+				callback(this);
+			};
+			req.send();
+		}
+	};
+
 	editName = () => {
 
 	}
 
 	logOut = () => {
-		localStorage.removeItem('currUser');
-		this.props.changeLoginState(false);
+		this.ajax('get', Server_ip+'/exe/logout', '', (req) => {
+			let result=JSON.parse(req.responseText);
+			if(result.err) {
+				alert('登出失敗: ' + result.err);
+			} else {
+				this.props.changeLoginState(false);
+			}
+		});
 	}
 
 	getLoginState = () => {
-		let currUser = JSON.parse(localStorage.getItem('currUser'));
-		this.setState(
-			{
-				profile_name: currUser.name,
-				profile_email: currUser.email
-			});
+		this.ajax('get', Server_ip+'/exe/checkloginstate', '', (req) => {
+			let result=JSON.parse(req.responseText);
+			console.log('MainProfile.js session' + result);
+			if(result.isLogin) {
+				this.setState(
+					{
+						profile_name: result.name,
+						profile_email: result.email
+					}
+				);
+			}
+		});
 	}
 
 	componentDidMount() {

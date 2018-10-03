@@ -12,13 +12,16 @@ import logo from '../../photo/logo_04.png';
 import Main from './Main';
 import Trip from './Trip';
 
+// Server ip
+// let Server_ip = 'http://localhost:9000';
+let Server_ip = 'http://52.89.137.222:9000';
 
 class App extends Component {
 
 	constructor(props) {
 		super(props);
 		this.state = {
-			isLogin: false,
+			// isLogin: false,
 			loginOrSignup: 'signup',
 			trip: [],
 			tripTitle: '',
@@ -29,6 +32,26 @@ class App extends Component {
 
 	}
 
+	// ajax = (method, src, args, callback) => {
+	// 	let req = new XMLHttpRequest();
+	// 	if(method.toLowerCase() === 'post'){ 
+	// 		// post through json args
+	// 		req.open(method, src);
+	// 		req.setRequestHeader('Content-Type', 'application/json');
+	// 		req.onload = function(){
+	// 			callback(this);
+	// 		};
+	// 		req.send(JSON.stringify(args));
+	// 	}else{ 
+	// 		// get through http args
+	// 		req.open(method, src+'?'+args);
+	// 		req.onload = function(){
+	// 			callback(this);
+	// 		};
+	// 		req.send();
+	// 	}
+	// };
+
 	loginWithFB = (e) => {
 
 	}
@@ -37,21 +60,25 @@ class App extends Component {
 
 	}
 
-	handleIsLogin = (state) => {
-		this.setState({isLogin: state});
-	}
+	// handleIsLogin = (state) => {
+	// 	this.setState({isLogin: state});
+	// }
 
-	checkLoginState = () => {
-		if(!JSON.parse(localStorage.getItem('currUser')) || JSON.parse(localStorage.getItem('currUser')).length === 0) {
-			this.setState({isLogin: false});
-		} else {
-			this.setState({isLogin: true});
-		}
-	}
+	// checkLoginState = () => {
+	// 	this.ajax('get', Server_ip+'/exe/checkloginstate', '', (req) => {
+	// 		let result=JSON.parse(req.responseText);
+	// 		console.log('App.js session' + result);
+	// 		if(result.isLogin) {
+	// 			this.setState({isLogin: true});
+	// 		} else {
+	// 			this.setState({isLogin: false});
+	// 		}
+	// 	});
+	// }
 
-	componentDidMount() {
-		this.checkLoginState();
-	}
+	// componentDidMount() {
+	// 	this.checkLoginState();
+	// }
 
 	render() {
 		return(
@@ -59,8 +86,8 @@ class App extends Component {
 				<Route 
 					exact path='/' 
 					render={() => <Main
-						isLogin={this.state.isLogin}
-						handleIsLogin={this.handleIsLogin}
+						// isLogin={this.state.isLogin}
+						// handleIsLogin={this.handleIsLogin}
 					/>}
 				/>
 				<Route 

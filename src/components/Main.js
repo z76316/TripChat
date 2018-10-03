@@ -24,7 +24,7 @@ class Main extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			isLogin: this.props.isLogin,
+			isLogin: '',
 			loginOrSignup: 'login',
 			login_tab_style: 'login_tab active',
 			signup_tab_style: 'login_tab',
@@ -98,15 +98,6 @@ class Main extends Component {
 		this.setState({inputPassword: inputPassword});
 	}
 
-	setLoginState = (data) => {
-		localStorage.setItem('currUser', JSON.stringify(
-			{
-				name: data.name,
-				email: data.email,
-				provider: data.provider
-			}));
-	}
-
 	submitLogin = () => {
 		console.log(this.state.loginOrSignup);
 		if(this.state.loginOrSignup === 'signup') {
@@ -126,9 +117,8 @@ class Main extends Component {
 					if(result.err) {
 						alert(result.err);
 					} else {
-						this.setLoginState(signup_data);
 						alert(result.message);
-						this.props.handleIsLogin(true);
+						// this.props.handleIsLogin(true);
 						this.setState({isLogin: true});
 					}
 				});
@@ -151,9 +141,8 @@ class Main extends Component {
 					if(result.err) {
 						alert(result.err);
 					} else {
-						this.setLoginState(result.loginState);
 						alert(result.message);
-						this.props.handleIsLogin(true);
+						// this.props.handleIsLogin(true);
 						this.setState({isLogin: true});
 					}
 				});
@@ -164,16 +153,22 @@ class Main extends Component {
 	}
 
 	changeLoginState = (state) => {
-		this.props.handleIsLogin(state);
+		// this.props.handleIsLogin(state);
 		this.setState({isLogin: state});
 	}
 
 	checkLoginState = () => {
-		if(!JSON.parse(localStorage.getItem('currUser')) || JSON.parse(localStorage.getItem('currUser')).length === 0) {
-			this.setState({isLogin: false});
-		} else {
-			this.setState({isLogin: true});
-		}
+		this.ajax('get', Server_ip+'/exe/checkloginstate', '', (req) => {
+			let result=JSON.parse(req.responseText);
+			console.log('Main.js session' + result);
+			if(result.isLogin) {
+				// this.props.handleIsLogin(true);
+				this.setState({isLogin: true});
+			} else {
+				// this.props.handleIsLogin(false);
+				this.setState({isLogin: false});
+			}
+		});
 	}
 
 	componentDidMount() {
@@ -257,9 +252,9 @@ class Main extends Component {
 
 }
 
-Main.propTypes = { 
-	isLogin: PropTypes.any,
-	handleIsLogin: PropTypes.func
-}; 
+// Main.propTypes = { 
+// 	isLogin: PropTypes.any,
+// 	handleIsLogin: PropTypes.func
+// }; 
 
 export default Main;
