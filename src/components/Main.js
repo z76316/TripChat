@@ -15,8 +15,8 @@ import planIcon from '../../photo/plan_icon_01.png';
 import MainProfile from './MainProfile';
 
 // Server ip
-// let Server_ip = 'http://localhost:9000';
-let Server_ip = 'http://52.89.137.222:9000';
+let Server_ip = 'http://localhost:9000';
+// let Server_ip = 'http://52.89.137.222:9000';
 
 
 class Main extends Component {
@@ -142,7 +142,6 @@ class Main extends Component {
 						alert(result.err);
 					} else {
 						alert(result.message);
-						// this.props.handleIsLogin(true);
 						this.setState({isLogin: true});
 					}
 				});
@@ -160,7 +159,7 @@ class Main extends Component {
 	checkLoginState = () => {
 		this.ajax('get', Server_ip+'/exe/checkloginstate', '', (req) => {
 			let result=JSON.parse(req.responseText);
-			console.log('Main.js session' + result);
+			console.log('Main.js session ' + result.name + ' ' + result.email);
 			if(result.isLogin) {
 				// this.props.handleIsLogin(true);
 				this.setState({isLogin: true});

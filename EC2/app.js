@@ -89,14 +89,10 @@ app.get('/exe/mysql/test_tbl', function(req, res) {
 	});
 });
 
-// let findUser = function(name, password) {
-// 	return test_accounts.find(function(item){
-// 		return item.name === name && item.password === password;
-// 	});
-// };
 
-app.get('/exe/checkloginstate', function(req, res){
+app.get('/exe/checkloginstate', function (req, res) {
 	let sess = req.session;
+	let account_id = sess.account_id;
 	let name = sess.name;
 	let email = sess.email;
 	let isLogin = !!email;
@@ -105,7 +101,7 @@ app.get('/exe/checkloginstate', function(req, res){
 		email: email,
 		isLogin: isLogin
 	});
-	console.log(`name = ${name}, email = ${email}, isLogin = ${isLogin}`);
+	console.log(`id = ${account_id}, name = ${name}, email = ${email}, isLogin = ${isLogin}`);
 	console.log(sess);
 });
 
@@ -118,6 +114,40 @@ app.get('/exe/logout', function(req, res){
 		res.clearCookie('identityKey');
 		res.send({message: 'See ya!'});
 	});
+});
+
+app.post('/exe/accounts/editname', (req, res) => {
+	let sess = req.session;
+	let account_id = sess.account_id;
+	let new_name = req.body.new_name;
+	let update_date = {
+		account_name: new_name
+	};
+	let UpdateName = 
+		`UPDATE accounts 
+		SET ? WHERE account_id = ?`;
+	if(new_name.length < 1) {
+		res.send({name: sess.name});
+		return;
+	}
+		connection.query(UpdateName, [update_date, account_id], (err, result) => {
+			console.log(result);
+			if(err) {
+				res.send( {err: 'Something went wrong during update profile name: ' + err} );
+			} else {
+				req.session.regenerate(function(err) {
+					if(err) {
+						res.send({err: 'Something went wrong during regenerate session: ' + err});
+						return;
+					}
+				});
+				req.session.name = new_name;
+				console.log(req.session);
+				res.send({
+					name: req.session.name
+				});
+			}
+		});
 });
 
 app.post('/exe/accounts/login', (req, res) => {
@@ -151,6 +181,11 @@ app.post('/exe/accounts/login', (req, res) => {
 						return;
 					}
 				});
+				console.log('id在這裡啦' + account[0].account_id);
+				console.log(account[0].account_name);
+				console.log(account[0].account_email);
+				console.log(account[0].provider);
+				req.session.account_id = account[0].account_id;
 				req.session.name = account[0].account_name;
 				req.session.email = account[0].account_email;
 				req.session.isLogin = true;
