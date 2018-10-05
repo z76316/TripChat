@@ -14,16 +14,9 @@ app.use(session({
 	saveUninitialized: false,
 	resave: true,
 	cookie: {
-		maxAge: 300 * 1000
+		maxAge: 1800 * 1000
 	}
 }));
-
-// let test_accounts = [
-// 	{
-// 		name: 'test',
-// 		password: '123456'
-// 	}	
-// ];
 
 // socket.io
 const socket = require('socket.io');
@@ -38,7 +31,7 @@ const request = require("request");
 const mysql = require('mysql');
 
 // connnect mysql
-const connection = mysql.createConnection({
+const db = mysql.createConnection({
 	host: 'localhost',
 	user: 'root',
 	password: 'ec2server',
@@ -46,7 +39,7 @@ const connection = mysql.createConnection({
 	insecureAuthL: true
 });
 
-connection.connect(err => {
+db.connect(err => {
 	if(err) {
 		return err;
 	}
@@ -78,7 +71,7 @@ app.get('/exe/test',function(req, res) {
 
 // MySQL API
 app.get('/exe/mysql/test_tbl', function(req, res) {
-	connection.query(SELECT_ALL_test_tbl_QUERY, (err, results) => {
+	db.query(SELECT_ALL_test_tbl_QUERY, (err, results) => {
 		if(err) {
 			res.send(err);
 		} else {
@@ -130,7 +123,7 @@ app.post('/exe/accounts/editname', (req, res) => {
 		res.send({name: sess.name});
 		return;
 	}
-		connection.query(UpdateName, [update_date, account_id], (err, result) => {
+		db.query(UpdateName, [update_date, account_id], (err, result) => {
 			console.log(result);
 			if(err) {
 				res.send( {err: 'Something went wrong during update profile name: ' + err} );
@@ -168,7 +161,7 @@ app.post('/exe/accounts/login', (req, res) => {
 		account_password = '${password}' AND
 		provider = '${provider}'`;
 		console.log(checkAccount);
-		connection.query(checkAccount, (err, account) => {
+		db.query(checkAccount, (err, account) => {
 			console.log(account);
 			if(err) {
 				res.send( {err: 'Something went wrong during check your email and password input: ' + err} );
@@ -216,13 +209,13 @@ app.post('/exe/accounts/signup', (req, res) => {
 		`INSERT INTO accounts (account_name, account_email, account_password, create_date, provider) 
 		VALUES 
 		('${name}', '${email}', '${password}', CURDATE(), '${provider}')`;
-		connection.query(isExistAccount, (err, account) => {
+		db.query(isExistAccount, (err, account) => {
 			if(err) {
 				res.send( {err: 'Something went wrong during check this email is exist: ' + err} );
 			} else if(account.length !== 0) {
 				res.send( {err: '此信箱已被註冊。'} );
 			} else {
-				connection.query(INSERT_INTO_accounts, (err, results) => {
+				db.query(INSERT_INTO_accounts, (err, results) => {
 				if(err) {
 					res.send({err: 'Something went wrong during add this account into database: ' + err});
 				} else {
