@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { BrowserRouter, Link, Switch, Route } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import {Map, InfoWindow, Marker, GoogleApiWrapper} from 'google-maps-react';
 
 // import CSS
 import '../css/reset.css';
@@ -24,18 +25,22 @@ import MyChatBox from './myChatBox';
 import OthersChatBox from './othersChatBox';
 
 // Server ip
-let Server_ip = 'http://localhost:9000';
-// let Server_ip = 'http://52.89.137.222:9000';
+// let Server_ip = 'http://localhost:9000';
+let Server_ip = 'http://52.89.137.222:9000';
 
 let socket;
 
-class Trip extends Component {
+export class Trip extends Component {
 
 	constructor(props) {
 		super(props);
 		this.state = {
+			mapInitPos: {
+				lat: 25.042299,
+				lng: 121.565182
+			},
 			chatInputValue: '',
-			currUser: '伯斯',
+			currUser: '',
 			whoTyping: '',
 			chatBoxes: []
 		};
@@ -62,10 +67,6 @@ class Trip extends Component {
 		}
 	};
 
-	exportFile = (e) => {
-
-	}
-
 	handleTripTitleInput = (e) => {
 
 	}
@@ -76,12 +77,6 @@ class Trip extends Component {
 
 	handleTripLocationInput = (e) => {
 		
-	}
-
-	// 暫時，以後直接用 state 中的 currUser
-	handleNameInput = (e) => {
-		let chatNameValue = e.target.value;
-		this.setState({currUser: chatNameValue});
 	}
 
 	handleChatInput = (e) => {
@@ -119,6 +114,7 @@ class Trip extends Component {
 	}
 
 	componentDidMount() {
+		// check login state
 		this.ajax('get', Server_ip+'/exe/checkloginstate', '', (req) => {
 			let result=JSON.parse(req.responseText);
 			console.log('Trip.js session ' + result.name + ' ' + result.email);
@@ -128,8 +124,10 @@ class Trip extends Component {
 				window.location = '/';
 			}
 		});
+		// let chat room scoll to bottom
 		this.scrollToBottom();
 
+		// socket.IO connect
 		socket = io.connect(Server_ip);
 
 		// Listen for chat
@@ -173,7 +171,22 @@ class Trip extends Component {
 					</Link>
 				</header>
 				<div className="trip_container">
-					<div className='trip_map'></div>
+					<div className='trip_map'>
+						<Map google={this.props.google} 
+							initialCenter={this.state.mapInitPos}
+							zoom={14}
+						>
+
+							<Marker onClick={this.onMarkerClick}
+								name={'Current location'} />
+
+							<InfoWindow onClose={this.onInfoWindowClose}>
+								{/* <div>
+									<h1>{this.state.selectedPlace.name}</h1>
+								</div> */}
+							</InfoWindow>
+						</Map>
+					</div>
 					<div className='trip_map_bar'>
 						<div className='bar_title_container'>
 							<div className='trip_title_style'>Trip:</div>
@@ -316,8 +329,13 @@ Trip.propTypes = {
 	tripTitle: PropTypes.any,
 	tripDate: PropTypes.any,
 	tripLocation: PropTypes.any,
-	tripMember: PropTypes.any
+	tripMember: PropTypes.any,
+	google: PropTypes.any
 }; 
 
 
-export default Trip;
+// export default Trip;
+export default GoogleApiWrapper({
+	apiKey: ('AIzaSyAOrwA13NUBURp_YygxsGwTPHyCs4dEoOs')
+})(Trip);
+
