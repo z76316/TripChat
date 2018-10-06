@@ -25,10 +25,12 @@ import MyChatBox from './myChatBox';
 import OthersChatBox from './othersChatBox';
 
 // Server ip
-// let Server_ip = 'http://localhost:9000';
-let Server_ip = 'http://52.89.137.222:9000';
+let Server_ip = 'http://localhost:9000';
+// let Server_ip = 'http://52.89.137.222:9000';
 
 let socket;
+
+let map, geocoder;
 
 export class Trip extends Component {
 
@@ -39,6 +41,8 @@ export class Trip extends Component {
 				lat: 25.042299,
 				lng: 121.565182
 			},
+			currPos: '',
+			tool: 'none',
 			chatInputValue: '',
 			currUser: '',
 			whoTyping: '',
@@ -79,6 +83,72 @@ export class Trip extends Component {
 		
 	}
 
+	// Google map
+	initMap = (mapInitPos) => {
+
+		let address = '花蓮';
+
+		// set map's initial position by the location of this trip
+		geocoder = new google.maps.Geocoder();
+		geocoder.geocode( { 'address': address}, (results, status) => {
+			if (status == 'OK') {
+				map = new google.maps.Map(document.querySelector('.trip_map'), {
+					center: results[0].geometry.location,
+					zoom: 14
+				});
+			} else {
+				console.log(status);
+				map = new google.maps.Map(document.querySelector('.trip_map'), {
+					center: mapInitPos,
+					zoom: 14
+				});
+			}
+
+			map.addListener('click', (e) => {                
+				console.log(e.latLng);
+				console.log(e.latLng.lat());
+				console.log(e.latLng.lng());
+				let lat = e.latLng.lat();
+				let lng = e.latLng.lng();
+				let currPos = {
+					lat: lat,
+					lng: lng
+				};
+				this.setState({currPos: currPos});
+				this.placeMarker(currPos);
+			});
+
+		});
+
+	}
+
+	moveToLocation = (lat, lng) => {
+		let center = new google.maps.LatLng(lat, lng);
+		// using global variable:
+		map.panTo(center);
+	}
+
+	placeMarker = (location) => {
+		if(this.state.tool === 'none') {
+			let marker = new google.maps.Marker({
+				position: location, 
+				map: map,
+				animation: google.maps.Animation.DROP,
+				clickable: true
+			});
+			let content = '安安安安';
+			let infowindow = new google.maps.InfoWindow({
+				content: content
+			});
+			marker.addListener('click', () => {
+				infowindow.open(map, marker);
+			});
+			
+		}
+		
+	}
+
+	// Chat room
 	handleChatInput = (e) => {
 		let currUser = this.state.currUser;
 		let isTyping;
@@ -108,6 +178,7 @@ export class Trip extends Component {
 	scrollToBottom() {
 		this.messagesEnd.scrollIntoView({ behavior: 'auto' });
 	}
+
 
 	componentDidUpdate() {
   	this.scrollToBottom();
@@ -156,6 +227,9 @@ export class Trip extends Component {
 			}
 		});
 
+		let initPos = this.state.mapInitPos;
+		this.initMap(initPos);
+
 	}
 
 	render() {
@@ -172,20 +246,43 @@ export class Trip extends Component {
 				</header>
 				<div className="trip_container">
 					<div className='trip_map'>
-						<Map google={this.props.google} 
+						{/* <Map google={this.props.google} 
 							initialCenter={this.state.mapInitPos}
+							onClick={this.getLatLng}
 							zoom={14}
 						>
 
-							<Marker onClick={this.onMarkerClick}
-								name={'Current location'} />
+							<Marker 
+								onClick={this.onMarkerClick}
+								name={'Current location'}
+								draggable={true}
+								onDragend={this.handleDragend}
+								position={{lat: 25.55500, lng: 121.55500}}
+							/>
 
-							<InfoWindow onClose={this.onInfoWindowClose}>
-								{/* <div>
-									<h1>{this.state.selectedPlace.name}</h1>
-								</div> */}
+							<InfoWindow 
+								onClose={this.onInfoWindowClose}
+								marker={this.state.activeMarker}
+								position={{lat: 25.00000, lng: 121.00000}}
+								visible={true}
+								disableAutoPan={true}
+							>
+								<div>
+									<h1>安安安安</h1>
+								</div>
 							</InfoWindow>
-						</Map>
+							<InfoWindow 
+								onClose={this.onInfoWindowClose}
+								marker={this.state.activeMarker}
+								position={{lat: 26.00000, lng: 121.00000}}
+								visible={true}
+								disableAutoPan={true}
+							>
+								<div>
+									<h1>安安安安安安222222222</h1>
+								</div>
+							</InfoWindow>
+						</Map> */}
 					</div>
 					<div className='trip_map_bar'>
 						<div className='bar_title_container'>
