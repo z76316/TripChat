@@ -32,6 +32,34 @@ let socket;
 
 let map, geocoder;
 
+let markers = [];
+let m1 = {
+	id: 1,
+	location: {
+		lat: 25.042299,
+		lng: 121.565182	
+	},
+	content: '安安喔喔喔',
+};
+let m2 = {
+	id: 2,
+	location: {
+		lat: 25.542299,
+		lng: 122.065182	
+	},
+	content: '安安喔喔喔2',
+};
+let m3 = {
+	id: 3,
+	location: {
+		lat: 26.042299,
+		lng: 122.565182	
+	},
+	content: '安安喔喔喔3',
+};
+let currMarkers = [m1, m2, m3];
+
+
 export class Trip extends Component {
 
 	constructor(props) {
@@ -42,7 +70,10 @@ export class Trip extends Component {
 				lng: 121.565182
 			},
 			currPos: '',
-			tool: 'none',
+			tool: 'marker',
+			markers: [],
+			newMarkers: [],
+			deleteMarkers: [],
 			chatInputValue: '',
 			currUser: '',
 			whoTyping: '',
@@ -86,7 +117,7 @@ export class Trip extends Component {
 	// Google map
 	initMap = (mapInitPos) => {
 
-		let address = '花蓮';
+		let address = '市政府轉運站';
 
 		// set map's initial position by the location of this trip
 		geocoder = new google.maps.Geocoder();
@@ -118,6 +149,10 @@ export class Trip extends Component {
 				this.placeMarker(currPos);
 			});
 
+			console.log('到setMarkersOnMap了');
+			console.log(currMarkers);
+			this.setMarkersOnMap(currMarkers);
+
 		});
 
 	}
@@ -129,14 +164,14 @@ export class Trip extends Component {
 	}
 
 	placeMarker = (location) => {
-		if(this.state.tool === 'none') {
+		if(this.state.tool === 'marker') {
 			let marker = new google.maps.Marker({
 				position: location, 
 				map: map,
 				animation: google.maps.Animation.DROP,
 				clickable: true
 			});
-			let content = '安安安安';
+			let content = '記錄您的旅遊筆記~';
 			let infowindow = new google.maps.InfoWindow({
 				content: content
 			});
@@ -144,9 +179,69 @@ export class Trip extends Component {
 				infowindow.open(map, marker);
 			});
 			
+		} else if (this.state.tool === 'hide') {
+			this.setMapOnAll(null);		
 		}
 		
 	}
+
+	// set all markers on map
+	setMarkersOnMap = (currMarkers) => {
+		currMarkers.map((marker, index) => {
+			let location = marker.location;
+			let content = marker.content;
+			console.log('等等要addMarker囉');
+			console.log(location);
+			console.log(content);
+			this.addMarker(location, content);
+		});
+		this.setMapOnAll(map);
+	}
+
+	// Adds a marker to the map and push to the array.
+	addMarker = (location, content) => {
+		let marker = new google.maps.Marker({
+			position: location, 
+			map: map,
+			animation: google.maps.Animation.DROP,
+			clickable: true
+		});
+		let cont = content;
+		let infowindow = new google.maps.InfoWindow({
+			content: cont
+		});
+		marker.addListener('click', () => {
+			infowindow.open(map, marker);
+		});
+		markers.push(marker);
+		console.log(markers);
+	}
+
+	// Sets the map on all markers in the array.
+	setMapOnAll = (map) => {
+		for (let i = 0; i < markers.length; i++) {
+			console.log(markers[i]);
+			console.log(map);
+			markers[i].setMap(map);
+		}
+	}
+
+	// Removes the markers from the map, but keeps them in the array.
+	clearMarkers = () => {
+		setMapOnAll(null);
+	}
+
+	// Shows any markers currently in the array.
+	showMarkers = () => {
+		setMapOnAll(map);
+	}
+
+	// Deletes all markers in the array by removing references to them.
+	deleteMarkers = () => {
+		clearMarkers();
+		markers = [];
+	}
+
 
 	// Chat room
 	handleChatInput = (e) => {
@@ -181,7 +276,7 @@ export class Trip extends Component {
 
 
 	componentDidUpdate() {
-  	this.scrollToBottom();
+		this.scrollToBottom();
 	}
 
 	componentDidMount() {
