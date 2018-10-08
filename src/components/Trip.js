@@ -25,8 +25,8 @@ import MyChatBox from './myChatBox';
 import OthersChatBox from './othersChatBox';
 
 // Server ip
-let Server_ip = 'http://localhost:9000';
-// let Server_ip = 'http://52.89.137.222:9000';
+// let Server_ip = 'http://localhost:9000';
+let Server_ip = 'http://52.89.137.222:9000';
 
 let socket;
 
@@ -34,7 +34,7 @@ let map, geocoder;
 
 let markers = [];
 let m1 = {
-	id: 1,
+	marker_id: 1,
 	location: {
 		lat: 25.042299,
 		lng: 121.565182	
@@ -42,7 +42,7 @@ let m1 = {
 	content: '安安喔喔喔',
 };
 let m2 = {
-	id: 2,
+	marker_id: 2,
 	location: {
 		lat: 25.542299,
 		lng: 122.065182	
@@ -50,10 +50,10 @@ let m2 = {
 	content: '安安喔喔喔2',
 };
 let m3 = {
-	id: 3,
+	marker_id: 3,
 	location: {
-		lat: 26.042299,
-		lng: 122.565182	
+		lat: 25.042299,
+		lng: 121.545182	
 	},
 	content: '安安喔喔喔3',
 };
@@ -72,8 +72,10 @@ export class Trip extends Component {
 			currPos: '',
 			tool: 'marker',
 			markers: [],
+			currMarkers: [],
 			newMarkers: [],
 			deleteMarkers: [],
+			currTextarea: '',
 			chatInputValue: '',
 			currUser: '',
 			whoTyping: '',
@@ -146,7 +148,7 @@ export class Trip extends Component {
 					lng: lng
 				};
 				this.setState({currPos: currPos});
-				this.placeMarker(currPos);
+				this.clickByTool(currPos);
 			});
 
 			console.log('到setMarkersOnMap了');
@@ -163,56 +165,103 @@ export class Trip extends Component {
 		map.panTo(center);
 	}
 
-	placeMarker = (location) => {
+	// judge clicking behavior by this.state.tool
+	clickByTool = (location) => {
 		if(this.state.tool === 'marker') {
-			let marker = new google.maps.Marker({
-				position: location, 
-				map: map,
-				animation: google.maps.Animation.DROP,
-				clickable: true
-			});
-			let content = '記錄您的旅遊筆記~';
-			let infowindow = new google.maps.InfoWindow({
+			let marker_id = currMarkers[currMarkers.length - 1].marker_id + 1;
+			let content = '寫下您的旅遊筆記~';
+			let newAddedMarker = {
+				marker_id: marker_id,
+				location: location,
 				content: content
-			});
-			marker.addListener('click', () => {
-				infowindow.open(map, marker);
-			});
-			
+			};
+			currMarkers.push(newAddedMarker);
+			this.addMarker(marker_id, location, content);
+
 		} else if (this.state.tool === 'hide') {
-			this.setMapOnAll(null);		
+			this.setMapOnAll(null);	
 		}
 		
 	}
 
 	// set all markers on map
 	setMarkersOnMap = (currMarkers) => {
-		currMarkers.map((marker, index) => {
-			let location = marker.location;
-			let content = marker.content;
-			console.log('等等要addMarker囉');
-			console.log(location);
-			console.log(content);
-			this.addMarker(location, content);
-		});
+		if(markers.length) {
+			currMarkers.map((marker, i) => {
+				console.log(i);
+				let marker_id = marker.marker_id;
+				let location = marker.location;
+				let content = marker.content;
+					
+				console.log('等等要addMarker囉');
+				// console.log(marker_id);
+				// console.log(location);
+				// console.log(content);
+				for(let j = 0; j < markers.length; j++) {
+					console.log(marker_id);
+					console.log(markers[j].marker_id);
+					if(marker_id === markers[j].marker_id ) {
+						return;
+					}	
+				}
+				
+				this.addMarker(marker_id, location, content);	
+				
+			});
+		} else {
+			currMarkers.map((marker, i) => {
+				let marker_id = marker.marker_id;
+				let location = marker.location;
+				let content = marker.content;
+				
+				console.log('等等要addMarker囉');
+				console.log(marker_id);
+				console.log(location);
+				console.log(content);
+
+				this.addMarker(marker_id, location, content);
+			});	
+		}
 		this.setMapOnAll(map);
 	}
 
 	// Adds a marker to the map and push to the array.
-	addMarker = (location, content) => {
+	addMarker = (marker_id, location, content) => {
 		let marker = new google.maps.Marker({
 			position: location, 
 			map: map,
 			animation: google.maps.Animation.DROP,
 			clickable: true
 		});
-		let cont = content;
-		let infowindow = new google.maps.InfoWindow({
+		marker.marker_id = marker_id;
+		console.log(marker.marker_id);
+		let cont = document.createElement('DIV');
+		let textarea = document.createElement('textarea');
+		textarea.placeholder = '寫下您的旅遊筆記~';
+		textarea.value = content;
+		textarea.oninput = (e) => {
+			this.handleTextarea(e);
+		};
+		let submitBut = document.createElement('BUTTON');
+		submitBut.textContent = '完成';
+		submitBut.onclick = () => {
+			console.log(`有按到id=${marker_id}的完成按鈕喔喔喔喔`);
+			this.editMarkerContent(marker_id);
+		};
+		let deleteBut = document.createElement('BUTTON');
+		deleteBut.textContent = '刪除';
+
+		cont.appendChild(textarea);
+		cont.appendChild(submitBut);
+		cont.appendChild(deleteBut);
+		let infoWindow = new google.maps.InfoWindow({
 			content: cont
 		});
+		console.log('加入 addListener 了啊');
 		marker.addListener('click', () => {
-			infowindow.open(map, marker);
+			infoWindow.open(map, marker);
 		});
+		
 		markers.push(marker);
 		console.log(markers);
 	}
@@ -220,28 +269,71 @@ export class Trip extends Component {
 	// Sets the map on all markers in the array.
 	setMapOnAll = (map) => {
 		for (let i = 0; i < markers.length; i++) {
-			console.log(markers[i]);
-			console.log(map);
 			markers[i].setMap(map);
 		}
 	}
 
 	// Removes the markers from the map, but keeps them in the array.
 	clearMarkers = () => {
-		setMapOnAll(null);
+		this.setMapOnAll(null);
 	}
 
 	// Shows any markers currently in the array.
 	showMarkers = () => {
-		setMapOnAll(map);
+		this.setMapOnAll(map);
 	}
 
 	// Deletes all markers in the array by removing references to them.
-	deleteMarkers = () => {
-		clearMarkers();
+	deleteAllMarkers = () => {
+		this.clearMarkers();
 		markers = [];
 	}
 
+	// Deletes a specific marker
+	deleteMarkers = (marker_id) => {
+		console.log(marker_id);
+		let new_markers = [];
+		for (let i = 0; i < markers.length; i++) {
+			if(markers[i].marker_id === marker_id) {
+				markers[i].setMap(null);
+			} else {
+				new_markers.push(markers[i]);
+				console.log(new_markers);
+
+			}
+			
+		}
+		markers = new_markers;
+		console.log(markers);
+
+	}
+
+	selectTool = (toolType) => {
+		this.setState({tool: toolType});
+		console.log(this.state.tool);
+	}
+
+	handleTextarea = (e) => {
+		let currTextarea = e.target.value;
+		console.log(currTextarea);
+		this.setState({currTextarea: currTextarea});
+	}
+
+	editMarkerContent = (marker_id) => {
+		console.log(marker_id);
+		for(let i = 0; i < currMarkers.length; i++) {
+			console.log(currMarkers[i].marker_id);
+			console.log(marker_id);
+			if(currMarkers[i].marker_id === marker_id) {
+				currMarkers[i].content = this.state.currTextarea;
+				console.log(this.state.currTextarea);
+				console.log(currMarkers[i]);
+			}
+		}
+		this.deleteMarkers(marker_id);
+		console.log(currMarkers);
+		this.setMarkersOnMap(currMarkers);
+	}
 
 	// Chat room
 	handleChatInput = (e) => {
@@ -411,10 +503,30 @@ export class Trip extends Component {
 							/>
 						</div>
 						<div className='trip_map_bar_tool_box'>
-							<img className='arrow_icon' src={arrowIcon} alt={'arrow tool'} />
-							<img className='note_icon' src={noteIcon} alt={'note tool'} />
-							<img className='pen_icon' src={penIcon} alt={'pen tool'} />
-							<img className='compass_icon' src={compassIcon} alt={'circle tool'} />
+							<img 
+								className='arrow_icon' 
+								src={arrowIcon} 
+								alt={'arrow tool'}
+								onClick={ () => this.selectTool('normal')} 
+							/>
+							<img 
+								className='note_icon' 
+								src={noteIcon} 
+								alt={'note tool'} 
+								onClick={ () => this.selectTool('marker')} 
+							/>
+							<img 
+								className='pen_icon' 
+								src={penIcon} 
+								alt={'pen tool'} 
+								onClick={ () => this.selectTool('food')} 
+							/>
+							<img 
+								className='compass_icon' 
+								src={compassIcon} 
+								alt={'circle tool'} 
+								onClick={ () => this.selectTool('delete')} 
+							/>
 						</div>
 						<div className='addMemberButton'>
 							<img className='add_member_icon' style={{height: '32px'}} src={addMemberIcon} alt={'add member button'} />
