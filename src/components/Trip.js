@@ -14,9 +14,8 @@ import logo from '../../photo/logo_04.png';
 import planIcon from '../../photo/plan_icon_01.png';
 import fbHead from '../../photo/fb_head.jpg';
 import arrowIcon from '../../photo/arrow_icon_01.png';
-import noteIcon from '../../photo/note_icon_01.png';
-import penIcon from '../../photo/pen_icon_01.png';
-import compassIcon from '../../photo/compass_icon_01.png';
+import markerIcon from '../../photo/marker_icon_01.png';
+import deleteIcon from '../../photo/delete_icon_01.png';
 import meetingIcon from '../../photo/meeting_icon_01.png';
 import addMemberIcon from '../../photo/add_member_icon_01.png';
 
@@ -25,8 +24,8 @@ import MyChatBox from './myChatBox';
 import OthersChatBox from './othersChatBox';
 
 // Server ip
-// let Server_ip = 'http://localhost:9000';
-let Server_ip = 'http://52.89.137.222:9000';
+let Server_ip = 'http://localhost:9000';
+// let Server_ip = 'http://52.89.137.222:9000';
 
 let socket;
 
@@ -69,10 +68,12 @@ export class Trip extends Component {
 				lat: 25.042299,
 				lng: 121.565182
 			},
+			tripTitleInput: '清水斷崖獨木舟',
+			tripDateInput: '2018-6-21',
+			tripLocationInput: '宜蘭',
+			members: [],
 			currPos: '',
 			tool: 'marker',
-			markers: [],
-			currMarkers: [],
 			newMarkers: [],
 			deleteMarkers: [],
 			currTextarea: '',
@@ -105,15 +106,21 @@ export class Trip extends Component {
 	};
 
 	handleTripTitleInput = (e) => {
-
+		let tripTitleInput = e.target.value;
+		this.setState({tripTitleInput: tripTitleInput});
+		console.log(tripTitleInput);
 	}
 
 	handleTripDateInput = (e) => {
-		
+		let tripDateInput = e.target.value;
+		this.setState({tripDateInput: tripDateInput});
+		console.log(tripDateInput);
 	}
 
 	handleTripLocationInput = (e) => {
-		
+		let tripLocationInput = e.target.value;
+		this.setState({tripLocationInput: tripLocationInput});
+		console.log(tripLocationInput);
 	}
 
 	// Google map
@@ -178,7 +185,7 @@ export class Trip extends Component {
 			currMarkers.push(newAddedMarker);
 			this.addMarker(marker_id, location, content);
 
-		} else if (this.state.tool === 'hide') {
+		} else if (this.state.tool === 'delete') {
 			this.setMapOnAll(null);	
 		}
 		
@@ -250,6 +257,11 @@ export class Trip extends Component {
 		};
 		let deleteBut = document.createElement('BUTTON');
 		deleteBut.textContent = '刪除';
+		deleteBut.onclick = () => {
+			console.log(`按到刪除id=${marker_id}囉`);
+			this.deleteMarkers(marker_id);
+			this.deleteCurrmarkers(marker_id);
+		};
 
 		cont.appendChild(textarea);
 		cont.appendChild(submitBut);
@@ -289,9 +301,9 @@ export class Trip extends Component {
 		markers = [];
 	}
 
-	// Deletes a specific marker
+	// Deletes a specific marker in markers array
 	deleteMarkers = (marker_id) => {
-		console.log(marker_id);
+		console.log(`gonna delete the marker its id= ${marker_id} in markers`);
 		let new_markers = [];
 		for (let i = 0; i < markers.length; i++) {
 			if(markers[i].marker_id === marker_id) {
@@ -306,6 +318,19 @@ export class Trip extends Component {
 		markers = new_markers;
 		console.log(markers);
 
+	}
+
+	// Deletes a apecific marker in currMarkers array
+	deleteCurrmarkers = (marker_id) => {
+		console.log(`gonna delete the marker its id= ${marker_id} in currMarkers`);
+		let new_currMarkers = [];
+		for(let i = 0; i < currMarkers.length; i++) {
+			if(currMarkers[i].marker_id !== marker_id) {
+				new_currMarkers.push(currMarkers[i]);
+			}
+		}
+		currMarkers = new_currMarkers;
+		console.log(currMarkers);
 	}
 
 	selectTool = (toolType) => {
@@ -334,6 +359,7 @@ export class Trip extends Component {
 		console.log(currMarkers);
 		this.setMarkersOnMap(currMarkers);
 	}
+
 
 	// Chat room
 	handleChatInput = (e) => {
@@ -433,43 +459,6 @@ export class Trip extends Component {
 				</header>
 				<div className="trip_container">
 					<div className='trip_map'>
-						{/* <Map google={this.props.google} 
-							initialCenter={this.state.mapInitPos}
-							onClick={this.getLatLng}
-							zoom={14}
-						>
-
-							<Marker 
-								onClick={this.onMarkerClick}
-								name={'Current location'}
-								draggable={true}
-								onDragend={this.handleDragend}
-								position={{lat: 25.55500, lng: 121.55500}}
-							/>
-
-							<InfoWindow 
-								onClose={this.onInfoWindowClose}
-								marker={this.state.activeMarker}
-								position={{lat: 25.00000, lng: 121.00000}}
-								visible={true}
-								disableAutoPan={true}
-							>
-								<div>
-									<h1>安安安安</h1>
-								</div>
-							</InfoWindow>
-							<InfoWindow 
-								onClose={this.onInfoWindowClose}
-								marker={this.state.activeMarker}
-								position={{lat: 26.00000, lng: 121.00000}}
-								visible={true}
-								disableAutoPan={true}
-							>
-								<div>
-									<h1>安安安安安安222222222</h1>
-								</div>
-							</InfoWindow>
-						</Map> */}
 					</div>
 					<div className='trip_map_bar'>
 						<div className='bar_title_container'>
@@ -479,6 +468,7 @@ export class Trip extends Component {
 								type="text" 
 								name="trip_title" 
 								placeholder='旅程標題' 
+								value={this.state.tripTitleInput}
 								onChange={ (e) => this.handleTripTitleInput(e) }
 							/>
 						</div>
@@ -489,6 +479,7 @@ export class Trip extends Component {
 								type="text" 
 								name="trip_date" 
 								placeholder='出發日期' 
+								value={this.state.tripDateInput}
 								onChange={ (e) => this.handleTripDateInput(e) }
 							/>
 						</div>
@@ -499,6 +490,7 @@ export class Trip extends Component {
 								type="text" 
 								name="trip_location" 
 								placeholder='旅遊地點' 
+								value={this.state.tripLocationInput}
 								onChange={ (e) => this.handleTripLocationInput(e) }
 							/>
 						</div>
@@ -510,31 +502,31 @@ export class Trip extends Component {
 								onClick={ () => this.selectTool('normal')} 
 							/>
 							<img 
-								className='note_icon' 
-								src={noteIcon} 
-								alt={'note tool'} 
+								className='marker_icon' 
+								src={markerIcon} 
+								alt={'marker tool'} 
 								onClick={ () => this.selectTool('marker')} 
 							/>
-							<img 
-								className='pen_icon' 
-								src={penIcon} 
-								alt={'pen tool'} 
-								onClick={ () => this.selectTool('food')} 
-							/>
-							<img 
+							{/* <img 
+								className='delete_icon' 
+								src={deleteIcon} 
+								alt={'delete tool'} 
+								onClick={ () => this.selectTool('delete')} 
+							/> */}
+							{/* <img 
 								className='compass_icon' 
 								src={compassIcon} 
 								alt={'circle tool'} 
 								onClick={ () => this.selectTool('delete')} 
-							/>
+							/> */}
 						</div>
 						<div className='addMemberButton'>
 							<img className='add_member_icon' style={{height: '32px'}} src={addMemberIcon} alt={'add member button'} />
 						</div>
-						<button 
+						{/* <button 
 							className='export_button'
 							type='button' 
-							onClick={() => this.exportFile()}>匯出</button>
+							onClick={() => this.exportFile()}>匯出</button> */}
 					</div>
 					<div className='trip_chat_room'>
 						<div className='chat_room_header'>
@@ -567,29 +559,6 @@ export class Trip extends Component {
 									}
 								})}
 
-								{/*<div className="talk_bubble">
-								  <div className="talktext">
-								    <p>真伯斯: 呵啥呵</p>
-								  </div>
-								</div>
-
-								<div className="talk_bubble_self">
-								  <div className="talktext">
-								    <p>伯斯: 呵屁呵</p>
-								  </div>
-								</div>
-
-								<div className="talk_bubble_self">
-								  <div className="talktext">
-								    <p>伯斯: 呵屁呵</p>
-								  </div>
-								</div>
-
-								<div className="talk_bubble">
-								  <div className="talktext">
-								    <p>真伯斯: 呵啥呵</p>
-								  </div>
-								</div>*/}
 								{ 
 									this.state.whoTyping ? 
 										<div className='who_typing'>{this.state.whoTyping}輸入中訊息中...</div> : 

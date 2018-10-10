@@ -17,14 +17,14 @@ import fbHead from '../../photo/fb_head.jpg';
 import TripCard from './TripCard';
 
 // Server ip
-// let Server_ip = 'http://localhost:9000';
-let Server_ip = 'http://52.89.137.222:9000';
+let Server_ip = 'http://localhost:9000';
+// let Server_ip = 'http://52.89.137.222:9000';
 
 // Fake Trip list
 let a_trip = {
 	tripId: 1,
 	tripTitle: '清水斷崖獨木舟',
-	tripDate: new Date(2016,6,21),
+	tripDate: new Date(2018,6,21),
 	tripLocation: '宜蘭',
 	tripMembers: '伯斯, 真伯斯, 假伯斯'
 };
@@ -174,8 +174,41 @@ class MainProfile extends Component {
 						profile_email: result.email
 					}
 				);
+
+				this.getTripList();
 			}
 		});
+	}
+
+	getTripList = () => {
+		this.ajax('get', Server_ip+'/exe/gettriplist', '', (req) => {
+			let result=JSON.parse(req.responseText);
+			console.log('TripList data is: ' + result);
+			console.log(result[0]);
+			console.log(result[1]);
+		});
+	}
+
+	createNewTrip = () => {
+		let confirmToCreateNewTrip = confirm('是否要開啟新的旅程?');
+		let newTripId;
+		if (confirmToCreateNewTrip) {
+			if(this.state.trip_list){
+				newTripId = this.state.trip_list[this.state.trip_list.length-1] + 1;
+			} else {
+				newTripId = 1;
+			}
+			let newTrip = {
+				tripId: newTripId,
+				tripTitle: '新的旅程',
+				tripDate: new Date(),
+				tripLocation: '去哪玩咧',
+				tripMembers: this.state.profile_name 
+			};
+			let new_trip_list = this.state.trip_list;
+			new_trip_list.push(newTrip);
+			this.setState({trip_list: new_trip_list});
+		}
 	}
 
 	componentDidMount() {
@@ -259,7 +292,10 @@ class MainProfile extends Component {
 									)		
 								}
 								{this.state.now_or_memory === 'now' &&
-									(<div className='trip_create'>
+									(<div 
+										className='trip_create'
+										onClick={()=>{this.createNewTrip();}}
+									>
 										<div className='trip_create_content'>開啟下一趟旅程</div>
 									</div>)
 								}

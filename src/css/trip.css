@@ -27,7 +27,7 @@
 
 .trip_container > .trip_map_bar {
 	display: flex;
-	justify-content: space-between;
+	justify-content: space-evenly;
 	align-items: center;
 }
 
@@ -63,7 +63,7 @@
 
 .trip_map_bar > .trip_map_bar_tool_box {
 	display: flex;
-	justify-content: space-between;
+	justify-content: space-around;
 	align-items: center;
 	margin: 0 1%;
 	width: 16%;

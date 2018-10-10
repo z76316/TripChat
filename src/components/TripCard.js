@@ -13,8 +13,8 @@ import '../css/main_profile.css';
 // import ReactDOM
 
 // Server ip
-// let Server_ip = 'http://localhost:9000';
-let Server_ip = 'http://52.89.137.222:9000';
+let Server_ip = 'http://localhost:9000';
+// let Server_ip = 'http://52.89.137.222:9000';
 
 class TripCard extends Component {
 
@@ -34,7 +34,7 @@ class TripCard extends Component {
 			<Link to='/trip'>
 				<div className='trip'>
 					<div className='trip_title'>{this.props.tripTitle}</div>
-					<div className='trip_date'>{this.props.tripDate.getFullYear()+'.'+this.props.tripDate.getMonth()+'.'+this.props.tripDate.getDate()}</div>
+					<div className='trip_date'>{this.props.tripDate.getFullYear()+'.'+(this.props.tripDate.getMonth()+1)+'.'+this.props.tripDate.getDate()}</div>
 					<div className='trip_location'>{this.props.tripLocation}</div>
 					<div className='trip_member'>{this.props.tripMembers}</div>
 				</div>

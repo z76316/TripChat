@@ -85,20 +85,88 @@ app.get('/exe/mysql/test_tbl', function(req, res) {
 
 app.get('/exe/checkloginstate', function (req, res) {
 	let sess = req.session;
-	let account_id = sess.account_id;
 	let name = sess.name;
 	let email = sess.email;
+	let provider = sess.provider;
 	let isLogin = !!email;
-	res.send({
-		name: name,
-		email: email,
-		isLogin: isLogin
-	});
-	console.log(`id = ${account_id}, name = ${name}, email = ${email}, isLogin = ${isLogin}`);
-	console.log(sess);
+
+	if(sess.account_id) {
+		// login
+		let account_id = sess.account_id;
+		res.send({
+			account_id: account_id,
+			name: name,
+			email: email,
+			isLogin: isLogin
+		});
+
+		console.log(`id = ${account_id}, name = ${name}, email = ${email}, isLogin = ${isLogin}`);
+		console.log(sess);
+
+	} else {
+		// signup then link to profile page
+		let checkAccount = 
+			`SELECT * FROM accounts
+			WHERE 
+			account_email = '${email}' AND
+			provider = '${provider}'`;
+		console.log(checkAccount);
+		db.query(checkAccount, (err, account) => {
+			console.log(account);
+			if(err) {
+				res.send( {err: 'Something went wrong during check your email and password input: ' + err} );
+			} else if(account.length === 0) {
+				res.send( {err: '帳號或密碼輸入錯誤。'} );
+			} else {
+				req.session.regenerate(function(err) {
+					if(err) {
+						res.send({err: 'Something went wrong during regenerate session: ' + err});
+						return;
+					}
+				});
+				req.session.account_id = account[0].account_id;
+				let account_id = account[0].account_id;
+				console.log(req.session);
+				res.send({
+					account_id: account_id,
+					name: name,
+					email: email,
+					isLogin: isLogin
+				});
+				
+				console.log(`id = ${account_id}, name = ${name}, email = ${email}, isLogin = ${isLogin}`);
+				console.log(sess);
+
+			}
+		});
+	}	
 });
 
-app.get('/exe/logout', function(req, res){
+app.get('/exe/gettriplist', function(req,res) {
+	let sess = req.session;
+	let account_id = sess.account_id;
+	let getTripList = 
+		`SELECT * FROM trip_to_account
+		WHERE 
+		account_id = '${account_id}'`;
+	db.query(getTripList, (err, list) => {
+		if(err) {
+			res.send( {err: 'Something went wrong during join: ' + err} );
+		} else {
+			let trip_list = [];
+			for(let i = 0; i < list.length; i++) {
+				console.log(list[i]);
+				trip_list.push(list[i]);
+			}
+			res.send(
+				trip_list
+			);
+
+		}
+	});
+});
+
+app.get('/exe/logout', function(req, res) {
 	req.session.destroy(function(err) {
 		if(err) {
 			res.send({err: err});
@@ -160,34 +228,35 @@ app.post('/exe/accounts/login', (req, res) => {
 		account_email = '${email}' AND
 		account_password = '${password}' AND
 		provider = '${provider}'`;
-		console.log(checkAccount);
-		db.query(checkAccount, (err, account) => {
-			console.log(account);
-			if(err) {
-				res.send( {err: 'Something went wrong during check your email and password input: ' + err} );
-			} else if(account.length === 0) {
-				res.send( {err: '帳號或密碼輸入錯誤。'} );
-			} else {
-				req.session.regenerate(function(err) {
-					if(err) {
-						res.send({err: 'Something went wrong during regenerate session: ' + err});
-						return;
-					}
-				});
-				console.log('id在這裡啦' + account[0].account_id);
-				console.log(account[0].account_name);
-				console.log(account[0].account_email);
-				console.log(account[0].provider);
-				req.session.account_id = account[0].account_id;
-				req.session.name = account[0].account_name;
-				req.session.email = account[0].account_email;
-				req.session.isLogin = true;
-				console.log(req.session);
-				res.send({
-					message: `${account[0].account_name}，歡迎回來!`
-				});
-			}
-		});
+	console.log(checkAccount);
+	db.query(checkAccount, (err, account) => {
+		console.log(account);
+		if(err) {
+			res.send( {err: 'Something went wrong during check your email and password input: ' + err} );
+		} else if(account.length === 0) {
+			res.send( {err: '帳號或密碼輸入錯誤。'} );
+		} else {
+			req.session.regenerate(function(err) {
+				if(err) {
+					res.send({err: 'Something went wrong during regenerate session: ' + err});
+					return;
+				}
+			});
+			console.log('id在這裡啦' + account[0].account_id);
+			console.log(account[0].account_name);
+			console.log(account[0].account_email);
+			console.log(account[0].provider);
+			req.session.account_id = account[0].account_id;
+			req.session.name = account[0].account_name;
+			req.session.email = account[0].account_email;
+			req.session.provider = account[0].provider;
+			req.session.isLogin = true;
+			console.log(req.session);
+			res.send({
+				message: `${account[0].account_name}，歡迎回來!`
+			});
+		}
+	});
 });
 
 app.post('/exe/accounts/signup', (req, res) => {
@@ -227,6 +296,7 @@ app.post('/exe/accounts/signup', (req, res) => {
 					});
 					req.session.name = name;
 					req.session.email = email;
+					req.session.provider = provider;
 					req.session.isLogin = true;
 					console.log(req.session);
 					res.send({message: '您已成功註冊帳戶!'});
