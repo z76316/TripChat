@@ -186,6 +186,33 @@ class MainProfile extends Component {
 			console.log('TripList data is: ' + result);
 			console.log(result[0]);
 			console.log(result[1]);
+			let trip_list = [];
+			let memory_list = [];
+			let trip = {};
+			let temp = new Date();
+			let currDate = new Date(temp.toLocaleDateString());
+			console.log(currDate);
+			let datetime, tripDate;
+			for(let i = 0; i < result.length; i ++) {
+				datetime = result[i].trip_date;
+				tripDate = new Date(datetime);
+				trip = {
+					tripId: result[i].trip_id,
+					tripTitle: result[i].trip_title,
+					tripDate: tripDate,
+					tripLocation: result[i].trip_location,
+				};
+				console.log(trip.tripDate);
+				if(trip.tripDate < currDate) {
+					memory_list.push(trip);
+				} else {
+					trip_list.push(trip);
+				}
+			}
+			this.setState({
+				trip_list: trip_list,
+				memory_list: memory_list
+			});
 		});
 	}
 
@@ -193,21 +220,37 @@ class MainProfile extends Component {
 		let confirmToCreateNewTrip = confirm('是否要開啟新的旅程?');
 		let newTripId;
 		if (confirmToCreateNewTrip) {
-			if(this.state.trip_list){
-				newTripId = this.state.trip_list[this.state.trip_list.length-1] + 1;
-			} else {
-				newTripId = 1;
-			}
+			// if(this.state.trip_list){
+			// 	newTripId = this.state.trip_list[this.state.trip_list.length-1] + 1;
+			// } else {
+			// 	newTripId = 1;
+			// }
+			let temp = new Date();
+			let d = new Date(temp.setDate(temp.getDate() + 1)); 
+			let tripDate = d.toISOString().split('T')[0]+' '+d.toTimeString().split(' ')[0];
+			console.log(tripDate);
 			let newTrip = {
-				tripId: newTripId,
+				// tripId: newTripId,
 				tripTitle: '新的旅程',
-				tripDate: new Date(),
+				tripDate: tripDate,
 				tripLocation: '去哪玩咧',
-				tripMembers: this.state.profile_name 
 			};
-			let new_trip_list = this.state.trip_list;
-			new_trip_list.push(newTrip);
-			this.setState({trip_list: new_trip_list});
+
+			this.ajax('post', Server_ip+'/exe/createnewtrip', newTrip, (req) => {
+				let result=JSON.parse(req.responseText);
+				console.log(result);
+				if(result.err) {
+					alert(result.err);
+				} else {
+					newTrip.tripId = result.new_trip_id;
+					newTrip.tripDate = new Date();
+					let new_trip_list = this.state.trip_list;
+					new_trip_list.push(newTrip);
+					this.setState({trip_list: new_trip_list});
+					console.log(new_trip_list);
+				}
+			});
+
 		}
 	}
 
@@ -271,7 +314,6 @@ class MainProfile extends Component {
 													tripTitle={trip.tripTitle}
 													tripDate={trip.tripDate}
 													tripLocation={trip.tripLocation}
-													tripMembers={trip.tripMembers}
 												/>
 											);
 										})
@@ -285,7 +327,6 @@ class MainProfile extends Component {
 													tripTitle={trip.tripTitle}
 													tripDate={trip.tripDate}
 													tripLocation={trip.tripLocation}
-													tripMembers={trip.tripMembers}
 												/>
 											);
 										})
@@ -299,17 +340,6 @@ class MainProfile extends Component {
 										<div className='trip_create_content'>開啟下一趟旅程</div>
 									</div>)
 								}
-								{/* <Link to='/trip'>
-									<div className='trip'>
-										<div className='trip_title'>清水斷崖獨木舟</div>
-										<div className='trip_date'>2018.6.21</div>
-										<div className='trip_location'>宜蘭</div>
-										<div className='trip_member'>伯斯、真博斯、假伯斯</div>
-									</div>
-								</Link> */}
-								{/* <div className='trip_create'>
-									<div className='trip_create_content'>開啟下一趟旅程</div>
-								</div> */}
 							</div>
 						</div>
 					</div>

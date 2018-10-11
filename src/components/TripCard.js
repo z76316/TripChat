@@ -31,12 +31,11 @@ class TripCard extends Component {
 
 	render() {
 		return(
-			<Link to='/trip'>
+			<Link to={`/trip?trip_id=${this.props.tripId}`}>
 				<div className='trip'>
 					<div className='trip_title'>{this.props.tripTitle}</div>
 					<div className='trip_date'>{this.props.tripDate.getFullYear()+'.'+(this.props.tripDate.getMonth()+1)+'.'+this.props.tripDate.getDate()}</div>
 					<div className='trip_location'>{this.props.tripLocation}</div>
-					<div className='trip_member'>{this.props.tripMembers}</div>
 				</div>
 			</Link>
 		);
@@ -48,7 +47,6 @@ TripCard.propTypes = {
 	tripTitle: PropTypes.any,
 	tripDate: PropTypes.any,
 	tripLocation: PropTypes.any,
-	tripMembers: PropTypes.any
 }; 
 
 export default TripCard;

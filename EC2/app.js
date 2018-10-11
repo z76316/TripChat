@@ -146,9 +146,13 @@ app.get('/exe/gettriplist', function(req,res) {
 	let sess = req.session;
 	let account_id = sess.account_id;
 	let getTripList = 
-		`SELECT * FROM trip_to_account
+		`SELECT 
+		ta.account_id, ta.trip_id, t.trip_id, t.trip_title, t.trip_date, t.trip_location 
+		FROM 
+		trip_to_account ta, trips t
 		WHERE 
-		account_id = '${account_id}'`;
+		ta.trip_id = t.trip_id AND
+		account_id = '${account_id}'`; 
 	db.query(getTripList, (err, list) => {
 		if(err) {
 			res.send( {err: 'Something went wrong during join: ' + err} );
@@ -164,6 +168,51 @@ app.get('/exe/gettriplist', function(req,res) {
 
 		}
 	});
+});
+
+app.post('/exe/createnewtrip', function(req,res) {
+	let sess = req.session;
+	let account_id = sess.account_id;
+	let data = req.body;
+	let trip_title = data.tripTitle;
+	let trip_date = data.tripDate;
+	let trip_location = data.tripLocation;
+	let CreateNewTrip = 
+		`INSERT INTO trips 
+		(trip_title, trip_date, trip_location) 
+		VALUES 
+		('${trip_title}', '${trip_date}', '${trip_location}')`;
+	db.query(CreateNewTrip, (err, result) => {
+		if(err) {
+			res.send({err: 'Something went wrong during add this trip into database: ' + err});
+		} else {
+			let LastInsertID = 
+				`SELECT LAST_INSERT_ID()`;
+			db.query(LastInsertID, (err, result) => {
+				if(err) {
+					console.log(err);
+				} else {
+					console.log(result);
+					let new_trip_id = result[0]['LAST_INSERT_ID()'];
+					console.log(new_trip_id);
+					res.send({new_trip_id: new_trip_id});
+					let NewTripBridgeTable = 
+						`INSERT INTO trip_to_account 
+						(trip_id, account_id) 
+						VALUES 
+						('${new_trip_id}','${account_id}')`;
+					db.query(NewTripBridgeTable, (err, result) => {
+						if(err) {
+							console.log(err);
+						} else {
+							console.log(result);
+						}
+					});
+				}
+			});
+		}
+	});
+
 });
 
 app.get('/exe/logout', function(req, res) {
@@ -278,13 +327,13 @@ app.post('/exe/accounts/signup', (req, res) => {
 		`INSERT INTO accounts (account_name, account_email, account_password, create_date, provider) 
 		VALUES 
 		('${name}', '${email}', '${password}', CURDATE(), '${provider}')`;
-		db.query(isExistAccount, (err, account) => {
-			if(err) {
-				res.send( {err: 'Something went wrong during check this email is exist: ' + err} );
-			} else if(account.length !== 0) {
-				res.send( {err: '此信箱已被註冊。'} );
-			} else {
-				db.query(INSERT_INTO_accounts, (err, results) => {
+	db.query(isExistAccount, (err, account) => {
+		if(err) {
+			res.send( {err: 'Something went wrong during check this email is exist: ' + err} );
+		} else if(account.length !== 0) {
+			res.send( {err: '此信箱已被註冊。'} );
+		} else {
+			db.query(INSERT_INTO_accounts, (err, results) => {
 				if(err) {
 					res.send({err: 'Something went wrong during add this account into database: ' + err});
 				} else {
@@ -302,8 +351,8 @@ app.post('/exe/accounts/signup', (req, res) => {
 					res.send({message: '您已成功註冊帳戶!'});
 				}
 			});
-			}
-		});
+		}
+	});
 
   //宣告發信物件
   // let transporter = nodemailer.createTransport({
