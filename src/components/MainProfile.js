@@ -186,12 +186,21 @@ class MainProfile extends Component {
 			console.log('TripList data is: ' + result);
 			console.log(result[0]);
 			console.log(result[1]);
+			console.log(result[2]);
+			console.log(result);
 			let trip_list = [];
 			let memory_list = [];
 			let trip = {};
-			let temp = new Date();
-			let currDate = new Date(temp.toLocaleDateString());
+
+			// let temp = new Date();
+			// let currDate = new Date(temp.toLocaleDateString());
+			// console.log(currDate);
+
+			let now = new Date();
+			let currDate = new Date(now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate());
+			// let currDate = new Date(startOfDay / 1000);
 			console.log(currDate);
+
 			let datetime, tripDate;
 			for(let i = 0; i < result.length; i ++) {
 				datetime = result[i].trip_date;
@@ -220,15 +229,10 @@ class MainProfile extends Component {
 		let confirmToCreateNewTrip = confirm('是否要開啟新的旅程?');
 		let newTripId;
 		if (confirmToCreateNewTrip) {
-			// if(this.state.trip_list){
-			// 	newTripId = this.state.trip_list[this.state.trip_list.length-1] + 1;
-			// } else {
-			// 	newTripId = 1;
-			// }
-			let temp = new Date();
-			let d = new Date(temp.setDate(temp.getDate() + 1)); 
-			let tripDate = d.toISOString().split('T')[0]+' '+d.toTimeString().split(' ')[0];
+
+			let tripDate = + new Date();
 			console.log(tripDate);
+			
 			let newTrip = {
 				// tripId: newTripId,
 				tripTitle: '新的旅程',
@@ -243,7 +247,7 @@ class MainProfile extends Component {
 					alert(result.err);
 				} else {
 					newTrip.tripId = result.new_trip_id;
-					newTrip.tripDate = new Date();
+					newTrip.tripDate = new Date(tripDate);
 					let new_trip_list = this.state.trip_list;
 					new_trip_list.push(newTrip);
 					this.setState({trip_list: new_trip_list});

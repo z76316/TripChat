@@ -41,24 +41,37 @@
 .trip_map_bar > .bar_title_container > .trip_title_style {
 	font-weight:bolder;
 	padding: 2% 1%;
-	width: 25%;
+	width: 80%;
 }
 
 .trip_map_bar > .bar_title_container > .trip_date_style,
 .trip_map_bar > .bar_title_container > .trip_location_style {
 	font-weight:bolder;
 	padding: 1% 1%;
-	width: 25%;
-	font-size: 14px;
+	width: 80%;
 }
 
 .trip_map_bar > .bar_title_container > .input_trip_title,
 .trip_map_bar > .bar_title_container > .input_trip_date,
 .trip_map_bar > .bar_title_container > .input_trip_location {
 	width: 75%;
-  padding-left: 2%;
-  margin-left: 2px;
-  margin-right: 4px;
+	padding-left: 2%;
+	margin-left: 2px;
+	margin-right: 4px;
+	display: inline-block;
+}
+
+.trip_map_bar > .bar_title_container > .edit_icon {
+	display: inline-block;
+	margin-left: 10px;
+	background: url('../../photo/edit_name_01.png');
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+  }
+
+.trip_map_bar > .bar_title_container > .displayNone {
+	display: none;
 }
 
 .trip_map_bar > .trip_map_bar_tool_box {
@@ -81,6 +94,44 @@
 	border: 1px solid #E2E2E2;
 	border-radius: 4px;
 	cursor: pointer;
+}
+
+.trip_map_bar > .add_member_box {
+	display: block;
+	position: absolute;
+	top: 50%;
+	left: 43%;
+	transform: translate(-200px, -100px);
+	width: 320px;
+	height: 100px;
+	background-color: #FFFFFF;
+	box-shadow: 1px 1px #E2E2E2;
+}
+
+.trip_map_bar > .add_member_box > .input_add_member {
+	padding-left: 8px;
+}
+
+.trip_map_bar > .add_member_box > .add_member_submit_button,
+.trip_map_bar > .add_member_box > .close_add_member_box {
+	width: 60px;
+	box-shadow: 1px 1px gray;
+}
+
+.trip_map_bar > .add_member_box > .add_member_submit_button {
+	position: absolute;
+	bottom: 10px;
+	margin-left: 24%;
+}
+
+.trip_map_bar > .add_member_box > .close_add_member_box {
+	position: absolute;	
+	bottom: 10px;
+	margin-left: 60%;
+}
+
+.trip_map_bar > .displayNone {
+	display: none;
 }
 
 .trip_map_bar > .export_button {

@@ -183,14 +183,14 @@ class Main extends Component {
 							<div className="title">TripChat</div>
 						</div>
 						<div className="subtitle">編輯地圖，規劃旅途</div>
-						<button 
+						{/* <button 
 							className='fb_login_button'
 							type='button' 
 							onClick={() => this.loginWithFB()}>使用 Facebook 登入</button>
 						<button 
 							className='go_login_button'
 							type='button' 
-							onClick={() => this.loginWithGo()}>使用 Google 登入</button>
+							onClick={() => this.loginWithGo()}>使用 Google 登入</button> */}
 						<div className='login_tab_container'>
 							<span 
 								className={this.state.login_tab_style}

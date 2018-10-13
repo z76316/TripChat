@@ -34,7 +34,7 @@ class TripCard extends Component {
 			<Link to={`/trip?trip_id=${this.props.tripId}`}>
 				<div className='trip'>
 					<div className='trip_title'>{this.props.tripTitle}</div>
-					<div className='trip_date'>{this.props.tripDate.getFullYear()+'.'+(this.props.tripDate.getMonth()+1)+'.'+this.props.tripDate.getDate()}</div>
+					<div className='trip_date'>{this.props.tripDate.getFullYear()+'-'+(this.props.tripDate.getMonth()+1)+'-'+this.props.tripDate.getDate()}</div>
 					<div className='trip_location'>{this.props.tripLocation}</div>
 				</div>
 			</Link>
