@@ -17,14 +17,14 @@ import fbHead from '../../photo/fb_head.jpg';
 import TripCard from './TripCard';
 
 // Server ip
-// let Server_ip = 'http://localhost:9000';
-let Server_ip = 'http://52.89.137.222:9000';
+let Server_ip = 'http://localhost:9000';
+// let Server_ip = 'http://52.89.137.222:9000';
 
 // Fake Trip list
 let a_trip = {
 	tripId: 1,
 	tripTitle: '清水斷崖獨木舟',
-	tripDate: new Date(2016,6,21),
+	tripDate: new Date(2018,6,21),
 	tripLocation: '宜蘭',
 	tripMembers: '伯斯, 真伯斯, 假伯斯'
 };
@@ -174,8 +174,88 @@ class MainProfile extends Component {
 						profile_email: result.email
 					}
 				);
+
+				this.getTripList();
 			}
 		});
+	}
+
+	getTripList = () => {
+		this.ajax('get', Server_ip+'/exe/gettriplist', '', (req) => {
+			let result=JSON.parse(req.responseText);
+			console.log('TripList data is: ' + result);
+			console.log(result[0]);
+			console.log(result[1]);
+			console.log(result[2]);
+			console.log(result);
+			let trip_list = [];
+			let memory_list = [];
+			let trip = {};
+
+			// let temp = new Date();
+			// let currDate = new Date(temp.toLocaleDateString());
+			// console.log(currDate);
+
+			let now = new Date();
+			let currDate = new Date(now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate());
+			// let currDate = new Date(startOfDay / 1000);
+			console.log(currDate);
+
+			let datetime, tripDate;
+			for(let i = 0; i < result.length; i ++) {
+				datetime = result[i].trip_date;
+				tripDate = new Date(datetime);
+				trip = {
+					tripId: result[i].trip_id,
+					tripTitle: result[i].trip_title,
+					tripDate: tripDate,
+					tripLocation: result[i].trip_location,
+				};
+				console.log(trip.tripDate);
+				if(trip.tripDate < currDate) {
+					memory_list.push(trip);
+				} else {
+					trip_list.push(trip);
+				}
+			}
+			this.setState({
+				trip_list: trip_list,
+				memory_list: memory_list
+			});
+		});
+	}
+
+	createNewTrip = () => {
+		let confirmToCreateNewTrip = confirm('是否要開啟新的旅程?');
+		let newTripId;
+		if (confirmToCreateNewTrip) {
+
+			let tripDate = + new Date();
+			console.log(tripDate);
+			
+			let newTrip = {
+				// tripId: newTripId,
+				tripTitle: '新的旅程',
+				tripDate: tripDate,
+				tripLocation: '去哪玩咧',
+			};
+
+			this.ajax('post', Server_ip+'/exe/createnewtrip', newTrip, (req) => {
+				let result=JSON.parse(req.responseText);
+				console.log(result);
+				if(result.err) {
+					alert(result.err);
+				} else {
+					newTrip.tripId = result.new_trip_id;
+					newTrip.tripDate = new Date(tripDate);
+					let new_trip_list = this.state.trip_list;
+					new_trip_list.push(newTrip);
+					this.setState({trip_list: new_trip_list});
+					console.log(new_trip_list);
+				}
+			});
+
+		}
 	}
 
 	componentDidMount() {
@@ -238,7 +318,6 @@ class MainProfile extends Component {
 													tripTitle={trip.tripTitle}
 													tripDate={trip.tripDate}
 													tripLocation={trip.tripLocation}
-													tripMembers={trip.tripMembers}
 												/>
 											);
 										})
@@ -252,28 +331,19 @@ class MainProfile extends Component {
 													tripTitle={trip.tripTitle}
 													tripDate={trip.tripDate}
 													tripLocation={trip.tripLocation}
-													tripMembers={trip.tripMembers}
 												/>
 											);
 										})
 									)		
 								}
 								{this.state.now_or_memory === 'now' &&
-									(<div className='trip_create'>
+									(<div 
+										className='trip_create'
+										onClick={()=>{this.createNewTrip();}}
+									>
 										<div className='trip_create_content'>開啟下一趟旅程</div>
 									</div>)
 								}
-								{/* <Link to='/trip'>
-									<div className='trip'>
-										<div className='trip_title'>清水斷崖獨木舟</div>
-										<div className='trip_date'>2018.6.21</div>
-										<div className='trip_location'>宜蘭</div>
-										<div className='trip_member'>伯斯、真博斯、假伯斯</div>
-									</div>
-								</Link> */}
-								{/* <div className='trip_create'>
-									<div className='trip_create_content'>開啟下一趟旅程</div>
-								</div> */}
 							</div>
 						</div>
 					</div>

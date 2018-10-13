@@ -15,8 +15,8 @@ import planIcon from '../../photo/plan_icon_01.png';
 import MainProfile from './MainProfile';
 
 // Server ip
-// let Server_ip = 'http://localhost:9000';
-let Server_ip = 'http://52.89.137.222:9000';
+let Server_ip = 'http://localhost:9000';
+// let Server_ip = 'http://52.89.137.222:9000';
 
 
 class Main extends Component {
@@ -152,7 +152,6 @@ class Main extends Component {
 	}
 
 	changeLoginState = (state) => {
-		// this.props.handleIsLogin(state);
 		this.setState({isLogin: state});
 	}
 
@@ -161,10 +160,8 @@ class Main extends Component {
 			let result=JSON.parse(req.responseText);
 			console.log('Main.js session ' + result.name + ' ' + result.email);
 			if(result.isLogin) {
-				// this.props.handleIsLogin(true);
 				this.setState({isLogin: true});
 			} else {
-				// this.props.handleIsLogin(false);
 				this.setState({isLogin: false});
 			}
 		});
@@ -186,14 +183,14 @@ class Main extends Component {
 							<div className="title">TripChat</div>
 						</div>
 						<div className="subtitle">編輯地圖，規劃旅途</div>
-						<button 
+						{/* <button 
 							className='fb_login_button'
 							type='button' 
 							onClick={() => this.loginWithFB()}>使用 Facebook 登入</button>
 						<button 
 							className='go_login_button'
 							type='button' 
-							onClick={() => this.loginWithGo()}>使用 Google 登入</button>
+							onClick={() => this.loginWithGo()}>使用 Google 登入</button> */}
 						<div className='login_tab_container'>
 							<span 
 								className={this.state.login_tab_style}
@@ -250,10 +247,5 @@ class Main extends Component {
 	}
 
 }
-
-// Main.propTypes = { 
-// 	isLogin: PropTypes.any,
-// 	handleIsLogin: PropTypes.func
-// }; 
 
 export default Main;
