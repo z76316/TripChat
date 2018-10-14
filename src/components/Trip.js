@@ -23,8 +23,8 @@ import MyChatBox from './myChatBox';
 import OthersChatBox from './othersChatBox';
 
 // Server ip
-let Server_ip = 'http://localhost:9000';
-// let Server_ip = 'http://52.89.137.222:9000';
+// let Server_ip = 'http://localhost:9000';
+let Server_ip = 'http://52.89.137.222:9000';
 
 let socket;
 
@@ -372,8 +372,12 @@ export class Trip extends Component {
 					currMarkers.push(newAddedMarker);
 					this.addMarker(result.marker_id, result.location, result.content);
 
+					// socket emit adding marker
+					socket.emit('addMarker', newAddedMarker);
+
 				}
 			});
+
 		}
 	}
 
@@ -501,6 +505,17 @@ export class Trip extends Component {
 
 	}
 
+	selectTool = (toolType) => {
+		this.setState({tool: toolType});
+		console.log(this.state.tool);
+	}
+
+	handleTextarea = (e) => {
+		let currTextarea = e.target.value;
+		console.log(currTextarea);
+		this.setState({currTextarea: currTextarea});
+	}
+
 	// Deletes a specific marker in currMarkers array
 	deleteCurrmarkers = (marker_id) => {
 		console.log(`gonna delete the marker its id= ${marker_id} in currMarkers`);
@@ -522,22 +537,15 @@ export class Trip extends Component {
 				alert(result.err);
 			} else {
 				alert(result.message);
+
+				// socket emit deleting marker
+				socket.emit('deleteMarker', delete_marker);
 			}
 		});
 
 	}
 
-	selectTool = (toolType) => {
-		this.setState({tool: toolType});
-		console.log(this.state.tool);
-	}
-
-	handleTextarea = (e) => {
-		let currTextarea = e.target.value;
-		console.log(currTextarea);
-		this.setState({currTextarea: currTextarea});
-	}
-
+	// Edit a specific marker in currMarkers array
 	editMarkerContent = (marker_id) => {
 		console.log(marker_id);
 		for(let i = 0; i < currMarkers.length; i++) {
@@ -554,6 +562,8 @@ export class Trip extends Component {
 			marker_id: marker_id,
 			content: this.state.currTextarea
 		};
+
+
 		this.ajax('post', Server_ip+'/exe/trip/editmarker', update_marker, (req) => {
 			let result=JSON.parse(req.responseText);
 			if(result.err) {
@@ -562,6 +572,9 @@ export class Trip extends Component {
 				this.deleteMarkers(marker_id);
 				console.log(currMarkers);
 				this.setMarkersOnMap(currMarkers);
+
+				// socket emit updating marker
+				socket.emit('updateMarker', update_marker);
 			}
 		});
 
@@ -725,6 +738,44 @@ export class Trip extends Component {
 			}
 		});
 
+		// Listen for adding marker
+		socket.on('addMarker', (newMarker) => {
+			console.log(newMarker);
+			let temp_chatBoxes = this.state.chatBoxes;
+			currMarkers.push(newMarker);
+			this.addMarker(newMarker.marker_id, newMarker.location, newMarker.content);
+		});
+
+		// Listen for updating marker content
+		socket.on('updateMarker', (update_marker) => {
+			console.log(update_marker);
+			for(let i = 0; i < currMarkers.length; i++) {
+				console.log(currMarkers[i].marker_id);
+				console.log(update_marker.marker_id);
+				if(currMarkers[i].marker_id === update_marker.marker_id) {
+					currMarkers[i].content = update_marker.content;
+					console.log(currMarkers[i]);
+				}
+			}
+			this.deleteMarkers(update_marker.marker_id);
+			console.log(currMarkers);
+			this.setMarkersOnMap(currMarkers);
+		});
+
+		// Listen for deleting marker
+		socket.on('deleteMarker', (delete_marker) => {
+			console.log(delete_marker);
+			let new_currMarkers = [];
+			for(let i = 0; i < currMarkers.length; i++) {
+				if(currMarkers[i].marker_id !== delete_marker.marker_id) {
+					new_currMarkers.push(currMarkers[i]);
+				}
+			}
+
+			this.deleteMarkers(delete_marker.marker_id);
+			currMarkers = new_currMarkers;
+			console.log(currMarkers);
+		});
 	}
 
 	render() {

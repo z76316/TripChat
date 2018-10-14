@@ -713,14 +713,28 @@ app.post('/exe/trip/getchatlogs', (req, res) => {
 // Socket setup
 let io = socket(server);
 
-io.on('connection', function(socket) {
+io.on('connection', (socket) => {
 	console.log('made socket connection', socket.id);
 	
-	socket.on('chat', function(data) {
+	// Chat messages
+	socket.on('chat', (data) => {
 		io.sockets.emit('chat', data);
 	});
 
-	socket.on('typing', function(typingState) {
+	socket.on('typing', (typingState) => {
 		socket.broadcast.emit('typing', typingState);
+	});
+
+	//Map markers
+	socket.on('addMarker', (newAddedMarker) => {
+		io.sockets.emit('addMarker', newAddedMarker);
+	});
+
+	socket.on('updateMarker', (update_marker) => {
+		io.sockets.emit('updateMarker', update_marker);
+	});
+
+	socket.on('deleteMarker', (delete_marker) => {
+		io.sockets.emit('deleteMarker', delete_marker);
 	});
 })
