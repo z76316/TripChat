@@ -12,10 +12,9 @@ import '../css/trip.css';
 // import photo
 import logo from '../../photo/logo_04.png';
 import planIcon from '../../photo/plan_icon_01.png';
-import fbHead from '../../photo/fb_head.jpg';
 import arrowIcon from '../../photo/arrow_icon_01.png';
 import markerIcon from '../../photo/marker_icon_01.png';
-import deleteIcon from '../../photo/delete_icon_01.png';
+// import deleteIcon from '../../photo/delete_icon_01.png';
 import meetingIcon from '../../photo/meeting_icon_01.png';
 import addMemberIcon from '../../photo/add_member_icon_01.png';
 
@@ -24,8 +23,8 @@ import MyChatBox from './myChatBox';
 import OthersChatBox from './othersChatBox';
 
 // Server ip
-let Server_ip = 'http://localhost:9000';
-// let Server_ip = 'http://52.89.137.222:9000';
+// let Server_ip = 'http://localhost:9000';
+let Server_ip = 'http://52.89.137.222:9000';
 
 let socket;
 
@@ -91,11 +90,14 @@ export class Trip extends Component {
 			members: [],
 			currPos: '',
 			tool: 'normal',
+			arrow_icon_style: 'currTool',
+			marker_icon_style: '',
 			newMarkers: [],
 			deleteMarkers: [],
 			currTextarea: '',
 			chatInputValue: '',
 			currUser: '',
+			currUserEmail: '',
 			whoTyping: '',
 			chatBoxes: []
 		};
@@ -220,6 +222,12 @@ export class Trip extends Component {
 						edit_location: false,
 						input_trip_location_style: 'displayNone'
 					});
+
+					// socket emit updating trip location
+					let update_location = {
+						location: result.location
+					};
+					socket.emit('updateLocation', update_location);
 				}
 			});
 		}
@@ -304,13 +312,13 @@ export class Trip extends Component {
 			if (status == 'OK') {
 				map = new google.maps.Map(document.querySelector('.trip_map'), {
 					center: results[0].geometry.location,
-					zoom: 12
+					zoom: 14
 				});
 			} else {
 				console.log(status);
 				map = new google.maps.Map(document.querySelector('.trip_map'), {
 					center: this.state.mapInitPos,
-					zoom: 12
+					zoom: 14
 				});
 			}
 
@@ -372,8 +380,12 @@ export class Trip extends Component {
 					currMarkers.push(newAddedMarker);
 					this.addMarker(result.marker_id, result.location, result.content);
 
+					// socket emit adding marker
+					socket.emit('addMarker', newAddedMarker);
+
 				}
 			});
+
 		}
 	}
 
@@ -501,6 +513,28 @@ export class Trip extends Component {
 
 	}
 
+	selectTool = (toolType) => {
+		if(toolType === 'normal') {
+			this.setState({
+				tool: toolType,
+				arrow_icon_style: 'currTool',
+				marker_icon_style: ''
+			});
+		} else if (toolType === 'marker') {
+			this.setState({
+				tool: toolType,
+				arrow_icon_style: '',
+				marker_icon_style: 'currTool'
+			});
+		}
+	}
+
+	handleTextarea = (e) => {
+		let currTextarea = e.target.value;
+		console.log(currTextarea);
+		this.setState({currTextarea: currTextarea});
+	}
+
 	// Deletes a specific marker in currMarkers array
 	deleteCurrmarkers = (marker_id) => {
 		console.log(`gonna delete the marker its id= ${marker_id} in currMarkers`);
@@ -521,23 +555,16 @@ export class Trip extends Component {
 			if(result.err) {
 				alert(result.err);
 			} else {
-				alert(result.message);
+				console.log(result.message);
+
+				// socket emit deleting marker
+				socket.emit('deleteMarker', delete_marker);
 			}
 		});
 
 	}
 
-	selectTool = (toolType) => {
-		this.setState({tool: toolType});
-		console.log(this.state.tool);
-	}
-
-	handleTextarea = (e) => {
-		let currTextarea = e.target.value;
-		console.log(currTextarea);
-		this.setState({currTextarea: currTextarea});
-	}
-
+	// Edit a specific marker in currMarkers array
 	editMarkerContent = (marker_id) => {
 		console.log(marker_id);
 		for(let i = 0; i < currMarkers.length; i++) {
@@ -554,6 +581,8 @@ export class Trip extends Component {
 			marker_id: marker_id,
 			content: this.state.currTextarea
 		};
+
+
 		this.ajax('post', Server_ip+'/exe/trip/editmarker', update_marker, (req) => {
 			let result=JSON.parse(req.responseText);
 			if(result.err) {
@@ -562,6 +591,9 @@ export class Trip extends Component {
 				this.deleteMarkers(marker_id);
 				console.log(currMarkers);
 				this.setMarkersOnMap(currMarkers);
+
+				// socket emit updating marker
+				socket.emit('updateMarker', update_marker);
 			}
 		});
 
@@ -589,9 +621,26 @@ export class Trip extends Component {
 			// this.myFormRef.submit();
 			socket.emit('chat', {
 				message: this.state.chatInputValue,
-				currUser: this.state.currUser
+				currUser: this.state.currUser,
+				currUserEmail: this.state.currUserEmail
 			});
 			e.target.value = '';
+			
+			// Save message into SQL
+			let message_data = {
+				trip_id: this.state.trip_id,
+				show_name: this.state.currUser,
+				account_email: this.state.currUserEmail,
+				message: this.state.chatInputValue
+			};
+			this.ajax('post', Server_ip+'/exe/trip/savemessage', message_data, (req) => {
+				let result=JSON.parse(req.responseText);
+				if(result.err) {
+					alert(result.err);
+				} else {
+					console.log(result.done_message);
+				}
+			});
 		}
 	}
 
@@ -610,7 +659,10 @@ export class Trip extends Component {
 			let result=JSON.parse(req.responseText);
 			console.log('Trip.js session ' + result.name + ' ' + result.email);
 			if(result.isLogin) {
-				this.setState({currUser: result.name});
+				this.setState({
+					currUser: result.name,
+					currUserEmail: result.email
+				});
 			} else {
 				window.location = '/';
 			}
@@ -623,6 +675,8 @@ export class Trip extends Component {
 		let data = {
 			trip_id: trip_id
 		};
+
+		// initialize this trip's info and markers
 		this.ajax('post', Server_ip+'/exe/trip/getTripData', data, (req) => {
 			let result=JSON.parse(req.responseText);
 			console.log(result);
@@ -651,6 +705,24 @@ export class Trip extends Component {
 				});
 			}
 		});
+
+		// initialize this chat room's chat logs
+		let chat_room_data = {
+			trip_id: trip_id
+		};
+		this.ajax('post', Server_ip+'/exe/trip/getchatlogs', chat_room_data, (req) => {
+			let result=JSON.parse(req.responseText);
+			console.log(result);
+			if(result.err) {
+				alert(result.err);
+			} else if(result.no_chat_log) {
+				console.log(result.no_chat_log);
+			}else {
+				this.setState({
+					chatBoxes: result.chat_logs
+				});
+			}
+		});
 		
 		// let chat room scoll to bottom
 		this.scrollToBottom();
@@ -664,6 +736,7 @@ export class Trip extends Component {
 			let temp_chatBoxes = this.state.chatBoxes;
 			let new_chat = {
 				who: data.currUser,
+				email: data.currUserEmail,
 				content: data.message
 			};
 			temp_chatBoxes.push(new_chat);
@@ -684,6 +757,59 @@ export class Trip extends Component {
 			}
 		});
 
+		// Listen for adding marker
+		socket.on('addMarker', (newMarker) => {
+			console.log(newMarker);
+			let temp_chatBoxes = this.state.chatBoxes;
+			currMarkers.push(newMarker);
+			this.addMarker(newMarker.marker_id, newMarker.location, newMarker.content);
+		});
+
+		// Listen for updating marker content
+		socket.on('updateMarker', (update_marker) => {
+			console.log(update_marker);
+			for(let i = 0; i < currMarkers.length; i++) {
+				console.log(currMarkers[i].marker_id);
+				console.log(update_marker.marker_id);
+				if(currMarkers[i].marker_id === update_marker.marker_id) {
+					currMarkers[i].content = update_marker.content;
+					console.log(currMarkers[i]);
+				}
+			}
+			this.deleteMarkers(update_marker.marker_id);
+			console.log(currMarkers);
+			this.setMarkersOnMap(currMarkers);
+		});
+
+		// Listen for deleting marker
+		socket.on('deleteMarker', (delete_marker) => {
+			console.log(delete_marker);
+			let new_currMarkers = [];
+			for(let i = 0; i < currMarkers.length; i++) {
+				if(currMarkers[i].marker_id !== delete_marker.marker_id) {
+					new_currMarkers.push(currMarkers[i]);
+				}
+			}
+
+			this.deleteMarkers(delete_marker.marker_id);
+			currMarkers = new_currMarkers;
+			console.log(currMarkers);
+		});
+
+		// Listen for updating trip location
+		socket.on('updateLocation', (update_location) => {
+			console.log(update_location);
+			geocoder.geocode( { 'address': update_location.location}, (results, status) => {
+				if (status == 'OK') {
+					let	lat = results[0].geometry.location.lat();
+					let	lng = results[0].geometry.location.lng();
+					this.moveToLocation(lat, lng);
+				} 
+			});		
+			this.setState({
+				trip_location: update_location.location,
+			});
+		});
 	}
 
 	render() {
@@ -743,13 +869,13 @@ export class Trip extends Component {
 						</div>
 						<div className='trip_map_bar_tool_box'>
 							<img 
-								className='arrow_icon' 
+								className={this.state.arrow_icon_style} 
 								src={arrowIcon} 
 								alt={'arrow tool'}
 								onClick={ () => this.selectTool('normal')} 
 							/>
 							<img 
-								className='marker_icon' 
+								className={this.state.marker_icon_style} 
 								src={markerIcon} 
 								alt={'marker tool'} 
 								onClick={ () => this.selectTool('marker')} 
@@ -805,8 +931,9 @@ export class Trip extends Component {
 							<div className='chat_area'>
 								{ this.state.chatBoxes.map( (chat,index) => {
 									console.log(chat.who);
+									console.log(chat.email);
 									console.log(chat.content);
-									if(chat.who === this.state.currUser) {
+									if(chat.email === this.state.currUserEmail) {
 										return (
 											<MyChatBox 
 												key={index}
@@ -836,14 +963,6 @@ export class Trip extends Component {
            				ref={(el) => { this.messagesEnd = el; }}>
          				</div>
 							</div>
-
-							{/* <input 
-								className='temp_currUser' 
-								type="text" 
-								name="temp_currUser" 
-								placeholder='先打暱稱，以後幫大家變成使用者資訊' 
-								onChange={ (e) => this.handleNameInput(e) }
-							/> */}
 
 	            <textarea 
 	            	className='input_chat'
