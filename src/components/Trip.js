@@ -90,6 +90,8 @@ export class Trip extends Component {
 			members: [],
 			currPos: '',
 			tool: 'normal',
+			arrow_icon_style: 'currTool',
+			marker_icon_style: '',
 			newMarkers: [],
 			deleteMarkers: [],
 			currTextarea: '',
@@ -220,6 +222,12 @@ export class Trip extends Component {
 						edit_location: false,
 						input_trip_location_style: 'displayNone'
 					});
+
+					// socket emit updating trip location
+					let update_location = {
+						location: result.location
+					};
+					socket.emit('updateLocation', update_location);
 				}
 			});
 		}
@@ -304,13 +312,13 @@ export class Trip extends Component {
 			if (status == 'OK') {
 				map = new google.maps.Map(document.querySelector('.trip_map'), {
 					center: results[0].geometry.location,
-					zoom: 12
+					zoom: 14
 				});
 			} else {
 				console.log(status);
 				map = new google.maps.Map(document.querySelector('.trip_map'), {
 					center: this.state.mapInitPos,
-					zoom: 12
+					zoom: 14
 				});
 			}
 
@@ -506,8 +514,19 @@ export class Trip extends Component {
 	}
 
 	selectTool = (toolType) => {
-		this.setState({tool: toolType});
-		console.log(this.state.tool);
+		if(toolType === 'normal') {
+			this.setState({
+				tool: toolType,
+				arrow_icon_style: 'currTool',
+				marker_icon_style: ''
+			});
+		} else if (toolType === 'marker') {
+			this.setState({
+				tool: toolType,
+				arrow_icon_style: '',
+				marker_icon_style: 'currTool'
+			});
+		}
 	}
 
 	handleTextarea = (e) => {
@@ -536,7 +555,7 @@ export class Trip extends Component {
 			if(result.err) {
 				alert(result.err);
 			} else {
-				alert(result.message);
+				console.log(result.message);
 
 				// socket emit deleting marker
 				socket.emit('deleteMarker', delete_marker);
@@ -776,6 +795,21 @@ export class Trip extends Component {
 			currMarkers = new_currMarkers;
 			console.log(currMarkers);
 		});
+
+		// Listen for updating trip location
+		socket.on('updateLocation', (update_location) => {
+			console.log(update_location);
+			geocoder.geocode( { 'address': update_location.location}, (results, status) => {
+				if (status == 'OK') {
+					let	lat = results[0].geometry.location.lat();
+					let	lng = results[0].geometry.location.lng();
+					this.moveToLocation(lat, lng);
+				} 
+			});		
+			this.setState({
+				trip_location: update_location.location,
+			});
+		});
 	}
 
 	render() {
@@ -835,13 +869,13 @@ export class Trip extends Component {
 						</div>
 						<div className='trip_map_bar_tool_box'>
 							<img 
-								className='arrow_icon' 
+								className={this.state.arrow_icon_style} 
 								src={arrowIcon} 
 								alt={'arrow tool'}
 								onClick={ () => this.selectTool('normal')} 
 							/>
 							<img 
-								className='marker_icon' 
+								className={this.state.marker_icon_style} 
 								src={markerIcon} 
 								alt={'marker tool'} 
 								onClick={ () => this.selectTool('marker')} 
@@ -929,14 +963,6 @@ export class Trip extends Component {
            				ref={(el) => { this.messagesEnd = el; }}>
          				</div>
 							</div>
-
-							{/* <input 
-								className='temp_currUser' 
-								type="text" 
-								name="temp_currUser" 
-								placeholder='先打暱稱，以後幫大家變成使用者資訊' 
-								onChange={ (e) => this.handleNameInput(e) }
-							/> */}
 
 	            <textarea 
 	            	className='input_chat'

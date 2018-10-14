@@ -44,11 +44,16 @@
 	width: 80%;
 }
 
-.trip_map_bar > .bar_title_container > .trip_date_style,
-.trip_map_bar > .bar_title_container > .trip_location_style {
+.trip_map_bar > .bar_title_container > .trip_date_style {
 	font-weight:bolder;
 	padding: 1% 1%;
 	width: 80%;
+}
+
+.trip_map_bar > .bar_title_container > .trip_location_style {
+	font-weight:bolder;
+	padding: 1% 1%;
+	width: 60%;
 }
 
 .trip_map_bar > .bar_title_container > .input_trip_title,
@@ -83,7 +88,12 @@
 }
 
 .trip_map_bar > .trip_map_bar_tool_box > img {
-	height: 24px;	
+	height: 24px;
+	cursor: pointer;
+}
+
+.trip_map_bar > .trip_map_bar_tool_box > .currTool {
+	border: 1px solid gray;
 }
 
 .trip_map_bar > .addMemberButton {

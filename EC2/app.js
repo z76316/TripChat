@@ -725,16 +725,21 @@ io.on('connection', (socket) => {
 		socket.broadcast.emit('typing', typingState);
 	});
 
-	//Map markers
+	// Map markers
 	socket.on('addMarker', (newAddedMarker) => {
-		io.sockets.emit('addMarker', newAddedMarker);
+		socket.broadcast.emit('addMarker', newAddedMarker);
 	});
 
 	socket.on('updateMarker', (update_marker) => {
-		io.sockets.emit('updateMarker', update_marker);
+		socket.broadcast.emit('updateMarker', update_marker);
 	});
 
 	socket.on('deleteMarker', (delete_marker) => {
-		io.sockets.emit('deleteMarker', delete_marker);
+		socket.broadcast.emit('deleteMarker', delete_marker);
+	});
+
+	// Trip Location
+	socket.on('updateLocation', (update_location) => {
+		socket.broadcast.emit('updateLocation', update_location);
 	});
 })
