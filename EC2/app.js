@@ -639,6 +639,77 @@ app.post('/exe/trip/addnewmember', (req, res) => {
 });
 
 
+// Save messages into SQL
+app.post('/exe/trip/savemessage', (req, res) => {
+	let sess = req.session;
+	let account_id = sess.account_id;
+	let data = req.body;
+	let trip_id = data.trip_id;
+	let show_name = data.show_name;
+	let account_email = data.account_email;
+	let message = data.message;
+	let saveMessage = 
+		`INSERT INTO messages (trip_id, show_name, account_email, message) 
+		VALUES 
+		('${trip_id}', '${show_name}', '${account_email}', '${message}')`;
+
+	db.query(saveMessage, (err, done) => {
+		if(err) {
+			res.send( {err: 'Something went wrong during save message into db: ' + err} );
+		} else {
+			let LastInsertID = 
+				`SELECT LAST_INSERT_ID()`;
+			db.query(LastInsertID, (err, result) => {
+				if(err) {
+					console.log(err);
+				} else {
+					console.log(result);
+					let message_id = result[0]['LAST_INSERT_ID()'];
+					console.log(message_id);
+					res.send({
+						message_id: message_id,
+						done_message: '訊息已儲存。'
+					});
+				}
+			});
+		}
+	});
+});
+
+// Get chat logs
+app.post('/exe/trip/getchatlogs', (req, res) => {
+	let sess = req.session;
+	let account_id = sess.account_id;
+	let data = req.body;
+	let trip_id = data.trip_id;
+	console.log('trip_id!!!!!!!!!!!!!!!!!!! '+trip_id);
+	let getChatLogs =
+		`SELECT * FROM messages
+		WHERE trip_id = '${trip_id}'`;
+	db.query(getChatLogs, (err, result) => {
+		console.log(result);
+		if(err) {
+			res.send( {err: 'Something went wrong during get chat logs: ' + err} );
+		} else if(result.length === 0) {
+			res.send({no_chat_log: '尚無聊天記錄哦。'});
+		}else {
+			let message;
+			let chat_logs = [];
+			for(let i = 0; i < result.length; i++) {
+				message = {
+					who: result[i].show_name,
+					email: result[i].account_email,
+					content: result[i].message
+				};
+				chat_logs.push(message);
+			}
+			res.send({
+				chat_logs: chat_logs
+			});
+		}
+	});
+});
+
 // Socket setup
 let io = socket(server);
 

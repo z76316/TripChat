@@ -12,10 +12,9 @@ import '../css/trip.css';
 // import photo
 import logo from '../../photo/logo_04.png';
 import planIcon from '../../photo/plan_icon_01.png';
-import fbHead from '../../photo/fb_head.jpg';
 import arrowIcon from '../../photo/arrow_icon_01.png';
 import markerIcon from '../../photo/marker_icon_01.png';
-import deleteIcon from '../../photo/delete_icon_01.png';
+// import deleteIcon from '../../photo/delete_icon_01.png';
 import meetingIcon from '../../photo/meeting_icon_01.png';
 import addMemberIcon from '../../photo/add_member_icon_01.png';
 
@@ -96,6 +95,7 @@ export class Trip extends Component {
 			currTextarea: '',
 			chatInputValue: '',
 			currUser: '',
+			currUserEmail: '',
 			whoTyping: '',
 			chatBoxes: []
 		};
@@ -589,9 +589,26 @@ export class Trip extends Component {
 			// this.myFormRef.submit();
 			socket.emit('chat', {
 				message: this.state.chatInputValue,
-				currUser: this.state.currUser
+				currUser: this.state.currUser,
+				currUserEmail: this.state.currUserEmail
 			});
 			e.target.value = '';
+			
+			// Save message into SQL
+			let message_data = {
+				trip_id: this.state.trip_id,
+				show_name: this.state.currUser,
+				account_email: this.state.currUserEmail,
+				message: this.state.chatInputValue
+			};
+			this.ajax('post', Server_ip+'/exe/trip/savemessage', message_data, (req) => {
+				let result=JSON.parse(req.responseText);
+				if(result.err) {
+					alert(result.err);
+				} else {
+					console.log(result.done_message);
+				}
+			});
 		}
 	}
 
@@ -610,7 +627,10 @@ export class Trip extends Component {
 			let result=JSON.parse(req.responseText);
 			console.log('Trip.js session ' + result.name + ' ' + result.email);
 			if(result.isLogin) {
-				this.setState({currUser: result.name});
+				this.setState({
+					currUser: result.name,
+					currUserEmail: result.email
+				});
 			} else {
 				window.location = '/';
 			}
@@ -623,6 +643,8 @@ export class Trip extends Component {
 		let data = {
 			trip_id: trip_id
 		};
+
+		// initialize this trip's info and markers
 		this.ajax('post', Server_ip+'/exe/trip/getTripData', data, (req) => {
 			let result=JSON.parse(req.responseText);
 			console.log(result);
@@ -651,6 +673,24 @@ export class Trip extends Component {
 				});
 			}
 		});
+
+		// initialize this chat room's chat logs
+		let chat_room_data = {
+			trip_id: trip_id
+		};
+		this.ajax('post', Server_ip+'/exe/trip/getchatlogs', chat_room_data, (req) => {
+			let result=JSON.parse(req.responseText);
+			console.log(result);
+			if(result.err) {
+				alert(result.err);
+			} else if(result.no_chat_log) {
+				console.log(result.no_chat_log);
+			}else {
+				this.setState({
+					chatBoxes: result.chat_logs
+				});
+			}
+		});
 		
 		// let chat room scoll to bottom
 		this.scrollToBottom();
@@ -664,6 +704,7 @@ export class Trip extends Component {
 			let temp_chatBoxes = this.state.chatBoxes;
 			let new_chat = {
 				who: data.currUser,
+				email: data.currUserEmail,
 				content: data.message
 			};
 			temp_chatBoxes.push(new_chat);
@@ -805,8 +846,9 @@ export class Trip extends Component {
 							<div className='chat_area'>
 								{ this.state.chatBoxes.map( (chat,index) => {
 									console.log(chat.who);
+									console.log(chat.email);
 									console.log(chat.content);
-									if(chat.who === this.state.currUser) {
+									if(chat.email === this.state.currUserEmail) {
 										return (
 											<MyChatBox 
 												key={index}
