@@ -100,9 +100,16 @@ class Main extends Component {
 
 	submitLogin = () => {
 		console.log(this.state.loginOrSignup);
+		
+		let emailRule = /^\w+\@[A-Za-z0-9]+\.[A-Za-z]+$/;
+
 		if(this.state.loginOrSignup === 'signup') {
 			
-			if(this.state.inputName && 
+			if(!this.state.inputEmail.match(emailRule)) {
+				alert('Email 格式不正確。');
+			} else if(this.state.inputPassword.length < 6) {
+				alert('密碼至少需 6 碼。');
+			} else if(this.state.inputName && 
 				this.state.inputEmail && 
 				this.state.inputPassword) {
 
@@ -127,7 +134,10 @@ class Main extends Component {
 			}
 
 		} else if(this.state.loginOrSignup === 'login') {
-			if(this.state.inputEmail && 
+
+			if(!this.state.inputEmail.match(emailRule)) {
+				alert('Email 格式不正確。');
+			} else if(this.state.inputEmail && 
 				this.state.inputPassword) {
 
 				let login_data = {
