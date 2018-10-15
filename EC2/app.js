@@ -727,15 +727,15 @@ io.on('connection', (socket) => {
 
 	// Map markers
 	socket.on('addMarker', (newAddedMarker) => {
-		socket.broadcast.emit('addMarker', newAddedMarker);
+		io.sockets.emit('addMarker', newAddedMarker);
 	});
 
 	socket.on('updateMarker', (update_marker) => {
-		socket.broadcast.emit('updateMarker', update_marker);
+		io.sockets.emit('updateMarker', update_marker);
 	});
 
 	socket.on('deleteMarker', (delete_marker) => {
-		socket.broadcast.emit('deleteMarker', delete_marker);
+		io.sockets.emit('deleteMarker', delete_marker);
 	});
 
 	// Trip Location
