@@ -107,6 +107,8 @@ class Main extends Component {
 			
 			if(!this.state.inputEmail.match(emailRule)) {
 				alert('Email 格式不正確。');
+			} else if(this.state.inputPassword.length < 6) {
+				alert('密碼至少需 6 碼。');
 			} else if(this.state.inputName && 
 				this.state.inputEmail && 
 				this.state.inputPassword) {
