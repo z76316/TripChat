@@ -225,6 +225,7 @@ export class Trip extends Component {
 
 					// socket emit updating trip location
 					let update_location = {
+						trip_id: this.state.trip_id,
 						location: result.location
 					};
 					socket.emit('updateLocation', update_location);
@@ -380,6 +381,7 @@ export class Trip extends Component {
 					currMarkers.push(newAddedMarker);
 					this.addMarker(result.marker_id, result.location, result.content);
 
+					newAddedMarker.trip_id = this.state.trip_id;
 					// socket emit adding marker
 					socket.emit('addMarker', newAddedMarker);
 
@@ -557,6 +559,7 @@ export class Trip extends Component {
 			} else {
 				console.log(result.message);
 
+				delete_marker.trip_id = this.state.trip_id;
 				// socket emit deleting marker
 				socket.emit('deleteMarker', delete_marker);
 			}
@@ -592,6 +595,7 @@ export class Trip extends Component {
 				console.log(currMarkers);
 				this.setMarkersOnMap(currMarkers);
 
+				update_marker.trip_id = this.state.trip_id;
 				// socket emit updating marker
 				socket.emit('updateMarker', update_marker);
 			}
@@ -605,7 +609,11 @@ export class Trip extends Component {
 		let currUser = this.state.currUser;
 		let isTyping;
 		e.target.value ? isTyping = true : isTyping = false;
-		socket.emit('typing', {who: currUser, isTyping: isTyping});
+		socket.emit('typing', {
+			trip_id: this.state.trip_id,
+			who: currUser, 
+			isTyping: isTyping
+		});
 		let chatInputValue = e.target.value;
 		this.setState({chatInputValue: chatInputValue});
 		console.log(chatInputValue);
@@ -619,7 +627,9 @@ export class Trip extends Component {
 			}
 			e.preventDefault();
 			// this.myFormRef.submit();
+			let newMessage = this.state.chatInputValue.replace(/'/g, "''");
 			socket.emit('chat', {
+				trip_id: this.state.trip_id,
 				message: this.state.chatInputValue,
 				currUser: this.state.currUser,
 				currUserEmail: this.state.currUserEmail
@@ -631,7 +641,7 @@ export class Trip extends Component {
 				trip_id: this.state.trip_id,
 				show_name: this.state.currUser,
 				account_email: this.state.currUserEmail,
-				message: this.state.chatInputValue
+				message: newMessage
 			};
 			this.ajax('post', Server_ip+'/exe/trip/savemessage', message_data, (req) => {
 				let result=JSON.parse(req.responseText);
@@ -731,7 +741,7 @@ export class Trip extends Component {
 		socket = io.connect(Server_ip);
 
 		// Listen for chat
-		socket.on('chat', (data) => {
+		socket.on(`chat${trip_id}`, (data) => {
 			console.log(data);
 			let temp_chatBoxes = this.state.chatBoxes;
 			let new_chat = {
@@ -748,7 +758,7 @@ export class Trip extends Component {
 		});
 
 		// Listen for typing
-		socket.on('typing', (typingState) => {
+		socket.on(`typing${trip_id}`, (typingState) => {
 			console.log(typingState);
 			if(typingState.isTyping) {
 				this.setState({whoTyping: typingState.who});
@@ -758,7 +768,7 @@ export class Trip extends Component {
 		});
 
 		// Listen for adding marker
-		socket.on('addMarker', (newMarker) => {
+		socket.on(`addMarker${trip_id}`, (newMarker) => {
 			console.log(newMarker);
 			let temp_chatBoxes = this.state.chatBoxes;
 			currMarkers.push(newMarker);
@@ -766,7 +776,7 @@ export class Trip extends Component {
 		});
 
 		// Listen for updating marker content
-		socket.on('updateMarker', (update_marker) => {
+		socket.on(`updateMarker${trip_id}`, (update_marker) => {
 			console.log(update_marker);
 			for(let i = 0; i < currMarkers.length; i++) {
 				console.log(currMarkers[i].marker_id);
@@ -782,7 +792,7 @@ export class Trip extends Component {
 		});
 
 		// Listen for deleting marker
-		socket.on('deleteMarker', (delete_marker) => {
+		socket.on(`deleteMarker${trip_id}`, (delete_marker) => {
 			console.log(delete_marker);
 			let new_currMarkers = [];
 			for(let i = 0; i < currMarkers.length; i++) {
@@ -797,7 +807,7 @@ export class Trip extends Component {
 		});
 
 		// Listen for updating trip location
-		socket.on('updateLocation', (update_location) => {
+		socket.on(`updateLocation${trip_id}`, (update_location) => {
 			console.log(update_location);
 			geocoder.geocode( { 'address': update_location.location}, (results, status) => {
 				if (status == 'OK') {

@@ -718,28 +718,34 @@ io.on('connection', (socket) => {
 	
 	// Chat messages
 	socket.on('chat', (data) => {
-		io.sockets.emit('chat', data);
+		let trip_id = data.trip_id;
+		io.sockets.emit(`chat${trip_id}`, data);
 	});
 
 	socket.on('typing', (typingState) => {
-		socket.broadcast.emit('typing', typingState);
+		let trip_id = typingState.trip_id;
+		socket.broadcast.emit(`typing${trip_id}`, typingState);
 	});
 
 	// Map markers
 	socket.on('addMarker', (newAddedMarker) => {
-		io.sockets.emit('addMarker', newAddedMarker);
+		let trip_id = newAddedMarker.trip_id;
+		socket.broadcast.emit(`addMarker${trip_id}`, newAddedMarker);
 	});
 
 	socket.on('updateMarker', (update_marker) => {
-		io.sockets.emit('updateMarker', update_marker);
+		let trip_id = update_marker.trip_id;
+		socket.broadcast.emit(`updateMarker${trip_id}`, update_marker);
 	});
 
 	socket.on('deleteMarker', (delete_marker) => {
-		io.sockets.emit('deleteMarker', delete_marker);
+		let trip_id = delete_marker.trip_id;
+		socket.broadcast.emit(`deleteMarker${trip_id}`, delete_marker);
 	});
 
 	// Trip Location
 	socket.on('updateLocation', (update_location) => {
-		socket.broadcast.emit('updateLocation', update_location);
+		let trip_id = update_location.trip_id;
+		socket.broadcast.emit(`updateLocation${trip_id}`, update_location);
 	});
 })
