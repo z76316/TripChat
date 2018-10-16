@@ -115,7 +115,7 @@
 	width: 320px;
 	height: 100px;
 	background-color: #FFFFFF;
-	box-shadow: 1px 1px #E2E2E2;
+	box-shadow: 2px 2px 8px;
 }
 
 .trip_map_bar > .add_member_box > .input_add_member {
