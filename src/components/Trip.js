@@ -291,7 +291,7 @@ export class Trip extends Component {
 			} else {
 				let member_name = result.name;
 				alert(result.message);
-				this.close_add_member_box();
+				this.closeAddMember();
 			}
 		});
 	}
