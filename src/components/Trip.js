@@ -741,7 +741,10 @@ export class Trip extends Component {
 		socket = io.connect(Server_ip);
 
 		// Listen for chat
-		socket.on(`chat${trip_id}`, (data) => {
+		socket.on(`chat`, (data) => {
+			if(data.trip_id !== this.state.trip_id) {
+				return;
+			}
 			console.log(data);
 			let temp_chatBoxes = this.state.chatBoxes;
 			let new_chat = {
@@ -758,7 +761,10 @@ export class Trip extends Component {
 		});
 
 		// Listen for typing
-		socket.on(`typing${trip_id}`, (typingState) => {
+		socket.on(`typing`, (typingState) => {
+			if(typingState.trip_id !== this.state.trip_id) {
+				return;
+			}
 			console.log(typingState);
 			if(typingState.isTyping) {
 				this.setState({whoTyping: typingState.who});
@@ -768,7 +774,10 @@ export class Trip extends Component {
 		});
 
 		// Listen for adding marker
-		socket.on(`addMarker${trip_id}`, (newMarker) => {
+		socket.on(`addMarker`, (newMarker) => {
+			if(newMarker.trip_id !== this.state.trip_id) {
+				return;
+			}
 			console.log(newMarker);
 			let temp_chatBoxes = this.state.chatBoxes;
 			currMarkers.push(newMarker);
@@ -776,7 +785,10 @@ export class Trip extends Component {
 		});
 
 		// Listen for updating marker content
-		socket.on(`updateMarker${trip_id}`, (update_marker) => {
+		socket.on(`updateMarker`, (update_marker) => {
+			if(update_marker.trip_id !== this.state.trip_id) {
+				return;
+			}
 			console.log(update_marker);
 			for(let i = 0; i < currMarkers.length; i++) {
 				console.log(currMarkers[i].marker_id);
@@ -792,7 +804,10 @@ export class Trip extends Component {
 		});
 
 		// Listen for deleting marker
-		socket.on(`deleteMarker${trip_id}`, (delete_marker) => {
+		socket.on(`deleteMarker`, (delete_marker) => {
+			if(delete_marker.trip_id !== this.state.trip_id) {
+				return;
+			}
 			console.log(delete_marker);
 			let new_currMarkers = [];
 			for(let i = 0; i < currMarkers.length; i++) {
@@ -807,7 +822,10 @@ export class Trip extends Component {
 		});
 
 		// Listen for updating trip location
-		socket.on(`updateLocation${trip_id}`, (update_location) => {
+		socket.on(`updateLocation`, (update_location) => {
+			if(update_location.trip_id !== this.state.trip_id) {
+				return;
+			}
 			console.log(update_location);
 			geocoder.geocode( { 'address': update_location.location}, (results, status) => {
 				if (status == 'OK') {
