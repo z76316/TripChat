@@ -713,39 +713,39 @@ app.post('/exe/trip/getchatlogs', (req, res) => {
 // Socket setup
 let io = socket(server);
 
-io.once('connection', (socket) => {
+io.on('connection', (socket) => {
 	console.log('made socket connection', socket.id);
 	
 	// Chat messages
 	socket.on('chat', (data) => {
 		let trip_id = data.trip_id;
-		io.sockets.emit(`chat`, data);
+		io.sockets.emit(`chat${trip_id}`, data);
 	});
 
 	socket.on('typing', (typingState) => {
 		let trip_id = typingState.trip_id;
-		socket.broadcast.emit(`typing`, typingState);
+		socket.broadcast.emit(`typing${trip_id}`, typingState);
 	});
 
 	// Map markers
 	socket.on('addMarker', (newAddedMarker) => {
 		let trip_id = newAddedMarker.trip_id;
-		socket.broadcast.emit(`addMarker`, newAddedMarker);
+		socket.broadcast.emit(`addMarker${trip_id}`, newAddedMarker);
 	});
 
 	socket.on('updateMarker', (update_marker) => {
 		let trip_id = update_marker.trip_id;
-		socket.broadcast.emit(`updateMarker`, update_marker);
+		socket.broadcast.emit(`updateMarker${trip_id}`, update_marker);
 	});
 
 	socket.on('deleteMarker', (delete_marker) => {
 		let trip_id = delete_marker.trip_id;
-		socket.broadcast.emit(`deleteMarker`, delete_marker);
+		socket.broadcast.emit(`deleteMarker${trip_id}`, delete_marker);
 	});
 
 	// Trip Location
 	socket.on('updateLocation', (update_location) => {
 		let trip_id = update_location.trip_id;
-		socket.broadcast.emit(`updateLocation`, update_location);
+		socket.broadcast.emit(`updateLocation${trip_id}`, update_location);
 	});
 })
