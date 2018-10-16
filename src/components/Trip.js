@@ -822,6 +822,10 @@ export class Trip extends Component {
 		});
 	}
 
+	componentWillUnmount() {
+		socket.disconnect();
+	}
+
 	render() {
 		return(
 			<div>
@@ -940,9 +944,9 @@ export class Trip extends Component {
 						<div className='chat_room_main'>
 							<div className='chat_area'>
 								{ this.state.chatBoxes.map( (chat,index) => {
-									console.log(chat.who);
-									console.log(chat.email);
-									console.log(chat.content);
+									// console.log(chat.who);
+									// console.log(chat.email);
+									// console.log(chat.content);
 									if(chat.email === this.state.currUserEmail) {
 										return (
 											<MyChatBox 
