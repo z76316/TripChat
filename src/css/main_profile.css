@@ -24,6 +24,15 @@ button {
   color: white;*/
 }
 
+.main_profile_div {
+  height: 100%;
+  background: url("../../photo/profile_background_01.jpg");
+}
+
+.main_container {
+  height: 100%;
+}
+
 .profile_container {
   display: flex;
   justify-content: space-between;
@@ -92,6 +101,11 @@ button {
   margin: 2% auto auto 0;
 }
 
+.trip_list_container {
+  height: 100%;
+  z-index: 100;
+}
+
 .trip_list_container > .trip_list_tag {
   width: 100%;
   display: flex;
@@ -126,6 +140,7 @@ button {
 
 .trip_list_container > .trip_list_background {
   background-color: #617EB3;
+  height: 100%;
 }
 
 .trip_list_area {

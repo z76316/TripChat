@@ -828,7 +828,7 @@ export class Trip extends Component {
 
 	render() {
 		return(
-			<div>
+			<div className='trip_div'>
 				<header>
 					<div className='header_left'>
 						<img className='header_logo' src={logo} alt={'logo'} />

@@ -263,7 +263,7 @@ class MainProfile extends Component {
 
 	render() {
 		return(
-			<div>
+			<div className='main_profile_div'>
 				<header>
 					<div className='header_left'>
 						<img className='header_logo' src={logo} alt={'logo'} />
