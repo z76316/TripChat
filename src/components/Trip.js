@@ -23,8 +23,9 @@ import MyChatBox from './myChatBox';
 import OthersChatBox from './othersChatBox';
 
 // Server ip
+import Server_ip from '../server_ip';
 // let Server_ip = 'http://localhost:9000';
-let Server_ip = 'http://52.89.137.222:9000';
+// let Server_ip = 'http://52.89.137.222:9000';
 
 let socket;
 
@@ -87,12 +88,10 @@ export class Trip extends Component {
 			temp_location: '',
 			add_member_box_style: 'displayNone',
 			addMemberInput: '',
-			members: [],
 			currPos: '',
 			tool: 'normal',
 			arrow_icon_style: 'currTool',
 			marker_icon_style: '',
-			newMarkers: [],
 			deleteMarkers: [],
 			currTextarea: '',
 			chatInputValue: '',
@@ -292,7 +291,7 @@ export class Trip extends Component {
 			} else {
 				let member_name = result.name;
 				alert(result.message);
-				this.close_add_member_box();
+				this.closeAddMember();
 			}
 		});
 	}
@@ -535,6 +534,7 @@ export class Trip extends Component {
 		let currTextarea = e.target.value;
 		console.log(currTextarea);
 		this.setState({currTextarea: currTextarea});
+		console.log(this.state.currTextarea);
 	}
 
 	// Deletes a specific marker in currMarkers array
@@ -822,6 +822,12 @@ export class Trip extends Component {
 		});
 	}
 
+	componentWillUnmount() {
+		socket.disconnect();
+		markers = [];
+		currMarkers = [];
+	}
+
 	render() {
 		return(
 			<div>
@@ -940,9 +946,9 @@ export class Trip extends Component {
 						<div className='chat_room_main'>
 							<div className='chat_area'>
 								{ this.state.chatBoxes.map( (chat,index) => {
-									console.log(chat.who);
-									console.log(chat.email);
-									console.log(chat.content);
+									// console.log(chat.who);
+									// console.log(chat.email);
+									// console.log(chat.content);
 									if(chat.email === this.state.currUserEmail) {
 										return (
 											<MyChatBox 
