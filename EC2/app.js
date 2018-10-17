@@ -29,8 +29,6 @@ const request = require("request");
 
 // mysql
 const mysql = require('mysql');
-
-// connnect mysql
 const db = mysql.createConnection({
 	host: 'localhost',
 	user: 'root',
@@ -44,6 +42,28 @@ db.connect(err => {
 		return err;
 	}
 });
+
+// redis
+const redis = require('redis');
+const client = redis.createClient();
+// let a = 1;
+// let b = 2;
+// let array = [];
+// let firstContent = {
+// 	trip_title: '清水斷崖',
+// 	trip_date: 1234567890123,
+// 	trip_location: '宜蘭'
+// };
+// let secondContent = {
+// 	trip_title: '不是清水斷崖',
+// 	trip_date: 9876543210987,
+// 	trip_location: '花蓮'
+// };
+// array.push(firstContent);
+// array.push(secondContent);
+// let arrayJSON = JSON.stringify(array);
+// client.set(`aaa${a}`, arrayJSON);
+// // client.del(`aaa${a}`);
 
 // App setup
 let port = 9000;
@@ -285,27 +305,40 @@ app.post('/exe/accounts/editname', (req, res) => {
 app.get('/exe/gettriplist', function(req,res) {
 	let sess = req.session;
 	let account_id = sess.account_id;
-	let getTripList = 
-		`SELECT 
-		ta.account_id, ta.trip_id, t.trip_id, t.trip_title, t.trip_date, t.trip_location 
-		FROM 
-		trip_to_account ta, trips t
-		WHERE 
-		ta.trip_id = t.trip_id AND
-		account_id = '${account_id}'`; 
-	db.query(getTripList, (err, list) => {
-		if(err) {
-			res.send( {err: 'Something went wrong during join: ' + err} );
+	client.get(`trip_list${account_id}`, (err, lists) => {
+		if(err){
+			res.send({err: '系統忙碌中，請稍候再試。'});
+			console.log(err);
+		} else if (lists) {
+			let trip_list = JSON.parse(lists);
+			res.send(trip_list);
+			console.log('感恩 cache，讚嘆 cache!');
 		} else {
-			let trip_list = [];
-			for(let i = 0; i < list.length; i++) {
-				console.log(list[i]);
-				trip_list.push(list[i]);
-			}
-			res.send(
-				trip_list
-			);
-
+			let getTripList = 
+				`SELECT 
+				ta.account_id, ta.trip_id, t.trip_id, t.trip_title, t.trip_date, t.trip_location 
+				FROM 
+				trip_to_account ta, trips t
+				WHERE 
+				ta.trip_id = t.trip_id AND
+				account_id = '${account_id}'`; 
+			db.query(getTripList, (err, list) => {
+				if(err) {
+					res.send( {err: 'Something went wrong during join: ' + err} );
+				} else {
+					let trip_list = [];
+					for(let i = 0; i < list.length; i++) {
+						console.log(list[i]);
+						trip_list.push(list[i]);
+					}
+					let trip_list_JSON = JSON.stringify(trip_list);
+					client.set(`trip_list${account_id}`, trip_list_JSON);
+					res.send(
+						trip_list
+					);
+					console.log('database 少使用，多休息');
+				}
+			});
 		}
 	});
 });
@@ -352,6 +385,11 @@ app.post('/exe/createnewtrip', function(req,res) {
 							let new_trip_id = result[0]['LAST_INSERT_ID()'];
 							console.log(new_trip_id);
 							res.send({new_trip_id: new_trip_id});
+
+							// update => clear out trip_list${account_id} cache
+							client.del(`trip_list${account_id}`);
+							console.log('新增了 trip, 所以清空 trip_list${account_id} 的 cache');
+
 							let NewTripBridgeTable = 
 								`INSERT INTO trip_to_account 
 								(trip_id, account_id) 
@@ -538,6 +576,7 @@ app.post('/exe/trip/deletemarker', (req, res) => {
 
 app.post('/exe/trip/edittitle', (req, res) => {
 	let sess = req.session;
+	let account_id = sess.account_id;
 	let data = req.body;
 	let trip_id = data.trip_id;
 	let new_title = data.new_title;
@@ -560,12 +599,17 @@ app.post('/exe/trip/edittitle', (req, res) => {
 			res.send({
 				title: new_title
 			});
+
+			// update => clear out trip_list${account_id} cache
+			client.del(`trip_list${account_id}`);
+			console.log('新增了 trip, 所以清空 trip_list${account_id} 的 cache');
 		}
 	});
 });
 
 app.post('/exe/trip/editdate', (req, res) => {
 	let sess = req.session;
+	let account_id = sess.account_id;
 	let data = req.body;
 	let trip_id = data.trip_id;
 	let new_date = data.new_date;
@@ -588,12 +632,17 @@ app.post('/exe/trip/editdate', (req, res) => {
 			res.send({
 				date: new_date
 			});
+
+			// update => clear out trip_list${account_id} cache
+			client.del(`trip_list${account_id}`);
+			console.log('新增了 trip, 所以清空 trip_list${account_id} 的 cache');
 		}
 	});
 });
 
 app.post('/exe/trip/editlocation', (req, res) => {
 	let sess = req.session;
+	let account_id = sess.account_id;
 	let data = req.body;
 	let trip_id = data.trip_id;
 	let new_location = data.new_location;
@@ -616,6 +665,10 @@ app.post('/exe/trip/editlocation', (req, res) => {
 			res.send({
 				location: new_location
 			});
+
+			// update => clear out trip_list${account_id} cache
+			client.del(`trip_list${account_id}`);
+			console.log('新增了 trip, 所以清空 trip_list${account_id} 的 cache');
 		}
 	});
 });

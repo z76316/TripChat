@@ -24,8 +24,6 @@ import OthersChatBox from './othersChatBox';
 
 // Server ip
 import Server_ip from '../server_ip';
-// let Server_ip = 'http://localhost:9000';
-// let Server_ip = 'http://52.89.137.222:9000';
 
 let socket;
 
