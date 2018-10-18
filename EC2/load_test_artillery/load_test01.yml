@@ -1,0 +1,43 @@
+config:
+  target: "http://52.89.137.222:9000"
+  http:
+    # Responses have to be sent within 30 seconds or the request will be aborted
+    timeout: 30
+  variables:
+    email:
+      - 'z7631614@gmail.com'
+    password:
+      - 'ec2server'
+    message: ''
+    trip_title: ''
+  phases:
+    - duration: 30
+      arrivalRate: 10
+    - duration: 60
+      arrivalRate: 10
+      rampTo: 80
+      name: "Warm up the application"
+    - duration: 120
+      arrivalRate: 80
+      name: "Sustained max load"
+scenarios:
+  - name: "Login then get trip list"
+    flow:
+      - post:
+          url: "/exe/accounts/login"
+          headers:
+            Content-Type: 'application/json'
+          json:
+            email: "{{email}}"
+            password: "{{password}}"
+            provider: "email"
+          capture:
+            json: "$.message"
+            as: "message"
+      - log: "get message: {{message}}"
+      - get:
+          url: "/exe/gettriplist"
+          capture:
+            json: "$[0].trip_title"
+            as: "trip_title"
+      - log: "first trip title: {{trip_title}}"
