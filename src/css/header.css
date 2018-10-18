@@ -2,8 +2,10 @@ header {
   display: flex;
   justify-content: space-between;
   padding: 8px 1%;
-  margin-bottom: 8px;
+  /* margin-bottom: 8px; */
   border-bottom: 4px solid #1B4965;
+  background-color: white;
+  z-index: 100;
 }
 
 header > .header_left {

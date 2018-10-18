@@ -27,7 +27,7 @@ class App extends Component {
 
 	render() {
 		return(
-			<div>
+			<div className='render_me_div'>
 				<Route 
 					exact path='/' 
 					render={() => <Main	/>}

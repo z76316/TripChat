@@ -6,7 +6,10 @@
 #render_me {
 	width: 100%;
 	margin: 0 auto;
+	height: 100%;
 }
 
-
+.render_me_div {
+	height: 100%;
+}
 

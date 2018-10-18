@@ -1,3 +1,7 @@
+.trip_div {
+	height: 100%;
+}
+
 .trip_container {
 	display: grid;
 	grid-template-columns: .5% 75% .5% 24%;
@@ -7,7 +11,7 @@
 		"cg1 rg1 cg2 chat"
 		"cg1 bar cg2 chat";
 	width: 100%;
-	height: 89.5vh;
+	height: 92vh;
 }
 
 .trip_container > .trip_map {
@@ -178,7 +182,7 @@
 
 .trip_container > .trip_chat_room > .chat_room_main {
 	background-color: #617EB3;
-	height: 85.5vh;
+	height: 87.8vh;
 	top: 0;
 	position: relative;
 }
@@ -235,7 +239,7 @@
 	position: absolute;
 	width: 92%;
 	margin: 0 4%;
-	bottom: 1%;
+	bottom: 8px;
 }
 
 .trip_chat_room > .chat_room_main > .temp_currUser {
