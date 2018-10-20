@@ -101,8 +101,8 @@ app.get('/exe/checkloginstate', function (req, res) {
 			isLogin: isLogin
 		});
 
-		console.log(`id = ${account_id}, name = ${name}, email = ${email}, isLogin = ${isLogin}`);
-		console.log(sess);
+		// console.log(`id = ${account_id}, name = ${name}, email = ${email}, isLogin = ${isLogin}`);
+		// console.log(sess);
 
 	} else {
 		// signup then link to profile page
@@ -111,9 +111,9 @@ app.get('/exe/checkloginstate', function (req, res) {
 			WHERE 
 			account_email = '${email}' AND
 			provider = '${provider}'`;
-		console.log(checkAccount);
+		// console.log(checkAccount);
 		db.query(checkAccount, (err, account) => {
-			console.log(account);
+			// console.log(account);
 			if(err) {
 				res.send( {err: 'Something went wrong during check your email and password input: ' + err} );
 			} else if(account.length === 0) {
@@ -127,7 +127,7 @@ app.get('/exe/checkloginstate', function (req, res) {
 				});
 				req.session.account_id = account[0].account_id;
 				let account_id = account[0].account_id;
-				console.log(req.session);
+				// console.log(req.session);
 				res.send({
 					account_id: account_id,
 					name: name,
@@ -135,8 +135,8 @@ app.get('/exe/checkloginstate', function (req, res) {
 					isLogin: isLogin
 				});
 				
-				console.log(`id = ${account_id}, name = ${name}, email = ${email}, isLogin = ${isLogin}`);
-				console.log(sess);
+				// console.log(`id = ${account_id}, name = ${name}, email = ${email}, isLogin = ${isLogin}`);
+				// console.log(sess);
 
 			}
 		});
@@ -160,9 +160,8 @@ app.post('/exe/accounts/login', (req, res) => {
 		account_email = '${email}' AND
 		account_password = '${password}' AND
 		provider = '${provider}'`;
-	console.log(checkAccount);
 	db.query(checkAccount, (err, account) => {
-		console.log(account);
+		// console.log(account);
 		if(err) {
 			res.send( {err: 'Something went wrong during check your email and password input: ' + err} );
 		} else if(account.length === 0) {
@@ -174,16 +173,12 @@ app.post('/exe/accounts/login', (req, res) => {
 					return;
 				}
 			});
-			console.log('id在這裡啦' + account[0].account_id);
-			console.log(account[0].account_name);
-			console.log(account[0].account_email);
-			console.log(account[0].provider);
 			req.session.account_id = account[0].account_id;
 			req.session.name = account[0].account_name;
 			req.session.email = account[0].account_email;
 			req.session.provider = account[0].provider;
 			req.session.isLogin = true;
-			console.log(req.session);
+			// console.log(req.session);
 			res.send({
 				message: `${account[0].account_name}，歡迎回來!`
 			});
@@ -328,7 +323,7 @@ app.get('/exe/gettriplist', function(req,res) {
 				} else {
 					let trip_list = [];
 					for(let i = 0; i < list.length; i++) {
-						console.log(list[i]);
+						// console.log(list[i]);
 						trip_list.push(list[i]);
 					}
 					let trip_list_JSON = JSON.stringify(trip_list);
@@ -381,9 +376,9 @@ app.post('/exe/createnewtrip', function(req,res) {
 									console.log(err);
 								});
 							}
-							console.log(result);
+							// console.log(result);
 							let new_trip_id = result[0]['LAST_INSERT_ID()'];
-							console.log(new_trip_id);
+							// console.log(new_trip_id);
 							res.send({new_trip_id: new_trip_id});
 
 							// update => clear out trip_list${account_id} cache
@@ -399,7 +394,7 @@ app.post('/exe/createnewtrip', function(req,res) {
 								if(err) {
 									console.log(err);
 								} else {
-									console.log(result);
+									// console.log(result);
 								}
 							});
 						});
@@ -455,7 +450,7 @@ app.post('/exe/trip/getTripData', (req, res) => {
 								};
 								markers.push(marker);
 							}
-							console.log(markers);
+							// console.log(markers);
 							let trip_title = data[0].trip_title;
 							let trip_date = data[0].trip_date;
 							let trip_location = data[0].trip_location;
@@ -509,9 +504,9 @@ app.post('/exe/trip/addmarker', (req, res) => {
 								res.send({err: '系統忙碌中，請稍候再試。'});
 								console.log(err);
 							}
-							console.log(result);
+							// console.log(result);
 							let marker_id = result[0]['LAST_INSERT_ID()'];
-							console.log(marker_id);
+							// console.log(marker_id);
 							res.send({
 								marker_id: marker_id,
 								location: {
@@ -541,8 +536,8 @@ app.post('/exe/trip/editmarker', (req, res) => {
 		`UPDATE markers 
 		SET ? WHERE marker_id = ?`;
 	db.query(UpdateMarker, [update_date, marker_id], (err, result) => {
-		console.log('有 marker 的內容更新了');
-		console.log(result);
+		// console.log('有 marker 的內容更新了');
+		// console.log(result);
 		if(err) {
 			res.send( {err: 'Something went wrong during update marker content: ' + err} );
 		} else {
@@ -562,8 +557,8 @@ app.post('/exe/trip/deletemarker', (req, res) => {
 		`DELETE FROM markers
 		WHERE marker_id = ${marker_id}`;
 	db.query(DeleteMarker, (err, result) => {
-		console.log('有 marker 被刪除了');
-		console.log(result);
+		// console.log('有 marker 被刪除了');
+		// console.log(result);
 		if(err) {
 			res.send( {err: 'Something went wrong during delete marker: ' + err} );
 		} else {
@@ -592,7 +587,7 @@ app.post('/exe/trip/edittitle', (req, res) => {
 		return;
 	}
 	db.query(UpdateTitle, [update_data, trip_id], (err, result) => {
-		console.log(result);
+		// console.log(result);
 		if(err) {
 			res.send( {err: 'Something went wrong during update trip title: ' + err} );
 		} else {
@@ -625,7 +620,7 @@ app.post('/exe/trip/editdate', (req, res) => {
 		return;
 	}
 	db.query(UpdateDate, [update_data, trip_id], (err, result) => {
-		console.log(result);
+		// console.log(result);
 		if(err) {
 			res.send( {err: 'Something went wrong during update trip date: ' + err} );
 		} else {
@@ -658,7 +653,7 @@ app.post('/exe/trip/editlocation', (req, res) => {
 		return;
 	}
 	db.query(UpdateLocation, [update_data, trip_id], (err, result) => {
-		console.log(result);
+		// console.log(result);
 		if(err) {
 			res.send( {err: 'Something went wrong during update trip location: ' + err} );
 		} else {
@@ -695,8 +690,8 @@ app.post('/exe/trip/addnewmember', (req, res) => {
 			} else if(account.length === 0) {
 				res.send( {err: '無此使用者。'} );
 			} else {
-				console.log(account[0].account_id);
-				console.log(account[0].account_name);
+				// console.log(account[0].account_id);
+				// console.log(account[0].account_name);
 				let member_id = account[0].account_id;
 				let member_name = account[0].account_name;
 
@@ -712,7 +707,7 @@ app.post('/exe/trip/addnewmember', (req, res) => {
 							console.log(err);
 						});
 					} else {
-						console.log(result);
+						// console.log(result);
 						db.commit((err) => {
 							if(err) {
 								res.send({err: '系統忙碌中，請稍候再試。'});
@@ -767,9 +762,9 @@ app.post('/exe/trip/savemessage', (req, res) => {
 								res.send({err: '系統忙碌中，請稍候再試。'});
 								console.log(err);
 							}
-							console.log(result);
+							// console.log(result);
 							let message_id = result[0]['LAST_INSERT_ID()'];
-							console.log(message_id);
+							// console.log(message_id);
 							res.send({
 								message_id: message_id,
 								done_message: '訊息已儲存。'
@@ -788,12 +783,12 @@ app.post('/exe/trip/getchatlogs', (req, res) => {
 	let account_id = sess.account_id;
 	let data = req.body;
 	let trip_id = data.trip_id;
-	console.log('trip_id!!!!!!!!!!!!!!!!!!! '+trip_id);
+	// console.log('trip_id!!!!!!!!!!!!!!!!!!! '+trip_id);
 	let getChatLogs =
 		`SELECT * FROM messages
 		WHERE trip_id = '${trip_id}'`;
 	db.query(getChatLogs, (err, result) => {
-		console.log(result);
+		// console.log(result);
 		if(err) {
 			res.send( {err: 'Something went wrong during get chat logs: ' + err} );
 		} else if(result.length === 0) {
@@ -815,6 +810,8 @@ app.post('/exe/trip/getchatlogs', (req, res) => {
 		}
 	});
 });
+
+module.exports = app;
 
 // Socket setup
 let io = socket(server);
