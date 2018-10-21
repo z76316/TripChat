@@ -9,7 +9,7 @@ import '../css/header.css';
 import '../css/main_profile.css';
 
 // import photo
-import logo from '../../photo/logo_04.png';
+import logo from '../../photo/logo_04_burned.png';
 import planIcon from '../../photo/plan_icon_01.png';
 import fbHead from '../../photo/fb_head.jpg';
 
@@ -270,7 +270,7 @@ class MainProfile extends Component {
 						<div className="header_title">TripChat</div>
 					</div>
 					<Link to='/'>
-						<img className='plan_icon' src={planIcon} alt={'main page icon'} />
+						<img className='fbHead_icon' src={fbHead} alt={'main page icon'} />
 					</Link>
 				</header>
 				<div className="main_container">

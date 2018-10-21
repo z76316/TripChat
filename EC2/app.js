@@ -338,6 +338,48 @@ app.get('/exe/gettriplist', function(req,res) {
 	});
 });
 
+app.post('/exe/trip/gettripmember', function(req,res) {
+	let sess = req.session;
+	let account_id = sess.account_id;
+	let data = req.body;
+	let trip_id = data.trip_id;
+	client.get(`member_list${trip_id}`, (err, lists) => {
+		if(err){
+			res.send({err: '系統忙碌中，請稍候再試。'});
+			console.log(err);
+		} else if (lists) {
+			let member_list = JSON.parse(lists);
+			res.send(member_list);
+			console.log('感恩 cache，讚嘆 cache!');
+		} else {
+			let getTripMember = 
+				`SELECT 
+				ta.trip_id, ta.account_id, a.account_id, a.account_email 
+				FROM 
+				trip_to_account ta, accounts a
+				WHERE
+				ta.account_id = a.account_id AND 
+				trip_id = '${trip_id}'`;
+			db.query(getTripMember, (err, list) => {
+				if(err) {
+					res.send( {err: 'Something went wrong during join: ' + err} );
+				} else {
+					let member_list = [];
+					for(let i = 0; i < list.length; i++) {
+						member_list.push(list[i]);
+					}
+					let member_list_JSON = JSON.stringify(member_list);
+					client.set(`member_list${trip_id}`, member_list_JSON);
+					res.send(
+						member_list
+					);
+					console.log('database 少使用，多休息');
+				}
+			});
+		}
+	});
+});
+
 app.post('/exe/createnewtrip', function(req,res) {
 	let sess = req.session;
 	let account_id = sess.account_id;
@@ -717,6 +759,10 @@ app.post('/exe/trip/addnewmember', (req, res) => {
 								message: `${member_name}(${member_email}) 已成為旅程夥伴。`
 							});
 						});
+
+						// update => clear out trip_list${account_id} cache
+						client.del(`member_list${trip_id}`);
+						console.log('新增了 trip, 所以清空 member_list${trip_id} 的 cache');
 					}
 				});
 			}
