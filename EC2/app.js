@@ -760,9 +760,13 @@ app.post('/exe/trip/addnewmember', (req, res) => {
 							});
 						});
 
-						// update => clear out trip_list${account_id} cache
+						// update => clear out member_list${trip_id} cache
 						client.del(`member_list${trip_id}`);
 						console.log('新增了 trip, 所以清空 member_list${trip_id} 的 cache');
+
+						// update => clear out trip_list${account_id} cache
+						client.del(`trip_list${member_id}`);
+						console.log('新增了 trip, 所以清空 trip_list${account_id} 的 cache');
 					}
 				});
 			}
