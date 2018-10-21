@@ -102,6 +102,7 @@ textarea[readonly] {
 .trip_map_bar > .bar_title_container > .edit_icon {
 	display: inline-block;
 	margin-left: 10px;
+	padding-right: 16px;
 	background: url('../../photo/edit_name_01.png');
 	width: 16px;
 	height: 16px;
@@ -179,7 +180,7 @@ textarea[readonly] {
 
 .trip_map_bar > .add_member_box > .member_list  > .member_email {
 	padding: 2%;
-	padding-left: 18%;
+	padding-left: 10%;
 }
 
 .trip_map_bar > .add_member_box > .add_member_button_box {

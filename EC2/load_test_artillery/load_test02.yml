@@ -11,13 +11,13 @@ config:
     message: ''
     trip_title: ''
   phases:
-    - duration: 30
+    - duration: 10
       arrivalRate: 10
-    - duration: 60
+    - duration: 20
       arrivalRate: 10
       rampTo: 60
       name: "Warm up the application"
-    - duration: 120
+    - duration: 10
       arrivalRate: 60
       name: "Sustained max load"
 scenarios:
