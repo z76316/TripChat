@@ -10,8 +10,9 @@ import '../css/header.css';
 import '../css/trip.css';
 
 // import photo
-import logo from '../../photo/logo_04.png';
+import logo from '../../photo/logo_04_burned.png';
 import planIcon from '../../photo/plan_icon_01.png';
+import fbHead from '../../photo/fb_head.jpg';
 import arrowIcon from '../../photo/arrow_icon_01.png';
 import markerIcon from '../../photo/marker_icon_01.png';
 // import deleteIcon from '../../photo/delete_icon_01.png';
@@ -88,9 +89,10 @@ export class Trip extends Component {
 			addMemberInput: '',
 			currPos: '',
 			tool: 'normal',
-			arrow_icon_style: 'currTool',
-			marker_icon_style: '',
+			arrow_icon_style: 'arrow_icon_style currTool',
+			marker_icon_style: 'marker_icon_style',
 			deleteMarkers: [],
+			member_list: [],
 			currTextarea: '',
 			chatInputValue: '',
 			currUser: '',
@@ -290,6 +292,27 @@ export class Trip extends Component {
 				let member_name = result.name;
 				alert(result.message);
 				this.closeAddMember();
+				this.getTripMember();
+			}
+		});
+	}
+
+	getTripMember = () => {
+		let data = {
+			trip_id: this.state.trip_id
+		};
+
+		this.ajax('post', Server_ip+'/exe/trip/gettripmember', data, (req) => {
+			let result=JSON.parse(req.responseText);
+			if(result.err) {
+				alert(result.err);
+			} else {
+				let member_list = [];
+				for(let i = 0; i < result.length; i++) {
+					member_list.push(result[i].account_email);
+				}
+				console.log(member_list);
+				this.setState({member_list: member_list});
 			}
 		});
 	}
@@ -434,17 +457,26 @@ export class Trip extends Component {
 		});
 		marker.marker_id = marker_id;
 		console.log(marker.marker_id);
+
 		let cont = document.createElement('DIV');
+		cont.className = 'infoWindow_container';
 		let textarea = document.createElement('textarea');
+		textarea.className = `infowindow_textarea${marker_id}`;
 		textarea.placeholder = '寫下您的旅遊筆記~';
+		textarea.readOnly = true;
 		textarea.value = content;
 		textarea.oninput = (e) => {
 			this.handleTextarea(e);
 		};
+
+		let button_div = document.createElement('DIV');
+		button_div.className = 'button_div';
+
 		let submitBut = document.createElement('BUTTON');
-		submitBut.textContent = '完成';
+		submitBut.className = `submitBut${marker_id}`;
+		submitBut.textContent = '編輯';
 		submitBut.onclick = () => {
-			console.log(`有按到id=${marker_id}的完成按鈕喔喔喔喔`);
+			console.log(`有按到id=${marker_id}的編輯按鈕喔喔喔喔`);
 			this.editMarkerContent(marker_id);
 		};
 		let deleteBut = document.createElement('BUTTON');
@@ -456,8 +488,12 @@ export class Trip extends Component {
 		};
 
 		cont.appendChild(textarea);
-		cont.appendChild(submitBut);
-		cont.appendChild(deleteBut);
+		cont.appendChild(button_div);
+		button_div.appendChild(submitBut);
+		button_div.appendChild(deleteBut);
+		
+		// cont.appendChild(submitBut);
+		// cont.appendChild(deleteBut);
 		let infoWindow = new google.maps.InfoWindow({
 			content: cont
 		});
@@ -516,14 +552,14 @@ export class Trip extends Component {
 		if(toolType === 'normal') {
 			this.setState({
 				tool: toolType,
-				arrow_icon_style: 'currTool',
-				marker_icon_style: ''
+				arrow_icon_style: 'arrow_icon_style currTool',
+				marker_icon_style: 'marker_icon_style'
 			});
 		} else if (toolType === 'marker') {
 			this.setState({
 				tool: toolType,
-				arrow_icon_style: '',
-				marker_icon_style: 'currTool'
+				arrow_icon_style: 'arrow_icon_style',
+				marker_icon_style: 'marker_icon_style currTool'
 			});
 		}
 	}
@@ -568,36 +604,48 @@ export class Trip extends Component {
 	// Edit a specific marker in currMarkers array
 	editMarkerContent = (marker_id) => {
 		console.log(marker_id);
-		for(let i = 0; i < currMarkers.length; i++) {
-			console.log(currMarkers[i].marker_id);
-			console.log(marker_id);
-			if(currMarkers[i].marker_id === marker_id) {
-				currMarkers[i].content = this.state.currTextarea;
-				console.log(this.state.currTextarea);
-				console.log(currMarkers[i]);
+		let editBut = document.querySelector(`.submitBut${marker_id}`);
+		let infoTextarea = document.querySelector(`.infowindow_textarea${marker_id}`);
+		if(editBut.textContent === '編輯') {
+			editBut.textContent = '完成';
+			infoTextarea.readOnly = false;
+			let currTextareaContent = infoTextarea.value;
+			this.setState({currTextarea: currTextareaContent});
+		} else {
+			editBut.textContent = '編輯';
+			infoTextarea.readOnly = true;
+
+			for(let i = 0; i < currMarkers.length; i++) {
+				console.log(currMarkers[i].marker_id);
+				console.log(marker_id);
+				if(currMarkers[i].marker_id === marker_id) {
+					currMarkers[i].content = this.state.currTextarea;
+					console.log(this.state.currTextarea);
+					console.log(currMarkers[i]);
+				}
 			}
+	
+			let update_marker = {
+				marker_id: marker_id,
+				content: this.state.currTextarea
+			};
+	
+	
+			this.ajax('post', Server_ip+'/exe/trip/editmarker', update_marker, (req) => {
+				let result=JSON.parse(req.responseText);
+				if(result.err) {
+					alert(result.err);
+				} else {
+					this.deleteMarkers(marker_id);
+					console.log(currMarkers);
+					this.setMarkersOnMap(currMarkers);
+	
+					update_marker.trip_id = this.state.trip_id;
+					// socket emit updating marker
+					socket.emit('updateMarker', update_marker);
+				}
+			});
 		}
-
-		let update_marker = {
-			marker_id: marker_id,
-			content: this.state.currTextarea
-		};
-
-
-		this.ajax('post', Server_ip+'/exe/trip/editmarker', update_marker, (req) => {
-			let result=JSON.parse(req.responseText);
-			if(result.err) {
-				alert(result.err);
-			} else {
-				this.deleteMarkers(marker_id);
-				console.log(currMarkers);
-				this.setMarkersOnMap(currMarkers);
-
-				update_marker.trip_id = this.state.trip_id;
-				// socket emit updating marker
-				socket.emit('updateMarker', update_marker);
-			}
-		});
 
 	}
 
@@ -710,6 +758,8 @@ export class Trip extends Component {
 					tripTitleInput: result.trip_title,
 					tripDateInput: trip_date,
 					tripLocationInput: result.trip_location
+				}, () => {
+					this.getTripMember();
 				});
 			}
 		});
@@ -754,6 +804,9 @@ export class Trip extends Component {
 				whoTyping: ''
 			});
 		});
+
+		// Get Trip Member List
+		// this.getTripMember();
 
 		// Listen for typing
 		socket.on(`typing${trip_id}`, (typingState) => {
@@ -835,7 +888,7 @@ export class Trip extends Component {
 						<div className="header_title">TripChat</div>
 					</div>
 					<Link to='/'>
-						<img className='plan_icon' src={planIcon} alt={'main page icon'} />
+						<img className='fbHead_icon' src={fbHead} alt={'main page icon'} />
 					</Link>
 				</header>
 				<div className="trip_container">
@@ -882,18 +935,14 @@ export class Trip extends Component {
 								onClick={() => this.editLocation()}></div>
 						</div>
 						<div className='trip_map_bar_tool_box'>
-							<img 
+							<div 
 								className={this.state.arrow_icon_style} 
-								src={arrowIcon} 
-								alt={'arrow tool'}
-								onClick={ () => this.selectTool('normal')} 
-							/>
-							<img 
+								onClick={ () => this.selectTool('normal')} >
+							</div>
+							<div 
 								className={this.state.marker_icon_style} 
-								src={markerIcon} 
-								alt={'marker tool'} 
-								onClick={ () => this.selectTool('marker')} 
-							/>
+								onClick={ () => this.selectTool('marker')} >
+							</div>
 							{/* <img 
 								className='delete_icon' 
 								src={deleteIcon} 
@@ -922,14 +971,29 @@ export class Trip extends Component {
 								value={this.state.addMemberInput}
 								onChange={ (e) => this.handleAddMemberInput(e) }
 							/>
-							<button
-								className='add_member_submit_button'
-								type='button'
-								onClick={() => this.submitAddMember()}>加入</button>
-							<button
-								className='close_add_member_box'
-								type='button'
-								onClick={() => this.closeAddMember()}>關閉</button>
+							<div className='member_list'>
+								{'旅遊夥伴: '}
+								{
+									this.state.member_list.map((email, index) => {
+										return (
+											<div 
+												className='member_email'
+												key={index}
+											>{email}</div>
+										);
+									})
+								}
+							</div>
+							<div className='add_member_button_box'>
+								<button
+									className='add_member_submit_button'
+									type='button'
+									onClick={() => this.submitAddMember()}>加入</button>
+								<button
+									className='close_add_member_box'
+									type='button'
+									onClick={() => this.closeAddMember()}>關閉</button>
+							</div>
 						</div>
 						{/* <button 
 							className='export_button'
@@ -974,18 +1038,18 @@ export class Trip extends Component {
 										<div className='who_typing'></div>
 								}
 								<div style={{ float:'left', clear: 'both' }}
-           				ref={(el) => { this.messagesEnd = el; }}>
-         				</div>
+           							ref={(el) => { this.messagesEnd = el; }}>
+         						</div>
 							</div>
 
-	            <textarea 
-	            	className='input_chat'
-	            	name='chat_content'
-	            	onChange={ (e) => this.handleChatInput(e) } 
-	            	onKeyDown={this.onEnterPress}
-	            	placeholder='傳送訊息'
-	            	cols={40} rows={3}
-            	></textarea>
+							<textarea 
+								className='input_chat'
+								name='chat_content'
+								onChange={ (e) => this.handleChatInput(e) } 
+								onKeyDown={this.onEnterPress}
+								placeholder='傳送訊息'
+								cols={40} rows={3}
+							></textarea>
 
 						</div>
 					</div>

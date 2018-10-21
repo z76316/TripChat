@@ -1,3 +1,7 @@
+.render_me_div > div {
+	height: 100%;
+}
+
 .trip_div {
 	height: 100%;
 }
@@ -11,7 +15,8 @@
 		"cg1 rg1 cg2 chat"
 		"cg1 bar cg2 chat";
 	width: 100%;
-	height: 92vh;
+	height: 92.5%;
+	background: linear-gradient(90deg, rgba(238,251,255,1) 0%, rgba(255,255,255,1) 100%);
 }
 
 .trip_container > .trip_map {
@@ -20,13 +25,37 @@
 	position: relative;
 }
 
+.infoWindow_container > textarea {
+	width: 180px;
+	height: 80px;
+	border-radius: 6px;
+	padding: 4px 8px;
+}
+
+textarea[readonly] {
+	background: linear-gradient(90deg, rgba(185,240,255,1) 0%, rgba(0,212,255,1) 50%, rgba(54,70,236,1) 100%);
+	border: 0px;
+}
+
+
+.infoWindow_container > .button_div {
+	display: flex;
+}
+
+.infoWindow_container > .button_div > button {
+	width: 40%;
+	border-radius: 6px;
+	margin-top: 4px;
+}
+
 .trip_container > .trip_map_bar {
 	grid-area: bar;	
 }
 
 .trip_container > .trip_chat_room {
 	grid-area: chat;
-	border: .5px solid #E2E2E2;
+	height: 100%;
+	/* border: .5px solid #E2E2E2; */
 }
 
 .trip_container > .trip_map_bar {
@@ -91,13 +120,26 @@
 	width: 16%;
 }
 
-.trip_map_bar > .trip_map_bar_tool_box > img {
-	height: 24px;
+.trip_map_bar > .trip_map_bar_tool_box > div {
+	width: 32px;
+	height: 32px;
 	cursor: pointer;
 }
 
-.trip_map_bar > .trip_map_bar_tool_box > .currTool {
-	border: 1px solid gray;
+.trip_map_bar > .trip_map_bar_tool_box > .arrow_icon_style {
+	background: no-repeat url('../../photo/arrow_icon_01.png');
+}
+
+.trip_map_bar > .trip_map_bar_tool_box > .marker_icon_style {
+	background: no-repeat url('../../photo/marker_icon_01.png');
+}
+
+.trip_map_bar > .trip_map_bar_tool_box > .arrow_icon_style.currTool {
+	background: no-repeat url('../../photo/arrow_icon_01_curr.png');
+}
+
+.trip_map_bar > .trip_map_bar_tool_box > .marker_icon_style.currTool {
+	background: no-repeat url('../../photo/marker_icon_01_curr.png');
 }
 
 .trip_map_bar > .addMemberButton {
@@ -117,7 +159,7 @@
 	left: 43%;
 	transform: translate(-200px, -100px);
 	width: 320px;
-	height: 100px;
+	/* height: 100px; */
 	background-color: #FFFFFF;
 	box-shadow: 2px 2px 8px;
 	border-radius: 8px;
@@ -127,22 +169,34 @@
 	padding-left: 8px;
 }
 
-.trip_map_bar > .add_member_box > .add_member_submit_button,
-.trip_map_bar > .add_member_box > .close_add_member_box {
-	width: 60px;
+.trip_map_bar > .add_member_box > .member_list {
+	display: flex;
+	flex-wrap: wrap;
+	padding: 1%;
+	width: 60%;
+	margin: 0 auto;
+}
+
+.trip_map_bar > .add_member_box > .member_list  > .member_email {
+	padding: 2%;
+	padding-left: 18%;
+}
+
+.trip_map_bar > .add_member_box > .add_member_button_box {
+	display: flex;
+	margin: 0 auto;
+	width: 60%;
+	padding: 4%;
+	padding-top: 2%;
+	justify-content: space-around;
+}
+
+.trip_map_bar > .add_member_box > .add_member_button_box > .add_member_submit_button,
+.trip_map_bar > .add_member_box > .add_member_button_box > .close_add_member_box {
+	width: 32%;
 	box-shadow: 1px 1px gray;
-}
-
-.trip_map_bar > .add_member_box > .add_member_submit_button {
-	position: absolute;
 	bottom: 10px;
-	margin-left: 24%;
-}
-
-.trip_map_bar > .add_member_box > .close_add_member_box {
-	position: absolute;	
-	bottom: 10px;
-	margin-left: 60%;
+	border-radius: 4px;
 }
 
 .trip_map_bar > .displayNone {
@@ -162,13 +216,14 @@
 
 
 .trip_container > .trip_chat_room > .chat_room_header {
+	background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(224,224,224,1) 100%);
 	height: 4%;
 	display: flex;
 	justify-content: flex-start;
 	align-items: center;
-	margin-top: 2px;
-	margin-bottom: 2px;
-	margin-left: 2px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	padding-left: 2px;
 }
 
 .chat_room_header_icon {
@@ -182,14 +237,14 @@
 
 .trip_container > .trip_chat_room > .chat_room_main {
 	background-color: #617EB3;
-	height: 87.8vh;
+	height: 96%;
 	top: 0;
 	position: relative;
 }
 
 .trip_chat_room > .chat_room_main > .chat_area {
 	overflow-y: scroll;
-	height: 73vh;
+	height: 87%;
 	top: 0;
 	position: relative;
 }
@@ -239,7 +294,7 @@
 	position: absolute;
 	width: 92%;
 	margin: 0 4%;
-	bottom: 8px;
+	bottom: 2%;
 }
 
 .trip_chat_room > .chat_room_main > .temp_currUser {
