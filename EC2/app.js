@@ -24,13 +24,11 @@ const socket = require('socket.io');
 // Utility
 const request = require("request");
 
-// 寄信 nodemailer
-// let nodemailer = require('nodemailer');
-
 // mysql
 const mysql = require('mysql');
 const db = mysql.createConnection({
-	host: 'localhost',
+	host: 'mysql',
+	port: 3306,
 	user: 'root',
 	password: 'ec2server',
 	database: 'TripChat',
@@ -39,31 +37,16 @@ const db = mysql.createConnection({
 
 db.connect(err => {
 	if(err) {
+		console.log(err);
 		return err;
 	}
 });
 
 // redis
 const redis = require('redis');
-const client = redis.createClient();
-// let a = 1;
-// let b = 2;
-// let array = [];
-// let firstContent = {
-// 	trip_title: '清水斷崖',
-// 	trip_date: 1234567890123,
-// 	trip_location: '宜蘭'
-// };
-// let secondContent = {
-// 	trip_title: '不是清水斷崖',
-// 	trip_date: 9876543210987,
-// 	trip_location: '花蓮'
-// };
-// array.push(firstContent);
-// array.push(secondContent);
-// let arrayJSON = JSON.stringify(array);
-// client.set(`aaa${a}`, arrayJSON);
-// // client.del(`aaa${a}`);
+const client = redis.createClient({
+	host: 'redis'
+});
 
 // App setup
 let port = 9000;

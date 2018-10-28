@@ -1,0 +1,47 @@
+version: '3'
+services:
+
+  tripchat-redis:
+    image: redis
+    container_name: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis:/data
+    networks: 
+      - backend
+
+  tripchat-mysql:
+    image: mysql:5.7
+    container_name: mysql
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=ec2server
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=ec2server
+      - MYSQL_DATABASE=TripChat
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./db_backup:/db_backup
+    restart: unless-stopped
+    networks: 
+      - backend
+
+  tripchat-server:
+    image: tripchat-server
+    container_name: tripchat-server
+    ports:
+      - 9000:9000
+    command: node app.js
+    depends_on:
+      # - tripchat-redis
+      - tripchat-mysql
+    links:
+      - tripchat-redis
+      - tripchat-mysql
+    networks: 
+      - backend
+networks: 
+  backend:
+    driver: bridge

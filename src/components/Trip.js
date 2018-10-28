@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { BrowserRouter, Link, Switch, Route } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import {Map, InfoWindow, Marker, GoogleApiWrapper} from 'google-maps-react';
+import { GoogleApiWrapper } from 'google-maps-react';
 
 // import CSS
 import '../css/reset.css';
@@ -11,11 +11,7 @@ import '../css/trip.css';
 
 // import photo
 import logo from '../../photo/logo_04_burned.png';
-import planIcon from '../../photo/plan_icon_01.png';
 import fbHead from '../../photo/fb_head.jpg';
-import arrowIcon from '../../photo/arrow_icon_01.png';
-import markerIcon from '../../photo/marker_icon_01.png';
-// import deleteIcon from '../../photo/delete_icon_01.png';
 import meetingIcon from '../../photo/meeting_icon_01.png';
 import addMemberIcon from '../../photo/add_member_icon_01.png';
 
@@ -29,32 +25,6 @@ import Server_ip from '../server_ip';
 let socket;
 
 let map, geocoder;
-
-// let m1 = {
-// 	marker_id: 1,
-// 	location: {
-// 		lat: 25.042299,
-// 		lng: 121.565182	
-// 	},
-// 	content: '安安喔喔喔',
-// };
-// let m2 = {
-// 	marker_id: 2,
-// 	location: {
-// 		lat: 25.542299,
-// 		lng: 122.065182	
-// 	},
-// 	content: '安安喔喔喔2',
-// };
-// let m3 = {
-// 	marker_id: 3,
-// 	location: {
-// 		lat: 25.042299,
-// 		lng: 121.545182	
-// 	},
-// 	content: '安安喔喔喔3',
-// };
-// let currMarkers = [m1, m2, m3];
 
 let markers = [];
 let currMarkers = [];
@@ -373,13 +343,6 @@ export class Trip extends Component {
 	// judge clicking behavior by this.state.tool
 	clickByTool = (location) => {
 		if(this.state.tool === 'marker') {
-			// let marker_id = currMarkers[currMarkers.length - 1].marker_id + 1;
-			// let content = '寫下您的旅遊筆記~';
-			// let newAddedMarker = {
-			// 	marker_id: marker_id,
-			// 	location: location,
-			// 	content: content
-			// };
 
 			// add this marker to SQL
 			let marker_data = {
@@ -492,8 +455,6 @@ export class Trip extends Component {
 		button_div.appendChild(submitBut);
 		button_div.appendChild(deleteBut);
 		
-		// cont.appendChild(submitBut);
-		// cont.appendChild(deleteBut);
 		let infoWindow = new google.maps.InfoWindow({
 			content: cont
 		});
@@ -805,9 +766,6 @@ export class Trip extends Component {
 			});
 		});
 
-		// Get Trip Member List
-		// this.getTripMember();
-
 		// Listen for typing
 		socket.on(`typing${trip_id}`, (typingState) => {
 			console.log(typingState);
@@ -944,12 +902,6 @@ export class Trip extends Component {
 								onClick={ () => this.selectTool('marker')} >
 							</div>
 							{/* <img 
-								className='delete_icon' 
-								src={deleteIcon} 
-								alt={'delete tool'} 
-								onClick={ () => this.selectTool('delete')} 
-							/> */}
-							{/* <img 
 								className='compass_icon' 
 								src={compassIcon} 
 								alt={'circle tool'} 
@@ -1008,9 +960,6 @@ export class Trip extends Component {
 						<div className='chat_room_main'>
 							<div className='chat_area'>
 								{ this.state.chatBoxes.map( (chat,index) => {
-									// console.log(chat.who);
-									// console.log(chat.email);
-									// console.log(chat.content);
 									if(chat.email === this.state.currUserEmail) {
 										return (
 											<MyChatBox 
@@ -1057,8 +1006,6 @@ export class Trip extends Component {
 			</div>
 		);
 
-
-		
 	}
 
 }

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { BrowserRouter, Link, Switch, Route } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 // import CSS
@@ -10,7 +10,6 @@ import '../css/main_profile.css';
 
 // import photo
 import logo from '../../photo/logo_04_burned.png';
-import planIcon from '../../photo/plan_icon_01.png';
 import fbHead from '../../photo/fb_head.jpg';
 
 // import ReactDOM
@@ -19,46 +18,6 @@ import TripCard from './TripCard';
 // Server ip
 import Server_ip from '../server_ip';
 
-// Fake Trip list
-// let a_trip = {
-// 	tripId: 1,
-// 	tripTitle: '清水斷崖獨木舟',
-// 	tripDate: new Date(2018,6,21),
-// 	tripLocation: '宜蘭',
-// 	tripMembers: '伯斯, 真伯斯, 假伯斯'
-// };
-
-// let b_trip = {
-// 	tripId: 2,
-// 	tripTitle: '草嶺古道驚魂記',
-// 	tripDate: new Date(2016,3,11),
-// 	tripLocation: '宜蘭',
-// 	tripMembers: '伯斯, 真伯斯, 假伯斯'
-// };
-
-// let c_trip = {
-// 	tripId: 3,
-// 	tripTitle: '司馬庫斯看星星',
-// 	tripDate: new Date(2013,8,17),
-// 	tripLocation: '新竹',
-// 	tripMembers: '伯斯, 真伯斯, 假伯斯'
-// };
-
-// let d_trip = {
-// 	tripId: 4,
-// 	tripTitle: '阿里山看日出沒看到',
-// 	tripDate: new Date(2012,1,3),
-// 	tripLocation: '嘉義',
-// 	tripMembers: '伯斯, 真伯斯, 假伯斯'
-// };
-
-// let e_trip = {
-// 	tripId: 5,
-// 	tripTitle: '花蓮3日遊',
-// 	tripDate: new Date(2011,8,27),
-// 	tripLocation: '花蓮',
-// 	tripMembers: '伯斯, 真伯斯, 假伯斯'
-// };
 
 class MainProfile extends Component {
 
