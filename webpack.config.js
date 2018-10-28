@@ -17,7 +17,7 @@ module.exports = {
     contentBase: path.join(__dirname, 'dist'),
     overlay: true
   },
-  performance: { hints: false },
+  // performance: { hints: false },
   module: {
     rules: [
       {

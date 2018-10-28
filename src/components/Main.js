@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import { BrowserRouter, Link, Switch, Route } from 'react-router-dom';
-import PropTypes from 'prop-types';
 
 // import CSS
 import '../css/reset.css';
@@ -9,7 +7,6 @@ import '../css/main.css';
 
 // import photo
 import logo from '../../photo/logo_04_burned.png';
-import planIcon from '../../photo/plan_icon_01.png';
 
 // import ReactDOM
 import MainProfile from './MainProfile';
