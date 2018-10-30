@@ -40,6 +40,7 @@ services:
     links:
       - tripchat-redis
       - tripchat-mysql
+    restart: unless-stopped
     networks: 
       - backend
 networks: 

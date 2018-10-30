@@ -91,7 +91,6 @@ class MainProfile extends Component {
 			temp_name: currEditName,
 			currEditName: currEditName
 		});
-		console.log(currEditName);
 	}
 
 	logOut = () => {
@@ -126,13 +125,10 @@ class MainProfile extends Component {
 			let result=JSON.parse(req.responseText);
 			console.log('MainProfile.js session ' + result.name + ' ' + result.email);
 			if(result.isLogin) {
-				this.setState(
-					{
-						profile_name: result.name,
-						profile_email: result.email
-					}
-				);
-
+				this.setState({
+					profile_name: result.name,
+					profile_email: result.email
+				});
 				this.getTripList();
 			}
 		});
@@ -141,24 +137,11 @@ class MainProfile extends Component {
 	getTripList = () => {
 		this.ajax('get', Server_ip+'/exe/gettriplist', '', (req) => {
 			let result=JSON.parse(req.responseText);
-			console.log('TripList data is: ' + result);
-			console.log(result[0]);
-			console.log(result[1]);
-			console.log(result[2]);
-			console.log(result);
 			let trip_list = [];
 			let memory_list = [];
 			let trip = {};
-
-			// let temp = new Date();
-			// let currDate = new Date(temp.toLocaleDateString());
-			// console.log(currDate);
-
 			let now = new Date();
 			let currDate = new Date(now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate());
-			// let currDate = new Date(startOfDay / 1000);
-			console.log(currDate);
-
 			let datetime, tripDate;
 			for(let i = 0; i < result.length; i ++) {
 				datetime = result[i].trip_date;
@@ -169,7 +152,6 @@ class MainProfile extends Component {
 					tripDate: tripDate,
 					tripLocation: result[i].trip_location,
 				};
-				console.log(trip.tripDate);
 				if(trip.tripDate < currDate) {
 					memory_list.push(trip);
 				} else {
@@ -185,14 +167,9 @@ class MainProfile extends Component {
 
 	createNewTrip = () => {
 		let confirmToCreateNewTrip = confirm('是否要開啟新的旅程?');
-		let newTripId;
 		if (confirmToCreateNewTrip) {
-
 			let tripDate = + new Date();
-			console.log(tripDate);
-			
 			let newTrip = {
-				// tripId: newTripId,
 				tripTitle: '新的旅程',
 				tripDate: tripDate,
 				tripLocation: '去哪玩咧',
@@ -200,7 +177,6 @@ class MainProfile extends Component {
 
 			this.ajax('post', Server_ip+'/exe/createnewtrip', newTrip, (req) => {
 				let result=JSON.parse(req.responseText);
-				console.log(result);
 				if(result.err) {
 					alert(result.err);
 				} else {
@@ -209,10 +185,8 @@ class MainProfile extends Component {
 					let new_trip_list = this.state.trip_list;
 					new_trip_list.push(newTrip);
 					this.setState({trip_list: new_trip_list});
-					console.log(new_trip_list);
 				}
 			});
-
 		}
 	}
 
@@ -305,15 +279,10 @@ class MainProfile extends Component {
 							</div>
 						</div>
 					</div>
-
 				</div>
 			</div>
-		);
-
-
-		
+		);	
 	}
-
 }
 
 MainProfile.propTypes = { 

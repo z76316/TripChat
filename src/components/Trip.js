@@ -22,13 +22,11 @@ import OthersChatBox from './othersChatBox';
 // Server ip
 import Server_ip from '../server_ip';
 
+// some global variable for Socket.IO and Google Maps API 
 let socket;
-
 let map, geocoder;
-
 let markers = [];
 let currMarkers = [];
-
 
 export class Trip extends Component {
 
@@ -70,7 +68,6 @@ export class Trip extends Component {
 			whoTyping: '',
 			chatBoxes: []
 		};
-
 	}
 
 	ajax = (method, src, args, callback) => {
@@ -178,7 +175,6 @@ export class Trip extends Component {
 				if(result.err) {
 					alert(result.err);
 				} else {
-					console.log(result.location);
 					geocoder.geocode( { 'address': result.location}, (results, status) => {
 						if (status == 'OK') {
 							let	lat = results[0].geometry.location.lat();
@@ -206,8 +202,6 @@ export class Trip extends Component {
 	getLatLng = (place) => {
 		geocoder.geocode( { 'address': place}, (results, status) => {
 			if (status == 'OK') {
-				console.log(results[0].geometry.location.lat());
-				console.log(results[0].geometry.location.lng());
 				let newCenter = {
 					lat: results[0].geometry.location.lat(),
 					lng: results[0].geometry.location.lng()
@@ -222,19 +216,16 @@ export class Trip extends Component {
 	handleTripTitleInput = (e) => {
 		let tripTitleInput = e.target.value;
 		this.setState({tripTitleInput: tripTitleInput});
-		console.log(tripTitleInput);
 	}
 
 	handleTripDateInput = (e) => {
 		let tripDateInput = e.target.value;
 		this.setState({tripDateInput: tripDateInput});
-		console.log(tripDateInput);
 	}
 
 	handleTripLocationInput = (e) => {
 		let tripLocationInput = e.target.value;
 		this.setState({tripLocationInput: tripLocationInput});
-		console.log(tripLocationInput);
 	}
 
 	addMember = () => {
@@ -244,7 +235,6 @@ export class Trip extends Component {
 	handleAddMemberInput = (e) => {
 		let addMemberInput = e.target.value;
 		this.setState({addMemberInput: addMemberInput});
-		console.log(addMemberInput);
 	}
 
 	submitAddMember = () => {
@@ -259,7 +249,6 @@ export class Trip extends Component {
 			if(result.err) {
 				alert(result.err);
 			} else {
-				let member_name = result.name;
 				alert(result.message);
 				this.closeAddMember();
 				this.getTripMember();
@@ -281,7 +270,6 @@ export class Trip extends Component {
 				for(let i = 0; i < result.length; i++) {
 					member_list.push(result[i].account_email);
 				}
-				console.log(member_list);
 				this.setState({member_list: member_list});
 			}
 		});
@@ -306,7 +294,6 @@ export class Trip extends Component {
 					zoom: 14
 				});
 			} else {
-				console.log(status);
 				map = new google.maps.Map(document.querySelector('.trip_map'), {
 					center: this.state.mapInitPos,
 					zoom: 14
@@ -314,8 +301,6 @@ export class Trip extends Component {
 			}
 
 			map.addListener('click', (e) => {                
-				console.log(e.latLng.lat());
-				console.log(e.latLng.lng());
 				let lat = e.latLng.lat();
 				let lng = e.latLng.lng();
 				let currPos = {
@@ -325,11 +310,7 @@ export class Trip extends Component {
 				this.setState({currPos: currPos});
 				this.clickByTool(currPos);
 			});
-
-			console.log('到setMarkersOnMap了');
-			console.log(currMarkers);
 			this.setMarkersOnMap(currMarkers);
-
 		});
 
 	}
@@ -343,7 +324,6 @@ export class Trip extends Component {
 	// judge clicking behavior by this.state.tool
 	clickByTool = (location) => {
 		if(this.state.tool === 'marker') {
-
 			// add this marker to SQL
 			let marker_data = {
 				trip_id: this.state.trip_id,
@@ -363,14 +343,11 @@ export class Trip extends Component {
 					};
 					currMarkers.push(newAddedMarker);
 					this.addMarker(result.marker_id, result.location, result.content);
-
 					newAddedMarker.trip_id = this.state.trip_id;
 					// socket emit adding marker
 					socket.emit('addMarker', newAddedMarker);
-
 				}
 			});
-
 		}
 	}
 
@@ -383,27 +360,17 @@ export class Trip extends Component {
 				let content = marker.content;
 					
 				for(let j = 0; j < markers.length; j++) {
-					console.log(marker_id);
-					console.log(markers[j].marker_id);
 					if(marker_id === markers[j].marker_id ) {
 						return;
 					}	
 				}
-				
 				this.addMarker(marker_id, location, content);	
-				
 			});
 		} else {
 			currMarkers.map((marker, i) => {
 				let marker_id = marker.marker_id;
 				let location = marker.location;
 				let content = marker.content;
-				
-				console.log('等等要addMarker囉');
-				console.log(marker_id);
-				console.log(location);
-				console.log(content);
-
 				this.addMarker(marker_id, location, content);
 			});	
 		}
@@ -419,8 +386,6 @@ export class Trip extends Component {
 			clickable: true
 		});
 		marker.marker_id = marker_id;
-		console.log(marker.marker_id);
-
 		let cont = document.createElement('DIV');
 		cont.className = 'infoWindow_container';
 		let textarea = document.createElement('textarea');
@@ -439,13 +404,11 @@ export class Trip extends Component {
 		submitBut.className = `submitBut${marker_id}`;
 		submitBut.textContent = '編輯';
 		submitBut.onclick = () => {
-			console.log(`有按到id=${marker_id}的編輯按鈕喔喔喔喔`);
 			this.editMarkerContent(marker_id);
 		};
 		let deleteBut = document.createElement('BUTTON');
 		deleteBut.textContent = '刪除';
 		deleteBut.onclick = () => {
-			console.log(`按到刪除id=${marker_id}囉`);
 			this.deleteMarkers(marker_id);
 			this.deleteCurrmarkers(marker_id);
 		};
@@ -458,13 +421,10 @@ export class Trip extends Component {
 		let infoWindow = new google.maps.InfoWindow({
 			content: cont
 		});
-		console.log('加入 addListener 了啊');
 		marker.addListener('click', () => {
 			infoWindow.open(map, marker);
 		});
-		
 		markers.push(marker);
-		console.log(markers);
 	}
 
 	// Sets the map on all markers in the array.
@@ -492,21 +452,15 @@ export class Trip extends Component {
 
 	// Deletes a specific marker in markers array
 	deleteMarkers = (marker_id) => {
-		console.log(`gonna delete the marker its id= ${marker_id} in markers`);
 		let new_markers = [];
 		for (let i = 0; i < markers.length; i++) {
 			if(markers[i].marker_id === marker_id) {
 				markers[i].setMap(null);
 			} else {
 				new_markers.push(markers[i]);
-				console.log(new_markers);
-
 			}
-			
 		}
 		markers = new_markers;
-		console.log(markers);
-
 	}
 
 	selectTool = (toolType) => {
@@ -527,9 +481,7 @@ export class Trip extends Component {
 
 	handleTextarea = (e) => {
 		let currTextarea = e.target.value;
-		console.log(currTextarea);
 		this.setState({currTextarea: currTextarea});
-		console.log(this.state.currTextarea);
 	}
 
 	// Deletes a specific marker in currMarkers array
@@ -542,8 +494,7 @@ export class Trip extends Component {
 			}
 		}
 		currMarkers = new_currMarkers;
-		console.log(currMarkers);
-		
+
 		let delete_marker = {
 			marker_id: marker_id
 		};
@@ -552,19 +503,16 @@ export class Trip extends Component {
 			if(result.err) {
 				alert(result.err);
 			} else {
-				console.log(result.message);
-
 				delete_marker.trip_id = this.state.trip_id;
+				
 				// socket emit deleting marker
 				socket.emit('deleteMarker', delete_marker);
 			}
 		});
-
 	}
 
 	// Edit a specific marker in currMarkers array
 	editMarkerContent = (marker_id) => {
-		console.log(marker_id);
 		let editBut = document.querySelector(`.submitBut${marker_id}`);
 		let infoTextarea = document.querySelector(`.infowindow_textarea${marker_id}`);
 		if(editBut.textContent === '編輯') {
@@ -577,20 +525,14 @@ export class Trip extends Component {
 			infoTextarea.readOnly = true;
 
 			for(let i = 0; i < currMarkers.length; i++) {
-				console.log(currMarkers[i].marker_id);
-				console.log(marker_id);
 				if(currMarkers[i].marker_id === marker_id) {
 					currMarkers[i].content = this.state.currTextarea;
-					console.log(this.state.currTextarea);
-					console.log(currMarkers[i]);
 				}
 			}
-	
 			let update_marker = {
 				marker_id: marker_id,
 				content: this.state.currTextarea
 			};
-	
 	
 			this.ajax('post', Server_ip+'/exe/trip/editmarker', update_marker, (req) => {
 				let result=JSON.parse(req.responseText);
@@ -598,18 +540,15 @@ export class Trip extends Component {
 					alert(result.err);
 				} else {
 					this.deleteMarkers(marker_id);
-					console.log(currMarkers);
 					this.setMarkersOnMap(currMarkers);
-	
 					update_marker.trip_id = this.state.trip_id;
+					
 					// socket emit updating marker
 					socket.emit('updateMarker', update_marker);
 				}
 			});
 		}
-
 	}
-
 
 	// Chat room
 	handleChatInput = (e) => {
@@ -623,7 +562,6 @@ export class Trip extends Component {
 		});
 		let chatInputValue = e.target.value;
 		this.setState({chatInputValue: chatInputValue});
-		console.log(chatInputValue);
 	}
 
 	onEnterPress = (e) => {
@@ -633,6 +571,7 @@ export class Trip extends Component {
 				return;	
 			}
 			e.preventDefault();
+
 			// this.myFormRef.submit();
 			let newMessage = this.state.chatInputValue.replace(/'/g, "''");
 			socket.emit('chat', {
@@ -654,8 +593,6 @@ export class Trip extends Component {
 				let result=JSON.parse(req.responseText);
 				if(result.err) {
 					alert(result.err);
-				} else {
-					console.log(result.done_message);
 				}
 			});
 		}
@@ -664,7 +601,6 @@ export class Trip extends Component {
 	scrollToBottom() {
 		this.messagesEnd.scrollIntoView({ behavior: 'auto' });
 	}
-
 
 	componentDidUpdate() {
 		this.scrollToBottom();
@@ -687,8 +623,6 @@ export class Trip extends Component {
 
 		let afterHashURL = location.hash;
 		let trip_id = parseInt(afterHashURL.split('=')[1]);
-		console.log(trip_id);
-		console.log(typeof trip_id);
 		let data = {
 			trip_id: trip_id
 		};
@@ -696,16 +630,13 @@ export class Trip extends Component {
 		// initialize this trip's info and markers
 		this.ajax('post', Server_ip+'/exe/trip/getTripData', data, (req) => {
 			let result=JSON.parse(req.responseText);
-			console.log(result);
 			if(result.err) {
 				alert(result.err);
 			} else if(result.notTripMember) {
 				window.location = '/';
 			} else {
-				console.log(result);
 				let date = new Date(result.trip_date);
 				let trip_date = date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate();
-				console.log(trip_date);
 
 				currMarkers = result.markers;
 				let initPos = result.trip_location;
@@ -731,11 +662,9 @@ export class Trip extends Component {
 		};
 		this.ajax('post', Server_ip+'/exe/trip/getchatlogs', chat_room_data, (req) => {
 			let result=JSON.parse(req.responseText);
-			console.log(result);
 			if(result.err) {
 				alert(result.err);
 			} else if(result.no_chat_log) {
-				console.log(result.no_chat_log);
 			}else {
 				this.setState({
 					chatBoxes: result.chat_logs
@@ -751,7 +680,6 @@ export class Trip extends Component {
 
 		// Listen for chat
 		socket.on(`chat${trip_id}`, (data) => {
-			console.log(data);
 			let temp_chatBoxes = this.state.chatBoxes;
 			let new_chat = {
 				who: data.currUser,
@@ -768,7 +696,6 @@ export class Trip extends Component {
 
 		// Listen for typing
 		socket.on(`typing${trip_id}`, (typingState) => {
-			console.log(typingState);
 			if(typingState.isTyping) {
 				this.setState({whoTyping: typingState.who});
 			} else {
@@ -778,46 +705,35 @@ export class Trip extends Component {
 
 		// Listen for adding marker
 		socket.on(`addMarker${trip_id}`, (newMarker) => {
-			console.log(newMarker);
-			let temp_chatBoxes = this.state.chatBoxes;
 			currMarkers.push(newMarker);
 			this.addMarker(newMarker.marker_id, newMarker.location, newMarker.content);
 		});
 
 		// Listen for updating marker content
 		socket.on(`updateMarker${trip_id}`, (update_marker) => {
-			console.log(update_marker);
 			for(let i = 0; i < currMarkers.length; i++) {
-				console.log(currMarkers[i].marker_id);
-				console.log(update_marker.marker_id);
 				if(currMarkers[i].marker_id === update_marker.marker_id) {
 					currMarkers[i].content = update_marker.content;
-					console.log(currMarkers[i]);
 				}
 			}
 			this.deleteMarkers(update_marker.marker_id);
-			console.log(currMarkers);
 			this.setMarkersOnMap(currMarkers);
 		});
 
 		// Listen for deleting marker
 		socket.on(`deleteMarker${trip_id}`, (delete_marker) => {
-			console.log(delete_marker);
 			let new_currMarkers = [];
 			for(let i = 0; i < currMarkers.length; i++) {
 				if(currMarkers[i].marker_id !== delete_marker.marker_id) {
 					new_currMarkers.push(currMarkers[i]);
 				}
 			}
-
 			this.deleteMarkers(delete_marker.marker_id);
 			currMarkers = new_currMarkers;
-			console.log(currMarkers);
 		});
 
 		// Listen for updating trip location
 		socket.on(`updateLocation${trip_id}`, (update_location) => {
-			console.log(update_location);
 			geocoder.geocode( { 'address': update_location.location}, (results, status) => {
 				if (status == 'OK') {
 					let	lat = results[0].geometry.location.lat();
@@ -901,12 +817,6 @@ export class Trip extends Component {
 								className={this.state.marker_icon_style} 
 								onClick={ () => this.selectTool('marker')} >
 							</div>
-							{/* <img 
-								className='compass_icon' 
-								src={compassIcon} 
-								alt={'circle tool'} 
-								onClick={ () => this.selectTool('delete')} 
-							/> */}
 						</div>
 						<div 
 							className='addMemberButton'
@@ -947,10 +857,6 @@ export class Trip extends Component {
 									onClick={() => this.closeAddMember()}>關閉</button>
 							</div>
 						</div>
-						{/* <button 
-							className='export_button'
-							type='button' 
-							onClick={() => this.exportFile()}>匯出</button> */}
 					</div>
 					<div className='trip_chat_room'>
 						<div className='chat_room_header'>
@@ -980,7 +886,6 @@ export class Trip extends Component {
 										);
 									}
 								})}
-
 								{ 
 									this.state.whoTyping ? 
 										<div className='who_typing'>{this.state.whoTyping}輸入中訊息中...</div> : 
@@ -1005,9 +910,7 @@ export class Trip extends Component {
 				</div>
 			</div>
 		);
-
 	}
-
 }
 
 Trip.propTypes = { 
@@ -1018,9 +921,7 @@ Trip.propTypes = {
 	google: PropTypes.any
 }; 
 
-
-// export default Trip;
+// export default Google Map API;
 export default GoogleApiWrapper({
 	apiKey: ('AIzaSyAOrwA13NUBURp_YygxsGwTPHyCs4dEoOs')
 })(Trip);
-

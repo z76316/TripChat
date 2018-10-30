@@ -1,8 +1,23 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const app = express(); // 產生 express application 物件
+const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// require DAO object
+const DAO = require('./dao.js');
+
+// mysql createConnection
+DAO.db;
+
+// console log err during connecting with mysql
+DAO.connect;
+
+// redis
+const redis = require('redis');
+const client = redis.createClient({
+	host: 'redis'
+});
 
 // session
 let session = require('express-session');
@@ -24,37 +39,13 @@ const socket = require('socket.io');
 // Utility
 const request = require("request");
 
-// mysql
-const mysql = require('mysql');
-const db = mysql.createConnection({
-	host: 'mysql',
-	port: 3306,
-	user: 'root',
-	password: 'ec2server',
-	database: 'TripChat',
-	insecureAuthL: true
-});
-
-db.connect(err => {
-	if(err) {
-		console.log(err);
-		return err;
-	}
-});
-
-// redis
-const redis = require('redis');
-const client = redis.createClient({
-	host: 'redis'
-});
-
 // App setup
 let port = 9000;
 let server = app.listen(port, function() {
 	console.log('Server is running on port', port);
 });
 
-// 路徑開頭若為 "/exe/" , server 端就允許這個 cross domain control 的行為
+// "/exe/": allow cross domain control
 // app.use("/exe/", function(req, res, next) {
 //     res.set("Access-Control-Allow-Origin", "*");
 //     res.set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");
@@ -83,24 +74,14 @@ app.get('/exe/checkloginstate', function (req, res) {
 			email: email,
 			isLogin: isLogin
 		});
-
-		// console.log(`id = ${account_id}, name = ${name}, email = ${email}, isLogin = ${isLogin}`);
-		// console.log(sess);
-
 	} else {
-		// signup then link to profile page
-		let checkAccount = 
-			`SELECT * FROM accounts
-			WHERE 
-			account_email = '${email}' AND
-			provider = '${provider}'`;
-		// console.log(checkAccount);
-		db.query(checkAccount, (err, account) => {
-			// console.log(account);
-			if(err) {
-				res.send( {err: 'Something went wrong during check your email and password input: ' + err} );
-			} else if(account.length === 0) {
-				res.send( {err: '帳號或密碼輸入錯誤。'} );
+		let input = {
+			email: email,
+			provider: provider
+		};
+		DAO.accounts.checkAccount('isAccountExist', input, (result) => {
+			if(result.err) {
+				res.send({err: result.err});
 			} else {
 				req.session.regenerate(function(err) {
 					if(err) {
@@ -108,131 +89,85 @@ app.get('/exe/checkloginstate', function (req, res) {
 						return;
 					}
 				});
-				req.session.account_id = account[0].account_id;
-				let account_id = account[0].account_id;
-				// console.log(req.session);
+				req.session.account_id = result.account[0].account_id;
+				let account_id = result.account[0].account_id;
+
 				res.send({
 					account_id: account_id,
 					name: name,
 					email: email,
 					isLogin: isLogin
 				});
-				
-				// console.log(`id = ${account_id}, name = ${name}, email = ${email}, isLogin = ${isLogin}`);
-				// console.log(sess);
-
 			}
 		});
 	}	
 });
 
 app.post('/exe/accounts/login', (req, res) => {
-	let sess = req.session;
 	let data = req.body;
 	if (!data.email || !data.password) {
 		res.send({ error: "Login Error: Wrong Data Format" });
 		return;
 	}
 
-	let email = data.email;
-	let password = data.password;
-	let provider = data.provider;
-	let checkAccount = 
-		`SELECT * FROM accounts
-		WHERE 
-		account_email = '${email}' AND
-		account_password = '${password}' AND
-		provider = '${provider}'`;
-	db.query(checkAccount, (err, account) => {
-		// console.log(account);
-		if(err) {
-			res.send( {err: 'Something went wrong during check your email and password input: ' + err} );
-		} else if(account.length === 0) {
-			res.send( {err: '帳號或密碼輸入錯誤。'} );
-		} else {
-			req.session.regenerate(function(err) {
-				if(err) {
-					res.send({err: 'Something went wrong during regenerate session: ' + err});
-					return;
-				}
-			});
-			req.session.account_id = account[0].account_id;
-			req.session.name = account[0].account_name;
-			req.session.email = account[0].account_email;
-			req.session.provider = account[0].provider;
-			req.session.isLogin = true;
-			// console.log(req.session);
-			res.send({
-				message: `${account[0].account_name}，歡迎回來!`
-			});
+	let input = {
+		email: data.email,
+		password: data.password,
+		provider: data.provider
+	};
+	DAO.accounts.checkAccount('login', input, (result) => {
+		if(result.err) {
+			res.send({err: result.err});
+			return;
 		}
+
+		req.session.regenerate(function(err) {
+			if(err) {
+				res.send({err: 'Something went wrong during regenerate session: ' + err});
+				return;
+			}
+		});
+		req.session.account_id = result.account[0].account_id;
+		req.session.name = result.account[0].account_name;
+		req.session.email = result.account[0].account_email;
+		req.session.provider = result.account[0].provider;
+		req.session.isLogin = true;
+		res.send({
+			message: `${result.account[0].account_name}，歡迎回來!`
+		});
 	});
 });
 
 app.post('/exe/accounts/signup', (req, res) => {
-	let sess = req.session;
 	let data = req.body;
 	if (!data.name || !data.email || !data.password) {
 		res.send({ error: "Signup Error: Wrong Data Format" });
 		return;
 	}
 
-	let name = data.name;
-	let email = data.email;
-	let password = data.password;
-	let provider = data.provider;
-	let isExistAccount = 
-		`SELECT * FROM accounts
-		WHERE account_email = '${email}'`;
-	let INSERT_INTO_accounts = 
-		`INSERT INTO accounts (account_name, account_email, account_password, create_date, provider) 
-		VALUES 
-		('${name}', '${email}', '${password}', CURDATE(), '${provider}')`;
-	
-	db.beginTransaction((err) => {
-		if(err) {
-			res.send({err: '系統忙碌中，請稍候再試。'});
-			console.log(err);
+	let input = {
+		name: data.name,
+		email: data.email,
+		password: data.password,
+		provider: data.provider
+	};	
+	DAO.accounts.signup(input, (result) => {
+		if(result.err) {
+			res.send({err: result.err});
+			return;
 		}
-		
-		db.query(isExistAccount, (err, account) => {
+		req.session.regenerate(function(err) {
 			if(err) {
-				res.send( {err: 'Something went wrong during check this email is exist: ' + err} );
-			} else if(account.length !== 0) {
-				res.send( {err: '此信箱已被註冊。'} );
-			} else {
-				db.query(INSERT_INTO_accounts, (err, results) => {
-					if(err) {
-						db.rollback(() => {
-							res.send({err: '系統忙碌中，請稍候再試。'});
-							console.log(err);
-						});
-					} else {
-						db.commit((err) => {
-							if(err) {
-								db.rollback(() => {
-									res.send({err: '系統忙碌中，請稍候再試。'});
-									console.log(err);
-								});
-							}
-							req.session.regenerate(function(err) {
-								if(err) {
-									res.send({err: 'Something went wrong during regenerate session: ' + err});
-									return;
-								}
-							});
-							req.session.name = name;
-							req.session.email = email;
-							req.session.provider = provider;
-							req.session.isLogin = true;
-							console.log(req.session);
-							res.send({message: '您已成功註冊帳戶!'});
-						});
-					}
-				});
+				res.send({err: 'Something went wrong during regenerate session: ' + err});
+				return;
 			}
 		});
-	});
+		req.session.name = data.name;
+		req.session.email = data.email;
+		req.session.provider = data.provider;
+		req.session.isLogin = true;
+		res.send({message: '您已成功註冊帳戶!'});
+	});	
 });
 
 app.get('/exe/logout', function(req, res) {
@@ -250,34 +185,37 @@ app.post('/exe/accounts/editname', (req, res) => {
 	let sess = req.session;
 	let account_id = sess.account_id;
 	let new_name = req.body.new_name;
-	let update_date = {
+	let update_data = {
 		account_name: new_name
 	};
-	let UpdateName = 
-		`UPDATE accounts 
-		SET ? WHERE account_id = ?`;
+
+	// send original account name back when input is empty
 	if(new_name.length < 1) {
 		res.send({name: sess.name});
 		return;
 	}
-	db.query(UpdateName, [update_date, account_id], (err, result) => {
-		console.log(result);
-		if(err) {
-			res.send( {err: 'Something went wrong during update profile name: ' + err} );
-		} else {
-			req.session.regenerate(function(err) {
-				if(err) {
-					res.send({err: 'Something went wrong during regenerate session: ' + err});
-					return;
-				}
-			});
-			req.session.name = new_name;
-			console.log(req.session);
-			res.send({
-				name: req.session.name
-			});
+
+	let input = {
+		update_data: update_data,
+		account_id: account_id
+	};
+	DAO.accounts.editName(input, (result) => {
+		if(result.err) {
+			res.send({err: result.err});
+			return;
 		}
+		req.session.regenerate(function(err) {
+			if(err) {
+				res.send({err: 'Something went wrong during regenerate session: ' + err});
+				return;
+			}
+		});
+		req.session.name = new_name;
+		res.send({
+			name: req.session.name
+		});
 	});
+
 });
 
 app.get('/exe/gettriplist', function(req,res) {
@@ -290,24 +228,17 @@ app.get('/exe/gettriplist', function(req,res) {
 		} else if (lists) {
 			let trip_list = JSON.parse(lists);
 			res.send(trip_list);
-			console.log('感恩 cache，讚嘆 cache!');
+			console.log('It is cache!');
 		} else {
-			let getTripList = 
-				`SELECT 
-				ta.account_id, ta.trip_id, t.trip_id, t.trip_title, t.trip_date, t.trip_location 
-				FROM 
-				trip_to_account ta, trips t
-				WHERE 
-				ta.trip_id = t.trip_id AND
-				account_id = '${account_id}'`; 
-			db.query(getTripList, (err, list) => {
-				if(err) {
-					res.send( {err: 'Something went wrong during join: ' + err} );
-				} else {
-					let trip_list = [];
-					for(let i = 0; i < list.length; i++) {
-						// console.log(list[i]);
-						trip_list.push(list[i]);
+			let input = {account_id: account_id};
+			DAO.trips.getTripList(input, (result) => {
+				if(result.err) {
+					res.send({err: result.err});
+					return;
+				}
+				let trip_list = [];
+					for(let i = 0; i < result.list.length; i++) {
+						trip_list.push(result.list[i]);
 					}
 					let trip_list_JSON = JSON.stringify(trip_list);
 					client.set(`trip_list${account_id}`, trip_list_JSON);
@@ -315,15 +246,12 @@ app.get('/exe/gettriplist', function(req,res) {
 						trip_list
 					);
 					console.log('database 少使用，多休息');
-				}
 			});
 		}
 	});
 });
 
 app.post('/exe/trip/gettripmember', function(req,res) {
-	let sess = req.session;
-	let account_id = sess.account_id;
 	let data = req.body;
 	let trip_id = data.trip_id;
 	client.get(`member_list${trip_id}`, (err, lists) => {
@@ -333,31 +261,24 @@ app.post('/exe/trip/gettripmember', function(req,res) {
 		} else if (lists) {
 			let member_list = JSON.parse(lists);
 			res.send(member_list);
-			console.log('感恩 cache，讚嘆 cache!');
+			console.log('It is cache!');
 		} else {
-			let getTripMember = 
-				`SELECT 
-				ta.trip_id, ta.account_id, a.account_id, a.account_email 
-				FROM 
-				trip_to_account ta, accounts a
-				WHERE
-				ta.account_id = a.account_id AND 
-				trip_id = '${trip_id}'`;
-			db.query(getTripMember, (err, list) => {
-				if(err) {
-					res.send( {err: 'Something went wrong during join: ' + err} );
-				} else {
-					let member_list = [];
-					for(let i = 0; i < list.length; i++) {
-						member_list.push(list[i]);
-					}
-					let member_list_JSON = JSON.stringify(member_list);
-					client.set(`member_list${trip_id}`, member_list_JSON);
-					res.send(
-						member_list
-					);
-					console.log('database 少使用，多休息');
+			let input = {trip_id: trip_id};
+			DAO.trips.getTripMember(input, (result) => {
+				if(result.err) {
+					res.send({err: result.err});
+					return;
 				}
+				let member_list = [];
+				for(let i = 0; i < result.list.length; i++) {
+					member_list.push(result.list[i]);
+				}
+				let member_list_JSON = JSON.stringify(member_list);
+				client.set(`member_list${trip_id}`, member_list_JSON);
+				res.send(
+					member_list
+				);
+				console.log('database 少使用，多休息');
 			});
 		}
 	});
@@ -370,64 +291,22 @@ app.post('/exe/createnewtrip', function(req,res) {
 	let trip_title = data.tripTitle;
 	let trip_date = data.tripDate;
 	let trip_location = data.tripLocation;
-	let CreateNewTrip = 
-		`INSERT INTO trips 
-		(trip_title, trip_date, trip_location) 
-		VALUES 
-		('${trip_title}', '${trip_date}', '${trip_location}')`;
-	
-	db.beginTransaction((err) => {
-		if(err) {
-			res.send({err: '系統忙碌中，請稍候再試。'});
-			console.log(err);
+	let input = {
+		account_id: account_id,
+		trip_title: trip_title,
+		trip_date: trip_date,
+		trip_location: trip_location
+	};
+	DAO.trips.createNewTrip(input, (result) => {
+		if(result.err) {
+			res.send({err: result.err});
+			return;
 		}
-		db.query(CreateNewTrip, (err, result) => {
-			if(err) {
-				res.send({err: 'Something went wrong during add this trip into database: ' + err});
-			} else {
-				let LastInsertID = 
-					`SELECT LAST_INSERT_ID()`;
-				db.query(LastInsertID, (err, result) => {
-					if(err) {
-						db.rollback(() => {
-							res.send({err: '系統忙碌中，請稍候再試。'});
-							console.log(err);
-						});
-					} else {
-						db.commit((err) => {
-							if(err) {
-								db.rollback(() => {
-									res.send({err: '系統忙碌中，請稍後再試。'});
-									console.log(err);
-								});
-							}
-							// console.log(result);
-							let new_trip_id = result[0]['LAST_INSERT_ID()'];
-							// console.log(new_trip_id);
-							res.send({new_trip_id: new_trip_id});
+		res.send(result);
 
-							// update => clear out trip_list${account_id} cache
-							client.del(`trip_list${account_id}`);
-							console.log('新增了 trip, 所以清空 trip_list${account_id} 的 cache');
-
-							let NewTripBridgeTable = 
-								`INSERT INTO trip_to_account 
-								(trip_id, account_id) 
-								VALUES 
-								('${new_trip_id}','${account_id}')`;
-							db.query(NewTripBridgeTable, (err, result) => {
-								if(err) {
-									console.log(err);
-								} else {
-									// console.log(result);
-								}
-							});
-						});
-					}
-				});
-			}
-		});
-		
+		// update => clear out trip_list${account_id} cache
+		client.del(`trip_list${account_id}`);
+		console.log('created a new trip then cleared out the cache of trip_list${account_id}');
 	});
 
 });
@@ -437,160 +316,100 @@ app.post('/exe/trip/getTripData', (req, res) => {
 	let account_id = sess.account_id;
 	let data = req.body;
 	let trip_id = data.trip_id;
-	let checkAuth =
-		`SELECT * FROM trip_to_account
-		WHERE trip_id = '${trip_id}'
-		AND account_id = '${account_id}'`;
-	db.query(checkAuth, (err, result) => {
-		if(err) {
-			res.send( {err: 'Something went wrong during check account authentication: ' + err} );
-		} else if(result.length === 0) {
-			res.send({notTripMember: true});
-		} else {
-			let SelectTrip = 
-				`SELECT * FROM trips
-				WHERE trip_id = '${trip_id}'`;
-
-			db.query(SelectTrip, (err, data) => {
-				if(err) {
-					res.send( {err: 'Something went wrong during get trip data: ' + err} );
-				} else {
-					let getMarkers = 
-						`SELECT * FROM markers
-						WHERE trip_id = '${trip_id}'`;
-					db.query(getMarkers, (err, markersData) => {
-						if(err) {
-							res.send( {err: 'Something went wrong during get markers: ' + err} );
-						} else {
-							let markers = [];
-							let marker;
-							for(let i = 0; i < markersData.length; i++) {
-								marker = {
-									marker_id: markersData[i].marker_id,
-									location: {
-										lat: markersData[i].lat,
-										lng: markersData[i].lng
-									},
-									content: markersData[i].content
-								};
-								markers.push(marker);
-							}
-							// console.log(markers);
-							let trip_title = data[0].trip_title;
-							let trip_date = data[0].trip_date;
-							let trip_location = data[0].trip_location;
-							res.send({
-								trip_title: trip_title,
-								trip_date: trip_date,
-								trip_location: trip_location,
-								markers: markers
-							});
-						}
-					});
-				}
-			});
+	let input = {
+		account_id: account_id,
+		trip_id: trip_id
+	};
+	DAO.trips.getTripData(input, (result) => {
+		if(result.err) {
+			res.send({err: result.err});
+			return;
+		} else if(result.notTripMember) {
+			res.send({notTripMember: result.notTripMember});
+			return;
 		}
+		let markers = [];
+		let marker;
+		for(let i = 0; i < result.markersData.length; i++) {
+			marker = {
+				marker_id: result.markersData[i].marker_id,
+				location: {
+					lat: result.markersData[i].lat,
+					lng: result.markersData[i].lng
+				},
+				content: result.markersData[i].content
+			};
+			markers.push(marker);
+		}
+		res.send({
+			trip_title: result.data[0].trip_title,
+			trip_date: result.data[0].trip_date,
+			trip_location: result.data[0].trip_location,
+			markers: markers
+		});
 	});
 });
 
 app.post('/exe/trip/addmarker', (req, res) => {
-	let sess = req.session;
-	let account_id = sess.account_id;
 	let data = req.body;
 	let trip_id = data.trip_id;
 	let lat = data.lat;
 	let lng = data.lng;
 	let content = data.content;
-	let addMarker = 
-		`INSERT INTO markers (trip_id, lat, lng, content) 
-		VALUES 
-		('${trip_id}', '${lat}', '${lng}', '${content}')`;
-
-	db.beginTransaction((err) => {
-		if(err) {
-			res.send({err: '系統忙碌中，請稍候再試。'});
-			console.log(err);
+	let input = {
+		trip_id: trip_id,
+		lat: lat,
+		lng: lng,
+		content: content
+	};
+	DAO.trips.addMarker(input, (result) => {
+		if(result.err) {
+			res.send({err: result.err});
+			return;
 		}
-		db.query(addMarker, (err, done) => {
-			if(err) {
-				res.send( {err: 'Something went wrong during add marker into db: ' + err} );
-			} else {
-				let LastInsertID = 
-					`SELECT LAST_INSERT_ID()`;
-				db.query(LastInsertID, (err, result) => {
-					if(err) {
-						db.rollback(() => {
-							res.send({err: '系統忙碌中，請稍候再試。'});
-							console.log(err);
-						});
-					} else {
-						db.commit((err) => {
-							if(err) {
-								res.send({err: '系統忙碌中，請稍候再試。'});
-								console.log(err);
-							}
-							// console.log(result);
-							let marker_id = result[0]['LAST_INSERT_ID()'];
-							// console.log(marker_id);
-							res.send({
-								marker_id: marker_id,
-								location: {
-									lat: lat,
-									lng: lng
-								},
-								content: content
-							});
-						});
-					}
-				});
-			}
+		res.send({
+			marker_id: result.marker_id,
+			location: {
+				lat: lat,
+				lng: lng
+			},
+			content: content
 		});
 	});
 });
 
 app.post('/exe/trip/editmarker', (req, res) => {
-	let sess = req.session;
-	let account_id = sess.account_id;
 	let data = req.body;
 	let marker_id = data.marker_id;
 	let content = data.content;
-	let update_date = {
+	let update_data = {
 		content: content
 	};
-	let UpdateMarker = 
-		`UPDATE markers 
-		SET ? WHERE marker_id = ?`;
-	db.query(UpdateMarker, [update_date, marker_id], (err, result) => {
-		// console.log('有 marker 的內容更新了');
-		// console.log(result);
-		if(err) {
-			res.send( {err: 'Something went wrong during update marker content: ' + err} );
-		} else {
-			res.send({
-				message: `Content of the marker id = ${marker_id} is updated.`
-			});
+	let input = {
+		marker_id: marker_id,
+		update_data: update_data
+	};
+	DAO.trips.editMarker(input, (result) => {
+		if(result.err) {
+			res.send({err: result.err});
+			return;
 		}
+		res.send({
+			message: `Content of the marker id = ${marker_id} is updated.`
+		});
 	});
 });
 
 app.post('/exe/trip/deletemarker', (req, res) => {
-	let sess = req.session;
-	let account_id = sess.account_id;
 	let data = req.body;
 	let marker_id = data.marker_id;
-	let DeleteMarker = 
-		`DELETE FROM markers
-		WHERE marker_id = ${marker_id}`;
-	db.query(DeleteMarker, (err, result) => {
-		// console.log('有 marker 被刪除了');
-		// console.log(result);
-		if(err) {
-			res.send( {err: 'Something went wrong during delete marker: ' + err} );
-		} else {
-			res.send({
-				message: `刪除成功。`
-			});
+	let input = {marker_id: marker_id};
+	DAO.trips.deleteMarker(input, (result) => {
+		if(result.err) {
+			res.send({err: result.err});
+			return;
 		}
+		res.send({message: `刪除成功。`});
 	});
 });
 
@@ -601,29 +420,31 @@ app.post('/exe/trip/edittitle', (req, res) => {
 	let trip_id = data.trip_id;
 	let new_title = data.new_title;
 	let old_title = data.old_title;
-	let update_data = {
-		trip_title: new_title
-	};
-	let UpdateTitle = 
-		`UPDATE trips 
-		SET ? WHERE trip_id = ?`;
+
 	if(new_title.length < 1) {
 		res.send({title: old_title});
 		return;
 	}
-	db.query(UpdateTitle, [update_data, trip_id], (err, result) => {
-		// console.log(result);
-		if(err) {
-			res.send( {err: 'Something went wrong during update trip title: ' + err} );
-		} else {
-			res.send({
-				title: new_title
-			});
-
-			// update => clear out trip_list${account_id} cache
-			client.del(`trip_list${account_id}`);
-			console.log('新增了 trip, 所以清空 trip_list${account_id} 的 cache');
+	
+	let update_data = {
+		trip_title: new_title
+	};
+	let input = {
+		trip_id: trip_id,
+		update_data: update_data
+	};
+	DAO.trips.editTripInfo(input, (result) => {
+		if(result.err) {
+			res.send({err: result.err});
+			return;
 		}
+		res.send({
+			title: new_title
+		});
+
+		// update => clear out trip_list${account_id} cache
+		client.del(`trip_list${account_id}`);
+		console.log('新增了 trip, 所以清空 trip_list${account_id} 的 cache');
 	});
 });
 
@@ -634,29 +455,31 @@ app.post('/exe/trip/editdate', (req, res) => {
 	let trip_id = data.trip_id;
 	let new_date = data.new_date;
 	let old_date = data.old_date;
-	let update_data = {
-		trip_date: new_date
-	};
-	let UpdateDate = 
-		`UPDATE trips 
-		SET ? WHERE trip_id = ?`;
+	
 	if(new_date.length < 1) {
 		res.send({date: old_date});
 		return;
 	}
-	db.query(UpdateDate, [update_data, trip_id], (err, result) => {
-		// console.log(result);
-		if(err) {
-			res.send( {err: 'Something went wrong during update trip date: ' + err} );
-		} else {
-			res.send({
-				date: new_date
-			});
 
-			// update => clear out trip_list${account_id} cache
-			client.del(`trip_list${account_id}`);
-			console.log('新增了 trip, 所以清空 trip_list${account_id} 的 cache');
+	let update_data = {
+		trip_date: new_date
+	};
+	let input = {
+		trip_id: trip_id,
+		update_data: update_data
+	};
+	DAO.trips.editTripInfo(input, (result) => {
+		if(result.err) {
+			res.send({err: result.err});
+			return;
 		}
+		res.send({
+			date: new_date
+		});
+
+		// update => clear out trip_list${account_id} cache
+		client.del(`trip_list${account_id}`);
+		console.log('新增了 trip, 所以清空 trip_list${account_id} 的 cache');
 	});
 });
 
@@ -667,184 +490,122 @@ app.post('/exe/trip/editlocation', (req, res) => {
 	let trip_id = data.trip_id;
 	let new_location = data.new_location;
 	let old_location = data.old_location;
-	let update_data = {
-		trip_location: new_location
-	};
-	let UpdateLocation = 
-		`UPDATE trips 
-		SET ? WHERE trip_id = ?`;
+
 	if(new_location.length < 1) {
 		res.send({location: old_location});
 		return;
 	}
-	db.query(UpdateLocation, [update_data, trip_id], (err, result) => {
-		// console.log(result);
-		if(err) {
-			res.send( {err: 'Something went wrong during update trip location: ' + err} );
-		} else {
-			res.send({
-				location: new_location
-			});
 
-			// update => clear out trip_list${account_id} cache
-			client.del(`trip_list${account_id}`);
-			console.log('新增了 trip, 所以清空 trip_list${account_id} 的 cache');
+	let update_data = {
+		trip_location: new_location
+	};
+	let input = {
+		trip_id: trip_id,
+		update_data: update_data
+	};
+	DAO.trips.editTripInfo(input, (result) => {
+		if(result.err) {
+			res.send({err: result.err});
+			return;
 		}
+		res.send({
+			location: new_location
+		});
+
+		// update => clear out trip_list${account_id} cache
+		client.del(`trip_list${account_id}`);
+		console.log('新增了 trip, 所以清空 trip_list${account_id} 的 cache');
 	});
 });
 
 app.post('/exe/trip/addnewmember', (req, res) => {
-	let sess = req.session;
 	let data = req.body;
 	let trip_id = data.trip_id;
 	let member_email = data.member_email;
-
-	let checkMember = 
-		`SELECT * FROM accounts
-		WHERE 
-		account_email = '${member_email}'`;
-			
-	db.beginTransaction((err) => {
-		if(err) {
-			res.send({err: '系統忙碌中，請稍候再試。'});
-			console.log(err);
+	
+	let input = {
+		trip_id: trip_id,
+		member_email: member_email
+	};
+	DAO.trips.addNewMember(input, (result) => {
+		if(result.err) {
+			res.send({err: result.err});
+			return;
 		}
-		db.query(checkMember, (err, account) => {
-			if(err) {
-				res.send( {err: 'Something went wrong during check member email: ' + err} );
-			} else if(account.length === 0) {
-				res.send( {err: '無此使用者。'} );
-			} else {
-				// console.log(account[0].account_id);
-				// console.log(account[0].account_name);
-				let member_id = account[0].account_id;
-				let member_name = account[0].account_name;
-
-				let NewTripBridgeTable = 
-					`INSERT INTO trip_to_account 
-					(trip_id, account_id) 
-					VALUES 
-					('${trip_id}','${member_id}')`;
-				db.query(NewTripBridgeTable, (err, result) => {
-					if(err) {
-						db.rollback(() => {
-							res.send({err: '系統忙碌中，請稍候再試。'});
-							console.log(err);
-						});
-					} else {
-						// console.log(result);
-						db.commit((err) => {
-							if(err) {
-								res.send({err: '系統忙碌中，請稍候再試。'});
-								console.log(err);
-							}
-							res.send({
-								message: `${member_name}(${member_email}) 已成為旅程夥伴。`
-							});
-						});
-
-						// update => clear out member_list${trip_id} cache
-						client.del(`member_list${trip_id}`);
-						console.log('新增了 trip, 所以清空 member_list${trip_id} 的 cache');
-
-						// update => clear out trip_list${account_id} cache
-						client.del(`trip_list${member_id}`);
-						console.log('新增了 trip, 所以清空 trip_list${account_id} 的 cache');
-					}
-				});
-			}
+		res.send({
+			message: `${result.member_name}(${member_email}) 已成為旅程夥伴。`
 		});
-	});		
+		// update => clear out member_list${trip_id} cache
+		client.del(`member_list${trip_id}`);
+		console.log('新增了 member, 所以清空 member_list${trip_id} 的 cache');
+	
+		// update => clear out trip_list${account_id} cache
+		client.del(`trip_list${result.member_id}`);
+		console.log('新增了 member, 所以清空 trip_list${account_id} 的 cache');
+	});
+
 });
 
 
 // Save messages into SQL
 app.post('/exe/trip/savemessage', (req, res) => {
-	let sess = req.session;
-	let account_id = sess.account_id;
 	let data = req.body;
 	let trip_id = data.trip_id;
 	let show_name = data.show_name;
 	let account_email = data.account_email;
 	let message = data.message;
-	let saveMessage = 
-		`INSERT INTO messages (trip_id, show_name, account_email, message) 
-		VALUES 
-		('${trip_id}', '${show_name}', '${account_email}', '${message}')`;
-
-	db.beginTransaction((err) => {
-		if(err) {
-			res.send({err: '系統忙碌中，請稍候再試。'})
-			console.log(err);
+	
+	let input = {
+		trip_id: trip_id,
+		show_name: show_name,
+		account_email: account_email,
+		message: message
+	};
+	DAO.trips.saveMessage(input, (result) => {
+		if(result.err) {
+			res.send({err: result.err});
+			return;
 		}
-		db.query(saveMessage, (err, done) => {
-			if(err) {
-				res.send( {err: 'Something went wrong during save message into db: ' + err} );
-			} else {
-				let LastInsertID = 
-					`SELECT LAST_INSERT_ID()`;
-				db.query(LastInsertID, (err, result) => {
-					if(err) {
-						db.rollback(() => {
-							res.send({err: '系統忙碌中，請稍候再試。'});
-							console.log(err);
-						});
-					} else {
-						db.commit((err) => {
-							if(err) {
-								res.send({err: '系統忙碌中，請稍候再試。'});
-								console.log(err);
-							}
-							// console.log(result);
-							let message_id = result[0]['LAST_INSERT_ID()'];
-							// console.log(message_id);
-							res.send({
-								message_id: message_id,
-								done_message: '訊息已儲存。'
-							});
-						});
-					}
-				});
-			}
+		res.send({
+			message_id: result.message_id,
+			done_message: '訊息已儲存。'
 		});
 	});
 });
 
 // Get chat logs
 app.post('/exe/trip/getchatlogs', (req, res) => {
-	let sess = req.session;
-	let account_id = sess.account_id;
 	let data = req.body;
 	let trip_id = data.trip_id;
-	// console.log('trip_id!!!!!!!!!!!!!!!!!!! '+trip_id);
-	let getChatLogs =
-		`SELECT * FROM messages
-		WHERE trip_id = '${trip_id}'`;
-	db.query(getChatLogs, (err, result) => {
-		// console.log(result);
-		if(err) {
-			res.send( {err: 'Something went wrong during get chat logs: ' + err} );
-		} else if(result.length === 0) {
-			res.send({no_chat_log: '尚無聊天記錄哦。'});
-		}else {
-			let message;
-			let chat_logs = [];
-			for(let i = 0; i < result.length; i++) {
-				message = {
-					who: result[i].show_name,
-					email: result[i].account_email,
-					content: result[i].message
-				};
-				chat_logs.push(message);
-			}
-			res.send({
-				chat_logs: chat_logs
-			});
+
+	let input = {trip_id: trip_id};
+	DAO.trips.getChatLogs(input, (result) => {
+		if(result.err) {
+			res.send({err: result.err});
+			return;
+		} else if(result.no_chat_log) {
+			res.send({no_chat_log: result.no_chat_log});
+			return;
 		}
+		let message;
+		let chat_logs = [];
+		for(let i = 0; i < result.messages.length; i++) {
+			message = {
+				who: result.messages[i].show_name,
+				email: result.messages[i].account_email,
+				content: result.messages[i].message
+			};
+			chat_logs.push(message);
+		}
+		res.send({
+			chat_logs: chat_logs
+		});
 	});
 });
 
+// for unit tests of APIs
 module.exports = app;
+
 
 // Socket setup
 let io = socket(server);
