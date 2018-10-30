@@ -55,14 +55,6 @@ class Main extends Component {
 		}
 	};
 
-	loginWithFB = (e) => {
-
-	}
-
-	loginWithGo = (e) => {
-
-	}
-
 	changeToSignup = () => {
 		this.setState({
 			loginOrSignup: 'signup',
@@ -95,8 +87,7 @@ class Main extends Component {
 	}
 
 	submitLogin = () => {
-		console.log(this.state.loginOrSignup);
-		
+		// regular expressions of email
 		let emailRule = /^\w+\@[A-Za-z0-9]+\.[A-Za-z]+$/;
 
 		if(this.state.loginOrSignup === 'signup') {
@@ -121,7 +112,6 @@ class Main extends Component {
 						alert(result.err);
 					} else {
 						alert(result.message);
-						// this.props.handleIsLogin(true);
 						this.setState({isLogin: true});
 					}
 				});
@@ -141,7 +131,6 @@ class Main extends Component {
 					password: this.state.inputPassword,
 					provider: 'email'
 				};
-				console.log(login_data);
 				this.ajax('post', Server_ip+'/exe/accounts/login', login_data, (req) => {
 					let result=JSON.parse(req.responseText);
 					if(result.err) {
@@ -189,14 +178,6 @@ class Main extends Component {
 							<div className="title">TripChat</div>
 						</div>
 						<div className="subtitle">編輯地圖，規劃旅途</div>
-						{/* <button 
-							className='fb_login_button'
-							type='button' 
-							onClick={() => this.loginWithFB()}>使用 Facebook 登入</button>
-						<button 
-							className='go_login_button'
-							type='button' 
-							onClick={() => this.loginWithGo()}>使用 Google 登入</button> */}
 						<div className='login_tab_container'>
 							<span 
 								className={this.state.login_tab_style}
@@ -247,11 +228,7 @@ class Main extends Component {
 					changeLoginState={this.changeLoginState}/>
 			);
 		}
-
-
-		
 	}
-
 }
 
 export default Main;

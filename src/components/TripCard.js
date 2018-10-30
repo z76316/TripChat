@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { BrowserRouter, Link, Switch, Route } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 // import CSS
@@ -8,24 +8,12 @@ import '../css/app.css';
 import '../css/header.css';
 import '../css/main_profile.css';
 
-// import photo
-
-// import ReactDOM
-
-// Server ip
-import Server_ip from '../server_ip';
-
 class TripCard extends Component {
 
 	constructor(props) {
 		super(props);
 		this.state = {
-
 		};
-	}
-
-	componentDidMount() {
-        
 	}
 
 	render() {

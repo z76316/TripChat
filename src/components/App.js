@@ -15,9 +15,7 @@ class App extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			
 		};
-
 	}
 
 	render() {
@@ -34,7 +32,6 @@ class App extends Component {
 			</div>
 		);
 	}
-
 }
 
 export default App;
