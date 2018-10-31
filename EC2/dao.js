@@ -437,7 +437,7 @@ dao.trips.addNewMember = (input, callback) => {
 dao.trips.saveMessage = (input, callback) => {
     let result;
     let saveMessage = 
-		`INSERT INTO messages (trip_id, show_name, account_email, message) 
+		`INSERT INTO messages (trip_id_FK, show_name, account_email, message) 
 		VALUES 
         ('${input.trip_id}', '${input.show_name}', '${input.account_email}', '${input.message}')`;
     let lastInsertID = 
@@ -484,7 +484,7 @@ dao.trips.getChatLogs = (input, callback) => {
     let result;
     let getChatLogs =
 		`SELECT * FROM messages
-		WHERE trip_id = '${input.trip_id}'`;
+		WHERE trip_id_FK = '${input.trip_id}'`;
 	dao.db.query(getChatLogs, (err, messages) => {
 		// console.log(result);
 		if(err) {
