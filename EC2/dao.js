@@ -246,7 +246,7 @@ DAO.trips.getTripData = (input, callback) => {
         WHERE trip_id = '${input.trip_id}'`;
     let getMarkers = 
         `SELECT * FROM markers
-        WHERE trip_id = '${input.trip_id}'`;
+        WHERE trip_id_FK = '${input.trip_id}'`;
 	DAO.db.query(checkAuth, (err, results) => {
 		if(err) {
             result = {err: 'Something went wrong during check account authentication: ' + err};
@@ -282,7 +282,7 @@ DAO.trips.getTripData = (input, callback) => {
 DAO.trips.addMarker = (input, callback) => {
     let result;
     let addMarker = 
-		`INSERT INTO markers (trip_id, lat, lng, content) 
+		`INSERT INTO markers (trip_id_FK, lat, lng, content) 
 		VALUES 
 		('${input.trip_id}', '${input.lat}', '${input.lng}', '${input.content}')`;
     let lastInsertID = 
