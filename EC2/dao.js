@@ -1,12 +1,12 @@
 // Data Access Object
-const DAO = {
+const dao = {
     accounts: {},
     trips: {}
 };
 
 // connect with MySQL
-DAO.mysql = require('mysql');
-DAO.db = DAO.mysql.createConnection({
+dao.mysql = require('mysql');
+dao.db = dao.mysql.createConnection({
     // host: 'localhost',
     host: 'mysql',
     port: 3306,
@@ -17,14 +17,14 @@ DAO.db = DAO.mysql.createConnection({
 });
 
 // console log err during connecting with MySQL
-DAO.connect = DAO.db.connect(err => {
+dao.connect = dao.db.connect(err => {
 	if(err) {
 		console.log(err);
 	}
 });
 
 // checking is the email account exist
-DAO.accounts.checkAccount = (scenario, input, callback) => {
+dao.accounts.checkAccount = (scenario, input, callback) => {
     console.log(scenario);
     // signup then link to profile page
     let result, mysqlQuery;
@@ -42,7 +42,7 @@ DAO.accounts.checkAccount = (scenario, input, callback) => {
             account_password = '${input.password}' AND
             provider = '${input.provider}'`;
     }
-    DAO.db.query(mysqlQuery, (err, account) => {
+    dao.db.query(mysqlQuery, (err, account) => {
         if(err) {
             result = {err: 'Something went wrong during check your email and password input: ' + err};
             callback(result);
@@ -57,7 +57,7 @@ DAO.accounts.checkAccount = (scenario, input, callback) => {
 };
 
 // create a account and response with login state
-DAO.accounts.signup = (input, callback) => {
+dao.accounts.signup = (input, callback) => {
     let result;
     let isExistAccount = 
         `SELECT * FROM accounts
@@ -67,14 +67,14 @@ DAO.accounts.signup = (input, callback) => {
         VALUES 
         ('${input.name}', '${input.email}', '${input.password}', CURDATE(), '${input.provider}')`;
 
-    DAO.db.beginTransaction((err) => {
+    dao.db.beginTransaction((err) => {
         if(err) {
             result = {err: '系統忙碌中，請稍候再試。'};
             callback(result);
             console.log(err);
             return;
         }
-        DAO.db.query(isExistAccount, (err, account) => {
+        dao.db.query(isExistAccount, (err, account) => {
             if(err) {
                 result = {err: 'Something went wrong during check this email is exist: ' + err};
                 callback(result);
@@ -82,17 +82,17 @@ DAO.accounts.signup = (input, callback) => {
                 result =  {err: '此信箱已被註冊。'};
                 callback(result);
             } else {
-                DAO.db.query(INSERT_INTO_accounts, (err, results) => {
+                dao.db.query(INSERT_INTO_accounts, (err, results) => {
                     if(err) {
-                        DAO.db.rollback(() => {
+                        dao.db.rollback(() => {
                             result = {err: '系統忙碌中，請稍候再試。'};
                             callback(result);
                             console.log(err);
                         });
                     } else {
-                        DAO.db.commit((err) => {
+                        dao.db.commit((err) => {
                             if(err) {
-                                DAO.db.rollback(() => {
+                                dao.db.rollback(() => {
                                     result = {err: '系統忙碌中，請稍候再試。'};
                                     callback(result);
                                     console.log(err);
@@ -110,13 +110,13 @@ DAO.accounts.signup = (input, callback) => {
 };
 
 // update account's user name
-DAO.accounts.editName = (input, callback) => {
+dao.accounts.editName = (input, callback) => {
     let result;
     let mysqlQuery = 
 		`UPDATE accounts 
 		SET ? WHERE account_id = ?`;
 	
-	DAO.db.query(mysqlQuery, [input.update_data, input.account_id], (err, results) => {
+	dao.db.query(mysqlQuery, [input.update_data, input.account_id], (err, results) => {
 		if(err) {
             result =  {err: 'Something went wrong during update profile name: ' + err};
             callback(result);
@@ -127,7 +127,7 @@ DAO.accounts.editName = (input, callback) => {
 };
 
 // get user's trip lists
-DAO.trips.getTripList = (input, callback) => {
+dao.trips.getTripList = (input, callback) => {
     let result;
     let mysqlQuery = 
         `SELECT 
@@ -137,7 +137,7 @@ DAO.trips.getTripList = (input, callback) => {
         WHERE 
         ta.trip_id = t.trip_id AND
         account_id = '${input.account_id}'`; 
-    DAO.db.query(mysqlQuery, (err, list) => {
+    dao.db.query(mysqlQuery, (err, list) => {
         if(err) {
             result = {err: 'Something went wrong during join: ' + err};
             callback(result);
@@ -149,7 +149,7 @@ DAO.trips.getTripList = (input, callback) => {
 };
 
 // get a trip's member list
-DAO.trips.getTripMember = (input, callback) => {
+dao.trips.getTripMember = (input, callback) => {
     let result;
     let mysqlQuery = 
         `SELECT 
@@ -159,7 +159,7 @@ DAO.trips.getTripMember = (input, callback) => {
         WHERE
         ta.account_id = a.account_id AND 
         trip_id = '${input.trip_id}'`;
-    DAO.db.query(mysqlQuery, (err, list) => {
+    dao.db.query(mysqlQuery, (err, list) => {
         if(err) {
             result = {err: 'Something went wrong during join: ' + err};
             callback(result);
@@ -172,7 +172,7 @@ DAO.trips.getTripMember = (input, callback) => {
 };
 
 // insert a new trip into MySQL
-DAO.trips.createNewTrip = (input, callback) => {
+dao.trips.createNewTrip = (input, callback) => {
     let result;
     let createNewTrip = 
         `INSERT INTO trips 
@@ -181,29 +181,29 @@ DAO.trips.createNewTrip = (input, callback) => {
         ('${input.trip_title}', '${input.trip_date}', '${input.trip_location}')`;
     let lastInsertID = 
         `SELECT LAST_INSERT_ID()`;
-    DAO.db.beginTransaction((err) => {
+    dao.db.beginTransaction((err) => {
         if(err) {
             result = {err: '系統忙碌中，請稍候再試。'};
             callback(result);
             console.log(err);
             return;
         }
-        DAO.db.query(createNewTrip, (err, results) => {
+        dao.db.query(createNewTrip, (err, results) => {
             if(err) {
                 result = {err: 'Something went wrong during add this trip into database: ' + err};
                 callback(result);
             } else {
-                DAO.db.query(lastInsertID, (err, newTrip) => {
+                dao.db.query(lastInsertID, (err, newTrip) => {
                     if(err) {
-                        DAO.db.rollback(() => {
+                        dao.db.rollback(() => {
                             result = {err: '系統忙碌中，請稍候再試。'};
                             callback(result);
                             console.log(err);
                         });
                     } else {
-                        DAO.db.commit((err) => {
+                        dao.db.commit((err) => {
                             if(err) {
-                                DAO.db.rollback(() => {
+                                dao.db.rollback(() => {
                                     result = {err: '系統忙碌中，請稍後再試。'};
                                     callback(result);
                                     console.log(err);
@@ -219,7 +219,7 @@ DAO.trips.createNewTrip = (input, callback) => {
                                 (trip_id, account_id) 
                                 VALUES 
                                 ('${new_trip_id}','${input.account_id}')`;
-                            DAO.db.query(newTripBridgeTable, (err, resultMessage) => {
+                            dao.db.query(newTripBridgeTable, (err, resultMessage) => {
                                 if(err) {
                                     console.log(err);
                                 } else {
@@ -235,7 +235,7 @@ DAO.trips.createNewTrip = (input, callback) => {
 };
 
 // get a trip's information and all markers on map
-DAO.trips.getTripData = (input, callback) => {
+dao.trips.getTripData = (input, callback) => {
     let result;
     let checkAuth =
 		`SELECT * FROM trip_to_account
@@ -246,8 +246,8 @@ DAO.trips.getTripData = (input, callback) => {
         WHERE trip_id = '${input.trip_id}'`;
     let getMarkers = 
         `SELECT * FROM markers
-        WHERE trip_id = '${input.trip_id}'`;
-	DAO.db.query(checkAuth, (err, results) => {
+        WHERE trip_id_FK = '${input.trip_id}'`;
+	dao.db.query(checkAuth, (err, results) => {
 		if(err) {
             result = {err: 'Something went wrong during check account authentication: ' + err};
             callback(result);
@@ -255,12 +255,12 @@ DAO.trips.getTripData = (input, callback) => {
             result = {notTripMember: true};
             callback(result);
 		} else {
-			DAO.db.query(selectTrip, (err, data) => {
+			dao.db.query(selectTrip, (err, data) => {
 				if(err) {
                     result = {err: 'Something went wrong during get trip data: ' + err};
                     callback(result);
 				} else {
-					DAO.db.query(getMarkers, (err, markersData) => {
+					dao.db.query(getMarkers, (err, markersData) => {
 						if(err) {
                             result = {err: 'Something went wrong during get markers: ' + err};
                             callback(result);
@@ -279,35 +279,35 @@ DAO.trips.getTripData = (input, callback) => {
 };
 
 // insert a new marker's data
-DAO.trips.addMarker = (input, callback) => {
+dao.trips.addMarker = (input, callback) => {
     let result;
     let addMarker = 
-		`INSERT INTO markers (trip_id, lat, lng, content) 
+		`INSERT INTO markers (trip_id_FK, lat, lng, content) 
 		VALUES 
 		('${input.trip_id}', '${input.lat}', '${input.lng}', '${input.content}')`;
     let lastInsertID = 
         `SELECT LAST_INSERT_ID()`;
-	DAO.db.beginTransaction((err) => {
+	dao.db.beginTransaction((err) => {
 		if(err) {
             result = {err: '系統忙碌中，請稍候再試。'};
             callback(result);
             console.log(err);
             return;
 		}
-		DAO.db.query(addMarker, (err, done) => {
+		dao.db.query(addMarker, (err, done) => {
 			if(err) {
                 result = {err: 'Something went wrong during add marker into db: ' + err};
                 callback(result);
 			} else {	
-				DAO.db.query(lastInsertID, (err, marker) => {
+				dao.db.query(lastInsertID, (err, marker) => {
 					if(err) {
-						DAO.db.rollback(() => {
+						dao.db.rollback(() => {
                             result = {err: '系統忙碌中，請稍候再試。'};
                             callback(result);
 							console.log(err);
 						});
 					} else {
-						DAO.db.commit((err) => {
+						dao.db.commit((err) => {
 							if(err) {
                                 result = {err: '系統忙碌中，請稍候再試。'};
                                 callback(result);
@@ -325,12 +325,12 @@ DAO.trips.addMarker = (input, callback) => {
 };
 
 // update a marker's content
-DAO.trips.editMarker = (input, callback) => {
+dao.trips.editMarker = (input, callback) => {
     let result;
     let updateMarker = 
 		`UPDATE markers 
 		SET ? WHERE marker_id = ?`;
-	DAO.db.query(updateMarker, [input.update_data, input.marker_id], (err, results) => {
+	dao.db.query(updateMarker, [input.update_data, input.marker_id], (err, results) => {
 		if(err) {
             result = {err: 'Something went wrong during update marker content: ' + err};
             callback(result);
@@ -342,12 +342,12 @@ DAO.trips.editMarker = (input, callback) => {
 };
 
 // delete a marker
-DAO.trips.deleteMarker = (input, callback) => {
+dao.trips.deleteMarker = (input, callback) => {
     let result;
     let deleteMarker = 
 		`DELETE FROM markers
 		WHERE marker_id = ${input.marker_id}`;
-	DAO.db.query(deleteMarker, (err, results) => {
+	dao.db.query(deleteMarker, (err, results) => {
 		if(err) {
             result = {err: 'Something went wrong during delete marker: ' + err};
             callback(result);
@@ -359,12 +359,12 @@ DAO.trips.deleteMarker = (input, callback) => {
 };
 
 // update a title, date or location of a trip
-DAO.trips.editTripInfo = (input, callback) => {
+dao.trips.editTripInfo = (input, callback) => {
     let result;
     let mysqlQuery = 
         `UPDATE trips 
         SET ? WHERE trip_id = ?`;
-    DAO.db.query(mysqlQuery, [input.update_data, input.trip_id], (err, results) => {
+    dao.db.query(mysqlQuery, [input.update_data, input.trip_id], (err, results) => {
         if(err) {
             result = {err: 'Something went wrong during update trip title: ' + err};
             callback(result);
@@ -376,20 +376,20 @@ DAO.trips.editTripInfo = (input, callback) => {
 };
 
 // let a user be one of a trip's members 
-DAO.trips.addNewMember = (input, callback) => {
+dao.trips.addNewMember = (input, callback) => {
     let result;
     let checkMember = 
 		`SELECT * FROM accounts
 		WHERE 
         account_email = '${input.member_email}'`;
-    DAO.db.beginTransaction((err) => {
+    dao.db.beginTransaction((err) => {
         if(err) {
             result = {err: '系統忙碌中，請稍候再試。'};
             callback(result);
             console.log(err);
             return;
         }
-        DAO.db.query(checkMember, (err, account) => {
+        dao.db.query(checkMember, (err, account) => {
             if(err) {
                 result = {err: 'Something went wrong during check member email: ' + err};
                 callback(result);
@@ -404,15 +404,15 @@ DAO.trips.addNewMember = (input, callback) => {
                     (trip_id, account_id) 
                     VALUES 
                     ('${input.trip_id}','${member_id}')`;
-                DAO.db.query(newTripBridgeTable, (err, results) => {
+                dao.db.query(newTripBridgeTable, (err, results) => {
                     if(err) {
-                        DAO.db.rollback(() => {
+                        dao.db.rollback(() => {
                             result = {err: '系統忙碌中，請稍候再試。'};
                             callback(result);
                             console.log(err);
                         });
                     } else {
-                        DAO.db.commit((err) => {
+                        dao.db.commit((err) => {
                             if(err) {
                                 result = {err: '系統忙碌中，請稍候再試。'};
                                 callback(result);
@@ -434,7 +434,7 @@ DAO.trips.addNewMember = (input, callback) => {
 };
 
 // save chat logs
-DAO.trips.saveMessage = (input, callback) => {
+dao.trips.saveMessage = (input, callback) => {
     let result;
     let saveMessage = 
 		`INSERT INTO messages (trip_id, show_name, account_email, message) 
@@ -442,27 +442,27 @@ DAO.trips.saveMessage = (input, callback) => {
         ('${input.trip_id}', '${input.show_name}', '${input.account_email}', '${input.message}')`;
     let lastInsertID = 
         `SELECT LAST_INSERT_ID()`;
-    DAO.db.beginTransaction((err) => {
+    dao.db.beginTransaction((err) => {
         if(err) {
             result = {err: '系統忙碌中，請稍候再試。'};
             callback(result);
             console.log(err);
             return;
         }
-        DAO.db.query(saveMessage, (err, done) => {
+        dao.db.query(saveMessage, (err, done) => {
             if(err) {
                 result = {err: 'Something went wrong during save message into db: ' + err};
                 callback(result);
             } else {
-                DAO.db.query(lastInsertID, (err, message) => {
+                dao.db.query(lastInsertID, (err, message) => {
                     if(err) {
-                        DAO.db.rollback(() => {
+                        dao.db.rollback(() => {
                             result = {err: '系統忙碌中，請稍候再試。'};
                             callback(result);
                             console.log(err);
                         });
                     } else {
-                        DAO.db.commit((err) => {
+                        dao.db.commit((err) => {
                             if(err) {
                                 result = {err: '系統忙碌中，請稍候再試。'};
                                 callback(result);
@@ -480,12 +480,12 @@ DAO.trips.saveMessage = (input, callback) => {
 };
 
 // get chat logs
-DAO.trips.getChatLogs = (input, callback) => {
+dao.trips.getChatLogs = (input, callback) => {
     let result;
     let getChatLogs =
 		`SELECT * FROM messages
 		WHERE trip_id = '${input.trip_id}'`;
-	DAO.db.query(getChatLogs, (err, messages) => {
+	dao.db.query(getChatLogs, (err, messages) => {
 		// console.log(result);
 		if(err) {
             result = {err: 'Something went wrong during get chat logs: ' + err};
@@ -500,4 +500,4 @@ DAO.trips.getChatLogs = (input, callback) => {
 	});
 };
 
-module.exports = DAO;
+module.exports = dao;

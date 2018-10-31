@@ -4,14 +4,14 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// require DAO object
-const DAO = require('./dao.js');
+// require dao object
+const dao = require('./dao.js');
 
 // mysql createConnection
-DAO.db;
+dao.db;
 
 // console log err during connecting with mysql
-DAO.connect;
+dao.connect;
 
 // redis
 const redis = require('redis');
@@ -79,7 +79,7 @@ app.get('/exe/checkloginstate', function (req, res) {
 			email: email,
 			provider: provider
 		};
-		DAO.accounts.checkAccount('isAccountExist', input, (result) => {
+		dao.accounts.checkAccount('isAccountExist', input, (result) => {
 			if(result.err) {
 				res.send({err: result.err});
 			} else {
@@ -115,7 +115,7 @@ app.post('/exe/accounts/login', (req, res) => {
 		password: data.password,
 		provider: data.provider
 	};
-	DAO.accounts.checkAccount('login', input, (result) => {
+	dao.accounts.checkAccount('login', input, (result) => {
 		if(result.err) {
 			res.send({err: result.err});
 			return;
@@ -151,7 +151,7 @@ app.post('/exe/accounts/signup', (req, res) => {
 		password: data.password,
 		provider: data.provider
 	};	
-	DAO.accounts.signup(input, (result) => {
+	dao.accounts.signup(input, (result) => {
 		if(result.err) {
 			res.send({err: result.err});
 			return;
@@ -199,7 +199,7 @@ app.post('/exe/accounts/editname', (req, res) => {
 		update_data: update_data,
 		account_id: account_id
 	};
-	DAO.accounts.editName(input, (result) => {
+	dao.accounts.editName(input, (result) => {
 		if(result.err) {
 			res.send({err: result.err});
 			return;
@@ -231,7 +231,7 @@ app.get('/exe/gettriplist', function(req,res) {
 			console.log('It is cache!');
 		} else {
 			let input = {account_id: account_id};
-			DAO.trips.getTripList(input, (result) => {
+			dao.trips.getTripList(input, (result) => {
 				if(result.err) {
 					res.send({err: result.err});
 					return;
@@ -264,7 +264,7 @@ app.post('/exe/trip/gettripmember', function(req,res) {
 			console.log('It is cache!');
 		} else {
 			let input = {trip_id: trip_id};
-			DAO.trips.getTripMember(input, (result) => {
+			dao.trips.getTripMember(input, (result) => {
 				if(result.err) {
 					res.send({err: result.err});
 					return;
@@ -297,7 +297,7 @@ app.post('/exe/createnewtrip', function(req,res) {
 		trip_date: trip_date,
 		trip_location: trip_location
 	};
-	DAO.trips.createNewTrip(input, (result) => {
+	dao.trips.createNewTrip(input, (result) => {
 		if(result.err) {
 			res.send({err: result.err});
 			return;
@@ -320,7 +320,7 @@ app.post('/exe/trip/getTripData', (req, res) => {
 		account_id: account_id,
 		trip_id: trip_id
 	};
-	DAO.trips.getTripData(input, (result) => {
+	dao.trips.getTripData(input, (result) => {
 		if(result.err) {
 			res.send({err: result.err});
 			return;
@@ -362,7 +362,7 @@ app.post('/exe/trip/addmarker', (req, res) => {
 		lng: lng,
 		content: content
 	};
-	DAO.trips.addMarker(input, (result) => {
+	dao.trips.addMarker(input, (result) => {
 		if(result.err) {
 			res.send({err: result.err});
 			return;
@@ -389,7 +389,7 @@ app.post('/exe/trip/editmarker', (req, res) => {
 		marker_id: marker_id,
 		update_data: update_data
 	};
-	DAO.trips.editMarker(input, (result) => {
+	dao.trips.editMarker(input, (result) => {
 		if(result.err) {
 			res.send({err: result.err});
 			return;
@@ -404,7 +404,7 @@ app.post('/exe/trip/deletemarker', (req, res) => {
 	let data = req.body;
 	let marker_id = data.marker_id;
 	let input = {marker_id: marker_id};
-	DAO.trips.deleteMarker(input, (result) => {
+	dao.trips.deleteMarker(input, (result) => {
 		if(result.err) {
 			res.send({err: result.err});
 			return;
@@ -433,7 +433,7 @@ app.post('/exe/trip/edittitle', (req, res) => {
 		trip_id: trip_id,
 		update_data: update_data
 	};
-	DAO.trips.editTripInfo(input, (result) => {
+	dao.trips.editTripInfo(input, (result) => {
 		if(result.err) {
 			res.send({err: result.err});
 			return;
@@ -468,7 +468,7 @@ app.post('/exe/trip/editdate', (req, res) => {
 		trip_id: trip_id,
 		update_data: update_data
 	};
-	DAO.trips.editTripInfo(input, (result) => {
+	dao.trips.editTripInfo(input, (result) => {
 		if(result.err) {
 			res.send({err: result.err});
 			return;
@@ -503,7 +503,7 @@ app.post('/exe/trip/editlocation', (req, res) => {
 		trip_id: trip_id,
 		update_data: update_data
 	};
-	DAO.trips.editTripInfo(input, (result) => {
+	dao.trips.editTripInfo(input, (result) => {
 		if(result.err) {
 			res.send({err: result.err});
 			return;
@@ -527,7 +527,7 @@ app.post('/exe/trip/addnewmember', (req, res) => {
 		trip_id: trip_id,
 		member_email: member_email
 	};
-	DAO.trips.addNewMember(input, (result) => {
+	dao.trips.addNewMember(input, (result) => {
 		if(result.err) {
 			res.send({err: result.err});
 			return;
@@ -561,7 +561,7 @@ app.post('/exe/trip/savemessage', (req, res) => {
 		account_email: account_email,
 		message: message
 	};
-	DAO.trips.saveMessage(input, (result) => {
+	dao.trips.saveMessage(input, (result) => {
 		if(result.err) {
 			res.send({err: result.err});
 			return;
@@ -579,7 +579,7 @@ app.post('/exe/trip/getchatlogs', (req, res) => {
 	let trip_id = data.trip_id;
 
 	let input = {trip_id: trip_id};
-	DAO.trips.getChatLogs(input, (result) => {
+	dao.trips.getChatLogs(input, (result) => {
 		if(result.err) {
 			res.send({err: result.err});
 			return;
