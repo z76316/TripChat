@@ -58,7 +58,7 @@ app.use("/exe/", function(req, res, next) {
 app.use(express.static('../dist'));
 
 // TripChat API
-app.get('/exe/checkloginstate', function (req, res) {
+app.get('/exe/accounts/loginstate', function (req, res) {
 	let sess = req.session;
 	let name = sess.name;
 	let email = sess.email;
@@ -170,7 +170,7 @@ app.post('/exe/accounts/signup', (req, res) => {
 	});	
 });
 
-app.get('/exe/logout', function(req, res) {
+app.get('/exe/accounts/logout', function(req, res) {
 	req.session.destroy(function(err) {
 		if(err) {
 			res.send({err: err});
@@ -218,7 +218,7 @@ app.post('/exe/accounts/editname', (req, res) => {
 
 });
 
-app.get('/exe/gettriplist', function(req,res) {
+app.get('/exe/trips/gettriplist', function(req,res) {
 	let sess = req.session;
 	let account_id = sess.account_id;
 	client.get(`trip_list${account_id}`, (err, lists) => {
@@ -251,7 +251,7 @@ app.get('/exe/gettriplist', function(req,res) {
 	});
 });
 
-app.post('/exe/trip/gettripmember', function(req,res) {
+app.post('/exe/trips/gettripmember', function(req,res) {
 	let data = req.body;
 	let trip_id = data.trip_id;
 	client.get(`member_list${trip_id}`, (err, lists) => {
@@ -284,7 +284,7 @@ app.post('/exe/trip/gettripmember', function(req,res) {
 	});
 });
 
-app.post('/exe/createnewtrip', function(req,res) {
+app.post('/exe/trips/createnewtrip', function(req,res) {
 	let sess = req.session;
 	let account_id = sess.account_id;
 	let data = req.body;
@@ -311,7 +311,7 @@ app.post('/exe/createnewtrip', function(req,res) {
 
 });
 
-app.post('/exe/trip/getTripData', (req, res) => {
+app.post('/exe/trips/getTripData', (req, res) => {
 	let sess = req.session;
 	let account_id = sess.account_id;
 	let data = req.body;
@@ -350,7 +350,7 @@ app.post('/exe/trip/getTripData', (req, res) => {
 	});
 });
 
-app.post('/exe/trip/addmarker', (req, res) => {
+app.post('/exe/trips/addmarker', (req, res) => {
 	let data = req.body;
 	let trip_id = data.trip_id;
 	let lat = data.lat;
@@ -378,7 +378,7 @@ app.post('/exe/trip/addmarker', (req, res) => {
 	});
 });
 
-app.post('/exe/trip/editmarker', (req, res) => {
+app.post('/exe/trips/editmarker', (req, res) => {
 	let data = req.body;
 	let marker_id = data.marker_id;
 	let content = data.content;
@@ -400,7 +400,7 @@ app.post('/exe/trip/editmarker', (req, res) => {
 	});
 });
 
-app.post('/exe/trip/deletemarker', (req, res) => {
+app.post('/exe/trips/deletemarker', (req, res) => {
 	let data = req.body;
 	let marker_id = data.marker_id;
 	let input = {marker_id: marker_id};
@@ -413,7 +413,7 @@ app.post('/exe/trip/deletemarker', (req, res) => {
 	});
 });
 
-app.post('/exe/trip/edittitle', (req, res) => {
+app.post('/exe/trips/edittitle', (req, res) => {
 	let sess = req.session;
 	let account_id = sess.account_id;
 	let data = req.body;
@@ -448,7 +448,7 @@ app.post('/exe/trip/edittitle', (req, res) => {
 	});
 });
 
-app.post('/exe/trip/editdate', (req, res) => {
+app.post('/exe/trips/editdate', (req, res) => {
 	let sess = req.session;
 	let account_id = sess.account_id;
 	let data = req.body;
@@ -483,7 +483,7 @@ app.post('/exe/trip/editdate', (req, res) => {
 	});
 });
 
-app.post('/exe/trip/editlocation', (req, res) => {
+app.post('/exe/trips/editlocation', (req, res) => {
 	let sess = req.session;
 	let account_id = sess.account_id;
 	let data = req.body;
@@ -518,7 +518,7 @@ app.post('/exe/trip/editlocation', (req, res) => {
 	});
 });
 
-app.post('/exe/trip/addnewmember', (req, res) => {
+app.post('/exe/trips/addnewmember', (req, res) => {
 	let data = req.body;
 	let trip_id = data.trip_id;
 	let member_email = data.member_email;
@@ -548,7 +548,7 @@ app.post('/exe/trip/addnewmember', (req, res) => {
 
 
 // Save messages into SQL
-app.post('/exe/trip/savemessage', (req, res) => {
+app.post('/exe/trips/savemessage', (req, res) => {
 	let data = req.body;
 	let trip_id = data.trip_id;
 	let show_name = data.show_name;
@@ -574,7 +574,7 @@ app.post('/exe/trip/savemessage', (req, res) => {
 });
 
 // Get chat logs
-app.post('/exe/trip/getchatlogs', (req, res) => {
+app.post('/exe/trips/getchatlogs', (req, res) => {
 	let data = req.body;
 	let trip_id = data.trip_id;
 
