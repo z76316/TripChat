@@ -620,7 +620,7 @@ module.exports = app;
 
 
 // Socket setup
-let io = socket(server);
+let io = socket(httpsServer);
 
 io.on('connection', (socket) => {
 	console.log('made socket connection', socket.id);
