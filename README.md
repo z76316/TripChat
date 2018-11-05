@@ -27,7 +27,7 @@ A trip planning platform provides a real-time chat room map editor for efficient
 ![](photo/snapshot03.png) 
 * **Trip Records in Profile Page**
 ![](photo/snapshot02.png) 
-* **Login by email**
+* **Login by Email**
 ![](photo/snapshot01.png)
 
 ## Contact
