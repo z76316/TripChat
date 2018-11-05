@@ -51,7 +51,7 @@ describe('#login then get trip list', () => {
 
     // 登入後 get trip list
     it('GET /exe/trips/gettriplist', function (done) {
-        let req = request(app).get('/exe/gettriplist');
+        let req = request(app).get('/exe/trips/gettriplist');
         // Set cookie to get saved user session
         req.cookies = Cookies;
         req.set('Accept','application/json')
