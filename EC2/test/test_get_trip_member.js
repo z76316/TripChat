@@ -22,7 +22,7 @@ describe('# Test get trip member api', () => {
     });
 
     // get trip data
-    it('POST /exe/trip/gettripmember', function (done) {
+    it('POST /exe/trips/gettripmember', function (done) {
         let req = request(app).post('/exe/trip/gettripmember');
         // Set cookie to get saved user sessio
         req.cookies = Cookies;

@@ -22,7 +22,7 @@ describe('# Test check login state api', () => {
     });
 
     // check login state
-    it('GET /exe/checkloginstate', function (done) {
+    it('GET /exe//accounts/checkloginstate', function (done) {
         let req = request(app).get('/exe/checkloginstate');
         // Set cookie to get saved user session
         req.cookies = Cookies;

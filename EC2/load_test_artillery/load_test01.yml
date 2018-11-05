@@ -1,5 +1,6 @@
 config:
-  target: "http://52.89.137.222:9000"
+  # target: "http://52.89.137.222:9000"
+  target: "https://waitforit.tw"
   http:
     # Responses have to be sent within 30 seconds or the request will be aborted
     timeout: 30
@@ -36,7 +37,7 @@ scenarios:
             as: "message"
       - log: "get message: {{message}}"
       - get:
-          url: "/exe/gettriplist"
+          url: "/exe/trips/gettriplist"
           capture:
             json: "$[0].trip_title"
             as: "trip_title"

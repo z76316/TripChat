@@ -22,7 +22,7 @@ describe('# Test get chat logs api', () => {
     });
 
     // get trip data
-    it('POST /exe/trip/getchatlogs', function (done) {
+    it('POST /exe/trips/getchatlogs', function (done) {
         let req = request(app).post('/exe/trip/getchatlogs');
         // Set cookie to get saved user sessio
         req.cookies = Cookies;
