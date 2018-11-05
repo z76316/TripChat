@@ -32,7 +32,7 @@ services:
     image: tripchat-server
     container_name: tripchat-server
     ports:
-      - 443:9000
+      - 443
     command: node app.js
     depends_on:
       # - tripchat-redis
