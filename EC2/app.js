@@ -4,6 +4,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+
 // require dao object
 const dao = require('./dao.js');
 
@@ -39,11 +40,25 @@ const socket = require('socket.io');
 // Utility
 const request = require("request");
 
-// App setup
+// HTTPS
+let fs = require('fs');
+let https = require('https');
+let credentials = {
+	key: fs.readFileSync('./for_HTTPS/privkey.pem'),
+	cert: fs.readFileSync('./for_HTTPS/cert.pem'),
+	ca: fs.readFileSync('./for_HTTPS/chain.pem')
+};
+let httpsServer = https.createServer(credentials, app);
 let port = 9000;
-let server = app.listen(port, function() {
-	console.log('Server is running on port', port);
+httpsServer.listen(port, function() {
+	console.log('Server in Docker Image is running on port', port);
 });
+
+// App setup
+// let port = 9000;
+// let server = app.listen(port, function() {
+// 	console.log('Server is running on port', port);
+// });
 
 // "/exe/": allow cross domain control
 app.use("/exe/", function(req, res, next) {
@@ -608,7 +623,7 @@ module.exports = app;
 
 
 // Socket setup
-let io = socket(server);
+let io = socket(httpsServer);
 
 io.on('connection', (socket) => {
 	console.log('made socket connection', socket.id);

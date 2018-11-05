@@ -1,7 +1,7 @@
 # TripChat
 A trip planning platform provides a real-time chat room map editor for efficient communication among users.
 
-[Stop Talking, Start Planning](http://waitforit.tw:9000)
+[Stop Talking, Start Planning](https://waitforit.tw)
 
 * **Test User**: aaa@gmail.com
 * **Password**: 1qaz2wsx
