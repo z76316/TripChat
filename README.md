@@ -22,11 +22,12 @@ A real-time chat room with a map editor to draw up your trip scheme.
 
 ## Features
 * **Realtime Chat Room & Map Marker Editor**
-* **Redirect current location of map by changing "Location" input**
+* **Redirect Current Location of Map by Changing "Location" Input**
+* **Add and View the Members of The Trip**
 ![](photo/snapshot03.png) 
 * **Trip Records in Profile Page**
 ![](photo/snapshot02.png) 
-* **Login by email**
+* **Login by Email**
 ![](photo/snapshot01.png)
 
 ## Contact
