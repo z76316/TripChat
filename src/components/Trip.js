@@ -107,7 +107,7 @@ export class Trip extends Component {
 				new_title: this.state.tripTitleInput,
 				old_title: this.state.temp_title
 			};
-			this.ajax('post', Server_ip+'/exe/trip/edittitle', update_data, (req) => {
+			this.ajax('post', Server_ip+'/exe/trips/edittitle', update_data, (req) => {
 				let result=JSON.parse(req.responseText);
 				if(result.err) {
 					alert(result.err);
@@ -138,7 +138,7 @@ export class Trip extends Component {
 				new_date: + new Date(this.state.tripDateInput),
 				old_date: + new Date(this.state.temp_date)
 			};
-			this.ajax('post', Server_ip+'/exe/trip/editdate', update_data, (req) => {
+			this.ajax('post', Server_ip+'/exe/trips/editdate', update_data, (req) => {
 				let result=JSON.parse(req.responseText);
 				if(result.err) {
 					alert(result.err);
@@ -171,7 +171,7 @@ export class Trip extends Component {
 				new_location: this.state.tripLocationInput,
 				old_location: this.state.temp_location
 			};
-			this.ajax('post', Server_ip+'/exe/trip/editlocation', update_data, (req) => {
+			this.ajax('post', Server_ip+'/exe/trips/editlocation', update_data, (req) => {
 				let result=JSON.parse(req.responseText);
 				if(result.err) {
 					alert(result.err);
@@ -245,7 +245,7 @@ export class Trip extends Component {
 			member_email: newMemberEmail
 		};
 
-		this.ajax('post', Server_ip+'/exe/trip/addnewmember', data, (req) => {
+		this.ajax('post', Server_ip+'/exe/trips/addnewmember', data, (req) => {
 			let result=JSON.parse(req.responseText);
 			if(result.err) {
 				alert(result.err);
@@ -262,7 +262,7 @@ export class Trip extends Component {
 			trip_id: this.state.trip_id
 		};
 
-		this.ajax('post', Server_ip+'/exe/trip/gettripmember', data, (req) => {
+		this.ajax('post', Server_ip+'/exe/trips/gettripmember', data, (req) => {
 			let result=JSON.parse(req.responseText);
 			if(result.err) {
 				alert(result.err);
@@ -332,7 +332,7 @@ export class Trip extends Component {
 				lng: location.lng,
 				content: '寫下您的旅遊筆記~'
 			};
-			this.ajax('post', Server_ip+'/exe/trip/addmarker', marker_data, (req) => {
+			this.ajax('post', Server_ip+'/exe/trips/addmarker', marker_data, (req) => {
 				let result=JSON.parse(req.responseText);
 				if(result.err) {
 					alert(result.err);
@@ -499,7 +499,7 @@ export class Trip extends Component {
 		let delete_marker = {
 			marker_id: marker_id
 		};
-		this.ajax('post', Server_ip+'/exe/trip/deletemarker', delete_marker, (req) => {
+		this.ajax('post', Server_ip+'/exe/trips/deletemarker', delete_marker, (req) => {
 			let result=JSON.parse(req.responseText);
 			if(result.err) {
 				alert(result.err);
@@ -535,7 +535,7 @@ export class Trip extends Component {
 				content: this.state.currTextarea
 			};
 	
-			this.ajax('post', Server_ip+'/exe/trip/editmarker', update_marker, (req) => {
+			this.ajax('post', Server_ip+'/exe/trips/editmarker', update_marker, (req) => {
 				let result=JSON.parse(req.responseText);
 				if(result.err) {
 					alert(result.err);
@@ -590,7 +590,7 @@ export class Trip extends Component {
 				account_email: this.state.currUserEmail,
 				message: newMessage
 			};
-			this.ajax('post', Server_ip+'/exe/trip/savemessage', message_data, (req) => {
+			this.ajax('post', Server_ip+'/exe/trips/savemessage', message_data, (req) => {
 				let result=JSON.parse(req.responseText);
 				if(result.err) {
 					alert(result.err);
@@ -609,7 +609,7 @@ export class Trip extends Component {
 
 	componentDidMount() {
 		// check login state
-		this.ajax('get', Server_ip+'/exe/checkloginstate', '', (req) => {
+		this.ajax('get', Server_ip+'/exe/accounts/loginstate', '', (req) => {
 			let result=JSON.parse(req.responseText);
 			console.log('Trip.js session ' + result.name + ' ' + result.email);
 			if(result.isLogin) {
@@ -629,7 +629,7 @@ export class Trip extends Component {
 		};
 
 		// initialize this trip's info and markers
-		this.ajax('post', Server_ip+'/exe/trip/getTripData', data, (req) => {
+		this.ajax('post', Server_ip+'/exe/trips/getTripData', data, (req) => {
 			let result=JSON.parse(req.responseText);
 			if(result.err) {
 				alert(result.err);
@@ -661,7 +661,7 @@ export class Trip extends Component {
 		let chat_room_data = {
 			trip_id: trip_id
 		};
-		this.ajax('post', Server_ip+'/exe/trip/getchatlogs', chat_room_data, (req) => {
+		this.ajax('post', Server_ip+'/exe/trips/getchatlogs', chat_room_data, (req) => {
 			let result=JSON.parse(req.responseText);
 			if(result.err) {
 				alert(result.err);

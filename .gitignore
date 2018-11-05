@@ -69,3 +69,6 @@ package-lock.json
 # docker volumn 
 mysql/
 redis/
+
+# SSL for Let's Encrypt on EC2
+for_HTTPS/

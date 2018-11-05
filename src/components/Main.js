@@ -152,7 +152,7 @@ class Main extends Component {
 	}
 
 	checkLoginState = () => {
-		this.ajax('get', Server_ip+'/exe/checkloginstate', '', (req) => {
+		this.ajax('get', Server_ip+'/exe/accounts/loginstate', '', (req) => {
 			let result=JSON.parse(req.responseText);
 			console.log('Main.js session ' + result.name + ' ' + result.email);
 			if(result.isLogin) {

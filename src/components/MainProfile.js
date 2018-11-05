@@ -95,7 +95,7 @@ class MainProfile extends Component {
 	}
 
 	logOut = () => {
-		this.ajax('get', Server_ip+'/exe/logout', '', (req) => {
+		this.ajax('get', Server_ip+'/exe/accounts/logout', '', (req) => {
 			let result=JSON.parse(req.responseText);
 			if(result.err) {
 				alert('登出失敗: ' + result.err);
@@ -122,7 +122,7 @@ class MainProfile extends Component {
 	}
 
 	getLoginState = () => {
-		this.ajax('get', Server_ip+'/exe/checkloginstate', '', (req) => {
+		this.ajax('get', Server_ip+'/exe/accounts/loginstate', '', (req) => {
 			let result=JSON.parse(req.responseText);
 			console.log('MainProfile.js session ' + result.name + ' ' + result.email);
 			if(result.isLogin) {
@@ -136,7 +136,7 @@ class MainProfile extends Component {
 	}
 
 	getTripList = () => {
-		this.ajax('get', Server_ip+'/exe/gettriplist', '', (req) => {
+		this.ajax('get', Server_ip+'/exe/trips/gettriplist', '', (req) => {
 			let result=JSON.parse(req.responseText);
 			let trip_list = [];
 			let memory_list = [];
@@ -176,7 +176,7 @@ class MainProfile extends Component {
 				tripLocation: '去哪玩咧',
 			};
 
-			this.ajax('post', Server_ip+'/exe/createnewtrip', newTrip, (req) => {
+			this.ajax('post', Server_ip+'/exe/trips/createnewtrip', newTrip, (req) => {
 				let result=JSON.parse(req.responseText);
 				if(result.err) {
 					alert(result.err);
