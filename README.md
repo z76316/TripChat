@@ -1,5 +1,5 @@
 # TripChat
-A real-time chat room with a map editor to draw up your trip scheme.
+A trip planning platform provides a real-time chat room map editor for efficient communication among users.
 
 [Stop Talking, Start Planning](http://waitforit.tw:9000)
 
