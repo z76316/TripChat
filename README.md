@@ -23,7 +23,6 @@ A trip planning platform provides a real-time chat room map editor for efficient
 ## Features
 * **Realtime Chat Room & Map Marker Editor**
 * **Redirect Current Location of Map by Changing "Location" Input**
-* **Add and View the Members of The Trip**
 ![](photo/snapshot03.png) 
 * **Trip Records in Profile Page**
 ![](photo/snapshot02.png) 
