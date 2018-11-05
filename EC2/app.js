@@ -49,7 +49,10 @@ let credentials = {
 	ca: fs.readFileSync('./for_HTTPS/chain.pem')
 };
 let httpsServer = https.createServer(credentials, app);
-httpsServer.listen(443);
+let port = 443;
+httpsServer.listen(port, function() {
+	console.log('Server is running on port', port);
+});
 
 // App setup
 // let port = 9000;
