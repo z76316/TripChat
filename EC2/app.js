@@ -44,7 +44,7 @@ const request = require("request");
 let fs = require('fs');
 let https = require('https');
 let credentials = {
-	key: fs.readFileSync('./for_HTTPS/privkey.pem'),
+	key: fs.readFileSync('.privkey.pem'),
 	cert: fs.readFileSync('./for_HTTPS/cert.pem'),
 	ca: fs.readFileSync('./for_HTTPS/chain.pem')
 };
