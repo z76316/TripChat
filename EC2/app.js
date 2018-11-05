@@ -51,7 +51,7 @@ let credentials = {
 let httpsServer = https.createServer(credentials, app);
 let port = 9000;
 httpsServer.listen(port, function() {
-	console.log('Server is running on port', port);
+	console.log('Server in Docker Image is running on port', port);
 });
 
 // App setup
