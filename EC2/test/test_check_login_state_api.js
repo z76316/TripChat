@@ -22,8 +22,8 @@ describe('# Test check login state api', () => {
     });
 
     // check login state
-    it('GET /exe/checkloginstate', function (done) {
-        let req = request(app).get('/exe/checkloginstate');
+    it('GET /exe//accounts/loginstate', function (done) {
+        let req = request(app).get('/exe/accounts/loginstate');
         // Set cookie to get saved user session
         req.cookies = Cookies;
         req.set('Accept','application/json')
