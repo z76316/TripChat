@@ -196,7 +196,7 @@ app.get('/exe/accounts/logout', function(req, res) {
 	});
 });
 
-app.post('/exe/accounts/editname', (req, res) => {
+app.put('/exe/accounts/name', (req, res) => {
 	let sess = req.session;
 	let account_id = sess.account_id;
 	let new_name = req.body.new_name;
@@ -365,7 +365,7 @@ app.post('/exe/trips/getTripData', (req, res) => {
 	});
 });
 
-app.post('/exe/trips/addmarker', (req, res) => {
+app.post('/exe/trips/marker', (req, res) => {
 	let data = req.body;
 	let trip_id = data.trip_id;
 	let lat = data.lat;
@@ -393,7 +393,7 @@ app.post('/exe/trips/addmarker', (req, res) => {
 	});
 });
 
-app.post('/exe/trips/editmarker', (req, res) => {
+app.put('/exe/trips/marker', (req, res) => {
 	let data = req.body;
 	let marker_id = data.marker_id;
 	let content = data.content;
@@ -415,7 +415,7 @@ app.post('/exe/trips/editmarker', (req, res) => {
 	});
 });
 
-app.post('/exe/trips/deletemarker', (req, res) => {
+app.delete('/exe/trips/marker', (req, res) => {
 	let data = req.body;
 	let marker_id = data.marker_id;
 	let input = {marker_id: marker_id};
@@ -428,7 +428,7 @@ app.post('/exe/trips/deletemarker', (req, res) => {
 	});
 });
 
-app.post('/exe/trips/edittitle', (req, res) => {
+app.put('/exe/trips/title', (req, res) => {
 	let sess = req.session;
 	let account_id = sess.account_id;
 	let data = req.body;
@@ -463,7 +463,7 @@ app.post('/exe/trips/edittitle', (req, res) => {
 	});
 });
 
-app.post('/exe/trips/editdate', (req, res) => {
+app.put('/exe/trips/date', (req, res) => {
 	let sess = req.session;
 	let account_id = sess.account_id;
 	let data = req.body;
@@ -498,7 +498,7 @@ app.post('/exe/trips/editdate', (req, res) => {
 	});
 });
 
-app.post('/exe/trips/editlocation', (req, res) => {
+app.put('/exe/trips/location', (req, res) => {
 	let sess = req.session;
 	let account_id = sess.account_id;
 	let data = req.body;

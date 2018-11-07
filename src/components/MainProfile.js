@@ -41,7 +41,9 @@ class MainProfile extends Component {
 	ajax = (method, src, args, callback) => {
 		let req = new XMLHttpRequest();
 		req.withCredentials = true;
-		if(method.toLowerCase() === 'post'){ 
+		if(method.toLowerCase() === 'post'
+		|| method.toLowerCase() === 'put'
+		|| method.toLowerCase() === 'delete'){ 
 			// post through json args
 			req.open(method, src);
 			req.setRequestHeader('Content-Type', 'application/json');
@@ -71,7 +73,7 @@ class MainProfile extends Component {
 			});
 		} else {
 			let update_data = {new_name: this.state.currEditName};
-			this.ajax('post', Server_ip+'/exe/accounts/editname', update_data, (req) => {
+			this.ajax('put', Server_ip+'/exe/accounts/name', update_data, (req) => {
 				let result=JSON.parse(req.responseText);
 				if(result.err) {
 					alert(result.err);
