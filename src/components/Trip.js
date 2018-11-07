@@ -73,7 +73,9 @@ export class Trip extends Component {
 	ajax = (method, src, args, callback) => {
 		let req = new XMLHttpRequest();
 		req.withCredentials = true;
-		if(method.toLowerCase() === 'post'){ 
+		if(method.toLowerCase() === 'post'
+		|| method.toLowerCase() === 'put'
+		|| method.toLowerCase() === 'delete'){ 
 			// post through json args
 			req.open(method, src);
 			req.setRequestHeader('Content-Type', 'application/json');
@@ -107,7 +109,7 @@ export class Trip extends Component {
 				new_title: this.state.tripTitleInput,
 				old_title: this.state.temp_title
 			};
-			this.ajax('post', Server_ip+'/exe/trips/edittitle', update_data, (req) => {
+			this.ajax('put', Server_ip+'/exe/trips/title', update_data, (req) => {
 				let result=JSON.parse(req.responseText);
 				if(result.err) {
 					alert(result.err);
@@ -138,7 +140,7 @@ export class Trip extends Component {
 				new_date: + new Date(this.state.tripDateInput),
 				old_date: + new Date(this.state.temp_date)
 			};
-			this.ajax('post', Server_ip+'/exe/trips/editdate', update_data, (req) => {
+			this.ajax('put', Server_ip+'/exe/trips/date', update_data, (req) => {
 				let result=JSON.parse(req.responseText);
 				if(result.err) {
 					alert(result.err);
@@ -171,7 +173,7 @@ export class Trip extends Component {
 				new_location: this.state.tripLocationInput,
 				old_location: this.state.temp_location
 			};
-			this.ajax('post', Server_ip+'/exe/trips/editlocation', update_data, (req) => {
+			this.ajax('put', Server_ip+'/exe/trips/location', update_data, (req) => {
 				let result=JSON.parse(req.responseText);
 				if(result.err) {
 					alert(result.err);
@@ -332,7 +334,7 @@ export class Trip extends Component {
 				lng: location.lng,
 				content: '寫下您的旅遊筆記~'
 			};
-			this.ajax('post', Server_ip+'/exe/trips/addmarker', marker_data, (req) => {
+			this.ajax('post', Server_ip+'/exe/trips/marker', marker_data, (req) => {
 				let result=JSON.parse(req.responseText);
 				if(result.err) {
 					alert(result.err);
@@ -487,7 +489,6 @@ export class Trip extends Component {
 
 	// Deletes a specific marker in currMarkers array
 	deleteCurrmarkers = (marker_id) => {
-		console.log(`gonna delete the marker its id= ${marker_id} in currMarkers`);
 		let new_currMarkers = [];
 		for(let i = 0; i < currMarkers.length; i++) {
 			if(currMarkers[i].marker_id !== marker_id) {
@@ -499,7 +500,7 @@ export class Trip extends Component {
 		let delete_marker = {
 			marker_id: marker_id
 		};
-		this.ajax('post', Server_ip+'/exe/trips/deletemarker', delete_marker, (req) => {
+		this.ajax('delete', Server_ip+'/exe/trips/marker', delete_marker, (req) => {
 			let result=JSON.parse(req.responseText);
 			if(result.err) {
 				alert(result.err);
@@ -535,7 +536,7 @@ export class Trip extends Component {
 				content: this.state.currTextarea
 			};
 	
-			this.ajax('post', Server_ip+'/exe/trips/editmarker', update_marker, (req) => {
+			this.ajax('put', Server_ip+'/exe/trips/marker', update_marker, (req) => {
 				let result=JSON.parse(req.responseText);
 				if(result.err) {
 					alert(result.err);

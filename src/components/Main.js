@@ -38,7 +38,9 @@ class Main extends Component {
 	ajax = (method, src, args, callback) => {
 		let req = new XMLHttpRequest();
 		req.withCredentials = true;
-		if(method.toLowerCase() === 'post'){ 
+		if(method.toLowerCase() === 'post'
+		|| method.toLowerCase() === 'put'
+		|| method.toLowerCase() === 'delete'){ 
 			// post through json args
 			req.open(method, src);
 			req.setRequestHeader('Content-Type', 'application/json');
