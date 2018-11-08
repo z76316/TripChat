@@ -138,7 +138,7 @@ class MainProfile extends Component {
 	}
 
 	getTripList = () => {
-		this.ajax('get', Server_ip+'/exe/trips/gettriplist', '', (req) => {
+		this.ajax('get', Server_ip+'/exe/trips/triplist', '', (req) => {
 			let result=JSON.parse(req.responseText);
 			let trip_list = [];
 			let memory_list = [];

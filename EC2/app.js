@@ -233,7 +233,7 @@ app.put('/exe/accounts/name', (req, res) => {
 
 });
 
-app.get('/exe/trips/gettriplist', function(req,res) {
+app.get('/exe/trips/triplist', function(req,res) {
 	let sess = req.session;
 	let account_id = sess.account_id;
 	client.get(`trip_list${account_id}`, (err, lists) => {

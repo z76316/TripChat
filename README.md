@@ -20,6 +20,9 @@ A trip planning platform provides a real-time chat room map editor for efficient
     * Library & Framework: React
     * Module Bundler: Webpack
 
+## TripChat RESTful API Documentation
+* [RESTful API](RESTful.md)
+
 ## Features
 * **Realtime Chat Room & Map Marker Editor**
 * **Redirect Current Location of Map by Changing "Location" Input**
