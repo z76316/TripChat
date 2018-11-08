@@ -37,7 +37,7 @@ scenarios:
             as: "message"
       - log: "get message: {{message}}"
       - get:
-          url: "/exe/trips/gettriplist"
+          url: "/exe/trips/triplist"
           capture:
             json: "$[0].trip_title"
             as: "trip_title"
