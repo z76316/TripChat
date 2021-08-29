@@ -50,15 +50,15 @@ let credentials = {
 };
 let httpsServer = https.createServer(credentials, app);
 let port = 9000;
-httpsServer.listen(port, function() {
-	console.log('Server in Docker Image is running on port', port);
-});
+// httpsServer.listen(port, function() {
+// 	console.log('Server in Docker Image is running on port', port);
+// });
 
 // App setup
 // let port = 9000;
-// let server = app.listen(port, function() {
-// 	console.log('Server is running on port', port);
-// });
+let httpsServer = app.listen(port, function() {
+	console.log('Server is running on port', port);
+ });
 
 // "/exe/": allow cross domain control
 app.use("/exe/", function(req, res, next) {
