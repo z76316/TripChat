@@ -43,12 +43,12 @@ const request = require("request");
 // HTTPS
 let fs = require('fs');
 let https = require('https');
-let credentials = {
-	key: fs.readFileSync('./for_HTTPS/privkey.pem'),
-	cert: fs.readFileSync('./for_HTTPS/cert.pem'),
-	ca: fs.readFileSync('./for_HTTPS/chain.pem')
-};
-let httpsServer = https.createServer(credentials, app);
+// let credentials = {
+//	key: fs.readFileSync('./for_HTTPS/privkey.pem'),
+//	cert: fs.readFileSync('./for_HTTPS/cert.pem'),
+//	ca: fs.readFileSync('./for_HTTPS/chain.pem')
+// };
+// let httpsServer = https.createServer(credentials, app);
 let port = 9000;
 // httpsServer.listen(port, function() {
 // 	console.log('Server in Docker Image is running on port', port);
