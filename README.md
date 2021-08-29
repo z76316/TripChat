@@ -1,7 +1,7 @@
 # TripChat
 A trip planning platform provides a real-time chat room map editor for efficient communication among users.
 
-[Stop Talking, Start Planning](https://waitforit.tw)
+[Stop Talking, Start Planning](https://www.tripchat.site)
 
 * **Test User**: aaa@gmail.com
 * **Password**: 1qaz2wsx
@@ -14,6 +14,7 @@ A trip planning platform provides a real-time chat room map editor for efficient
     * Unit Test: Mocha
     * Server Load Test: Artillery
     * Cloud service: AWS EC2
+    * Load Balancer: AWS Classic Load Balancer
     * Container: Docker
 * **Front-End**
     * Language: HTML / CSS / JavaScript
