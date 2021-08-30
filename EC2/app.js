@@ -62,7 +62,7 @@ let httpsServer = app.listen(port, function() {
 
 // "/exe/": allow cross domain control
 app.use("/exe/", function(req, res, next) {
-    res.set("Access-Control-Allow-Origin", "http://waitforit.tw:9000");
+    res.set("Access-Control-Allow-Origin", "http://www.tripchat.site:9000");
     res.set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");
     res.set("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
     res.set("Access-Control-Allow-Credentials", "true");
