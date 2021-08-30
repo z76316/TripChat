@@ -2,7 +2,7 @@
 
 ## General Information
 
-Host Name: `https://waitforit.tw`
+Host Name: `https://www.tripchat.site`
 
 ---
 
